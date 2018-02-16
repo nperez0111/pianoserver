@@ -52,8 +52,16 @@
   </v-app>
 </template>
 <script>
+import io from 'socket.io-client'
+window.io=io
 export default {
+  mount(){
+    this.socket=io('ws://localhost:8081')
+    this.socket.on("status",this.onStatus)
+    this.socket.on("currentTime",this.onCurrentTime)
+  },
   data: () => ({
+    socket:null,
     drawer: true,
     items: [{
       icon: 'trending_up',
@@ -90,6 +98,14 @@ export default {
   }),
   props: {
     source: String
+  },
+  methods:{
+    onStatus(status){
+
+    },
+    onCurrentTime(time){
+      
+    }
   }
 }
 </script>
