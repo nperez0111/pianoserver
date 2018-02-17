@@ -7,6 +7,7 @@ const ipc = require('node-ipc'),
     currentTime = new History(20),
     current = new History(120),
     pastSongs = new History(50),
+    isPlaying = new History(1),
     spawnInstance = new Spawner(true, {
         onExit: function(exitCode, signal) {
             if (signal === 'SIGINT')
@@ -25,6 +26,10 @@ const ipc = require('node-ipc'),
 
                 currentTime.push({ now, ofTotal })
                 //ipc.server.emit('currentTime',currentTime)
+                const lastTimes = currentTime.getNewest(7)
+                if (lastTimes.every(({ now }) => now === lastTimes[0].now)) {
+                    isPlaying.push(false)
+                }
 
             } else {
                 console.log(data.trim())
@@ -54,7 +59,7 @@ socket.on('connection', function(client) {
     })
     client.on('getCurrentStatus', (howMany) => {
         log('got a request for current status')
-        client.emit('getCurrentStatus', current.getNewest(parseInt(howMany)))
+        client.emit('getCurrentStatus', [current.getNewest(parseInt(howMany)), isPlaying.getNewest()])
     })
     client.on('getPastSongs', (howMany) => {
         log('got a request for past Songs')
@@ -65,19 +70,68 @@ socket.on('connection', function(client) {
         }
 
     })
-    const status = current.onpush((state, size) => {
-        client.emit('status', JSON.stringify(state))
-        client.emit('allStatus', JSON.stringify(current.store))
+    client.on('getIsPlaying', (clientStatus, clientTime) => {
+        log('got a request to see if is playing')
+        client.emit('getIsPlaying', isPlaying.getNewest())
     })
+    client.on('play', (clientStatus, clientTime) => {
+        log('got a request to play')
+        //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
+        if (isPlaying.getNewest() === false) {
+            spawnInstance.writeCommand("play")
+        }
+        isPlaying.push(true)
+    })
+    client.on('pause', (clientStatus, clientTime) => {
+        log('got a request to pause')
+        //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
+        spawnInstance.writeCommand("pause")
+        isPlaying.push(false)
+    })
+    client.on('likeSong', (clientStatus, clientTime) => {
+        log('got a request to like')
+        //make sure to like the right song
+        if (clientStatus.title === current.getNewest().title) {
+            spawnInstance.writeCommand("likeSong")
+        }
+
+    })
+    client.on('dislikeSong', (clientStatus, clientTime) => {
+        log('got a request to dislike')
+        //make sure to dislike the right song
+        if (clientStatus.title === current.getNewest().title) {
+            spawnInstance.writeCommand("dislikeSong")
+        }
+        isPlaying.push(true)
+    })
+
+    client.on('nextSong', (clientStatus, clientTime) => {
+        log('got a request to skip')
+        //make sure to dislike the right song
+        if (clientStatus.title === current.getNewest().title) {
+            spawnInstance.writeCommand("nextSong")
+        }
+        isPlaying.push(true)
+    })
+
+    const status = current.onpush((state, size) => {
+            client.emit('status', JSON.stringify(state))
+            client.emit('allStatus', JSON.stringify(current.store))
+        }),
+        isPlayingHandler = isPlaying.onpush((state) => {
+            client.emit('isPlaying', state)
+        })
 
     client.on('disconnect', function() {
         clearInterval(timeInterval)
         current.unpush(status)
-        console.log('Server has disconnected');
+        isPlaying.unpush(isPlayingHandler)
+        console.log('Client has disconnected');
     });
 });
 
 currentTime.push({ now: null, ofTotal: null })
+isPlaying.push(true)
 
 ipc.config.id = 'pianobar-server';
 ipc.config.retry = 1500;
