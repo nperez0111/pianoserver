@@ -24,10 +24,10 @@ const dev = true,
       this.save(newStation)
       this.pubSub.publish(CURRENT, newStation)
     },
-    getStations: function(filter = a => a) {
+    getStations: function (filter = a => a) {
       return this.allStations.filter(filter)
     },
-    setStations: function(stations) {
+    setStations: function (stations) {
       this.allStations = stations
       this.pubSub.publish(STATIONS, stations)
     },

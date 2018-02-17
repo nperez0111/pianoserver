@@ -7,11 +7,12 @@ const spawn = require('child_process').spawn,
         dislikeSong: '-',
         likeSong: '+',
         quit: 'q',
-        selectStation: 's',
+        selectStation: 's ',
         playPauseSong: 'p',
         play: 'p',
         pause: 'p',
-        playOrPauseSong: 'p'
+        playOrPauseSong: 'p',
+        shuffle: 'x'
     }
 let once = true
 class Spawner {
@@ -20,13 +21,13 @@ class Spawner {
         this.options = Object.assign({
             onExitCloseChild: true,
             takeInput: true,
-            onExit: function(exitCode, signal) {
+            onExit: function (exitCode, signal) {
 
             },
-            onEnd: function() {
+            onEnd: function () {
 
             },
-            onData: function(data) {
+            onData: function (data) {
 
             }
         }, options)
@@ -89,6 +90,7 @@ class Spawner {
             this.pianobar.stdin.write(mappings[key] + "\n")
             return true
         }
+        this.pianobar.stdin.write(key + "\n")
         return false
     }
     respawn() {

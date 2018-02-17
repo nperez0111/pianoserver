@@ -47,5 +47,8 @@ class History {
     has(key, value) {
         return this.store.some(item => item[key] === value)
     }
+    clear() {
+        this.store = []
+    }
 }
 module.exports = History

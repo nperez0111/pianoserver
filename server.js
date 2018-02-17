@@ -3,22 +3,22 @@ const ipc = require('node-ipc'),
     logger = require('simple-node-logger').createSimpleLogger('debug.log'),
     History = require('./History'),
     io = require('socket.io'),
-    log = logger.info,
+    log = logger.trace,
     currentTime = new History(20),
     current = new History(120),
     pastSongs = new History(50),
     isPlaying = new History(1),
     spawnInstance = new Spawner(true, {
-        onExit: function(exitCode, signal) {
+        onExit: function (exitCode, signal) {
             if (signal === 'SIGINT')
                 process.kill(process.pid, 'SIGINT');
             process.exit()
         },
-        onEnd: function() {
+        onEnd: function () {
             //this one is not foing to work
             ipc.server.stop()
         },
-        onData: function(data) {
+        onData: function (data) {
             //this one is not foing to work
             const getTime = /(\d\d:\d\d).(\d\d:\d\d)/
             if (getTime.test(data)) {
@@ -27,8 +27,8 @@ const ipc = require('node-ipc'),
                 currentTime.push({ now, ofTotal })
                 //ipc.server.emit('currentTime',currentTime)
                 const lastTimes = currentTime.getNewest(7)
-                if (lastTimes.every(({ now }) => now === lastTimes[0].now)) {
-                    isPlaying.push(false)
+                if (lastTimes.every(({ now }) => now === lastTimes[0].now) && isPlaying.getNewest() === true) {
+                    //isPlaying.push(false)
                 }
 
             } else {
@@ -38,7 +38,7 @@ const ipc = require('node-ipc'),
     })
 http = require('http'),
     port = 8081,
-    server = http.createServer(function(req, res) {
+    server = http.createServer(function (req, res) {
         // Send HTML headers and message
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end('<h1>Hello Socket Lover!</h1>');
@@ -49,8 +49,8 @@ server.listen(port);
 const socket = io.listen(server);
 
 // Add a connect listener
-socket.on('connection', function(client) {
-    const timeInterval = setInterval(function() {
+socket.on('connection', function (client) {
+    const timeInterval = setInterval(function () {
         client.volatile.emit('currentTime', currentTime.getNewest());
     }, 1000)
     client.on('getCurrentTime', (howMany) => {
@@ -80,12 +80,16 @@ socket.on('connection', function(client) {
         if (isPlaying.getNewest() === false) {
             spawnInstance.writeCommand("play")
         }
+        currentTime.clear()
         isPlaying.push(true)
+
     })
     client.on('pause', (clientStatus, clientTime) => {
         log('got a request to pause')
         //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
-        spawnInstance.writeCommand("pause")
+        if (isPlaying.getNewest() === true) {
+            spawnInstance.writeCommand("pause")
+        }
         isPlaying.push(false)
     })
     client.on('likeSong', (clientStatus, clientTime) => {
@@ -113,16 +117,30 @@ socket.on('connection', function(client) {
         }
         isPlaying.push(true)
     })
+    client.on('selectStation', (stationID) => {
+        logger.info('got a request to change station to ' + stationID)
+
+        spawnInstance.writeCommand("selectStation")
+        spawnInstance.writeCommand(stationID)
+        isPlaying.push(true)
+    })
+    client.on('shuffle', () => {
+        log('got a request to change station to shuffle')
+
+        spawnInstance.writeCommand("shuffle")
+        isPlaying.push(true)
+    })
 
     const status = current.onpush((state, size) => {
             client.emit('status', JSON.stringify(state))
             client.emit('allStatus', JSON.stringify(current.store))
         }),
         isPlayingHandler = isPlaying.onpush((state) => {
+            console.log(state ? 'is playing' : 'is not playing')
             client.emit('isPlaying', state)
         })
 
-    client.on('disconnect', function() {
+    client.on('disconnect', function () {
         clearInterval(timeInterval)
         current.unpush(status)
         isPlaying.unpush(isPlayingHandler)
@@ -141,36 +159,36 @@ const splitter = stdin => stdin.split("\n").map(str => str.split("=")).reduce((o
         return obj
     }, {}),
     commands = {
-        userlogin: function(stdin) {
+        userlogin: function (stdin) {
 
             current.push(splitter(stdin))
             ipc.server.emit('status', current)
             log(current)
         },
-        usergetstations: function(stdin) {
+        usergetstations: function (stdin) {
             current.push(splitter(stdin))
             ipc.server.emit('status', current)
             log(current)
         },
-        stationfetchplaylist: function(stdin) {
-            current.push(splitter(stdin))
-            ipc.server.emit('status', current)
-            log(current)
-
-        },
-        songstart: function(stdin) {
+        stationfetchplaylist: function (stdin) {
             current.push(splitter(stdin))
             ipc.server.emit('status', current)
             log(current)
 
         },
-        songfinish: function(stdin) {
+        songstart: function (stdin) {
             current.push(splitter(stdin))
             ipc.server.emit('status', current)
             log(current)
 
         },
-        defaultCommand: function() {
+        songfinish: function (stdin) {
+            current.push(splitter(stdin))
+            ipc.server.emit('status', current)
+            log(current)
+
+        },
+        defaultCommand: function () {
             log(arguments)
 
         }
@@ -178,24 +196,24 @@ const splitter = stdin => stdin.split("\n").map(str => str.split("=")).reduce((o
 
 
 ipc.serve(
-    function() {
+    function () {
         ipc.server.on(
             'connect',
-            function(socket) {
+            function (socket) {
                 //console.log('client connected')
             }
         )
 
         ipc.server.on(
             'data',
-            function(data, socket) {
+            function (data, socket) {
                 //console.log('got a message', data)
             }
         )
 
         ipc.server.on(
             'cli',
-            function([command, stdin], socket) {
+            function ([command, stdin], socket) {
                 //log('command:', command)
                 if (command in commands) {
                     const status = splitter(stdin)
@@ -212,7 +230,7 @@ ipc.serve(
 
         ipc.server.on(
             'getCurrentTime',
-            function(command, socket) {
+            function (command, socket) {
                 log('got a request for current time')
 
                 ipc.server.emit(socket, 'getCurrentTime', currentTime.getNewest())
@@ -221,7 +239,7 @@ ipc.serve(
 
         ipc.server.on(
             'getStatus',
-            function(command, socket) {
+            function (command, socket) {
                 log('got a request for current status')
 
                 ipc.server.emit(socket, 'getStatus', current.getNewest())
@@ -230,7 +248,7 @@ ipc.serve(
 
         ipc.server.on(
             'getAllStatus',
-            function(command, socket) {
+            function (command, socket) {
                 log('got a request for current status')
 
                 ipc.server.emit(socket, 'getAllStatus', current.getAll())

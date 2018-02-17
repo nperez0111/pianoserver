@@ -8,16 +8,19 @@
         <v-flex xs12>
           <v-layout row align-center>
             <v-layout column>
-              <v-btn icon fab large slot="activator" @click="likeSong">
+              <v-btn icon fab large flat slot="activator" @click="likeSong" v-if="liked" color="blue lighten-2">
                 <v-icon>thumb_up</v-icon>
               </v-btn>
-              <v-btn icon fab large slot="activator" @click="dislikeSong" :class="{light:!disliked,red:disliked}">
+              <v-btn icon fab large flat slot="activator" @click="likeSong" v-else>
+                <v-icon>thumb_up</v-icon>
+              </v-btn>
+              <v-btn icon fab large flat slot="activator" @click="dislikeSong" color="red lighten-2">
                 <v-icon>thumb_down</v-icon>
               </v-btn>
             </v-layout>
             
             <v-progress-circular :size="250" :width="15" :rotate="180" v-model="percentage" color="pink">
-              <v-btn icon fab large @click="play" v-if="!paused">
+              <v-btn icon fab large @click="play" v-if="!playing">
                 <v-icon>play_arrow</v-icon>
               </v-btn>
               <v-btn icon fab large @click="pause" v-else>
@@ -35,44 +38,50 @@
   </v-container>
 </template>
 <script>
-import io from 'socket.io-client'
-window.io=io
+
   export default{
   mounted(){
-    this.socket=io('ws://localhost:8081')
-    this.socket.on("status",this.onStatus.bind(this))
-    this.socket.on("currentTime",this.onCurrentTime.bind(this))
-    this.socket.on("isPlaying",this.isPlaying.bind(this))
-    this.socket.on("getCurrentStatus",([statuses,isPlaying])=>{
-      const state = statuses.some(status=>{
-        if(status && parseInt(status.stationCount) > 0 && status.coverArt){
+    window.player = this
+
+    //server emitted events
+    this.$socket.on("status", this.onStatus.bind(this))
+    this.$socket.on("currentTime", this.onCurrentTime.bind(this))
+    this.$socket.on("isPlaying", this.isPlaying.bind(this))
+
+    //try to initialize with some values
+    this.$socket.on("getCurrentStatus", ([statuses, isPlaying]) => {
+      const state = statuses.some(status => {
+        if (status && parseInt(status.stationCount) > 0 && status.coverArt) {
           this.stations = this.getStations(status)
           this.$station.setStations(this.stations)
-          this.$station.setStation(status.songStationName)
-          this.status=status
+          this.$station.setStation(status.stationName)
+          if(typeof status == 'string'){
+            this.status = JSON.parse(status)
+          }else{
+            this.status = status
+          }
           this.setUpSong(status)
           this.isPlaying(isPlaying)
           return true
         }
       })
 
-      if(this.stations===null){
-        setTimeout(()=>{
-          this.socket.emit("getCurrentStatus",10)
-        },1000)
+      if (this.stations === null) {
+        setTimeout(() => {
+          this.$socket.emit("getCurrentStatus", 10)
+        }, 1000)
       }
-      
+
     })
-    this.socket.emit("getCurrentStatus",4)
-    window.socket=this.socket
-    window.player=this
+
+    //trigger initialize
+    this.$socket.emit("getCurrentStatus", 6)
   },
   data(){
     this.$station.onchangeStation(station=>{
       this.station=station
     })
     return {
-      socket:null,
       status:{},
       liked:false,
       disliked:false,
@@ -80,21 +89,30 @@ window.io=io
       currentTime:{now:"0:0",ofTotal:"0:0"},
       stations:this.$station.getStations(),
       station:this.$station.getStation(),
-      paused:false
+      playing:true
     }
   },
   methods:{
     setUpSong(status){
-      this.liked=status.rating==='1'
-      this.disliked=false
-      this.loadingNextSong=false
+      this.liked = status.rating==='1'
+      this.disliked = false
+      this.loadingNextSong = false
     },
     onStatus(status){
-      this.status=status
+
+      
+      if(typeof status == 'string'){
+        this.status = JSON.parse(status)
+      }else{
+        this.status = status
+      }
+      this.$station.setStations(this.stations)
+      this.$station.setStation(status.stationName)
+      this.setUpSong(status)
       console.log(status)
     },
     onCurrentTime(time){
-      this.currentTime=time
+      this.currentTime = time
     },
     getStations(state){
       const amount=state.stationCount
@@ -104,28 +122,28 @@ window.io=io
       return null
     },
     play(){
-      this.paused=false
-      this.socket.emit("play",this.status,this.currentTime)
+      this.playing=true
+      this.$socket.emit("play",this.status,this.currentTime)
     },
     pause(){
-      this.paused=true
-      this.socket.emit("pause",this.status,this.currentTime)
+      this.playing=false
+      this.$socket.emit("pause",this.status,this.currentTime)
     },
     likeSong(){
       this.liked=true
-      this.socket.emit("likeSong",this.status,this.currentTime)
+      this.$socket.emit("likeSong",this.status,this.currentTime)
     },
     dislikeSong(){
       this.disliked=true
-      this.socket.emit("dislikeSong",this.status,this.currentTime)
+      this.$socket.emit("dislikeSong",this.status,this.currentTime)
     },
     nextSong(){
       this.loadingNextSong=true
-      this.socket.emit("nextSong",this.status,this.currentTime)
+      this.$socket.emit("nextSong",this.status,this.currentTime)
     },
     isPlaying(playing){
-      console.log('set paused to',!playing)
-      this.paused=!playing
+      //console.log('set playing to',playing)
+      this.playing=playing
     }
   },
   computed:{

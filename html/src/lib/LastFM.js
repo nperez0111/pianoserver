@@ -14,4 +14,13 @@ export default class LastFM {
     const url = `${type}.search&${type}=${encodeURIComponent(query)}`
     return fetch(url).then(resp => resp.json()).then(({ results }) => results[`${type}matches`][type])
   }
+  getImagesForStations(stations) {
+    stations.map(station => {
+      if (station.includes('Radio')) {
+        //Probably an artist
+      } else {
+        //probably a song
+      }
+    })
+  }
 }

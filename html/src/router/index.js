@@ -5,11 +5,9 @@ import Player from '@/components/Player'
 Vue.use(Router)
 
 export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'Player',
-      component: Player
-    }
-  ]
+  routes: [{
+    path: '/',
+    name: 'Player',
+    component: Player
+  }]
 })

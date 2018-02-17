@@ -3,9 +3,11 @@ import App from './App'
 import router from './router'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
-import Station from './plugins/station'
+import StationPlugin from './plugins/station'
+import SocketPlugin from './plugins/socket'
 
-Vue.use(Station, {})
+Vue.use(StationPlugin, {})
+Vue.use(SocketPlugin, {})
 Vue.use(Vuetify, {
   theme: {
     primary: '#ee44aa',
