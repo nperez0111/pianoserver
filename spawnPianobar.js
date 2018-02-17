@@ -72,7 +72,7 @@ class Spawner{
 	}
 	getPianobar(){
 		return this.pianobar
-	},
+	}
 	respawn(){
 		once=true
 		//other respawn code
