@@ -12,8 +12,8 @@ module.exports = {
             env_production: {
                 NODE_ENV: 'production'
             },
-            watch: true,
-            "ignore_watch": ["node_modules", "html/", "debug.log", ".*"],
+            watch: ["server", "spawnPianobar", "History"],
+            "ignore_watch": ["node_modules", "html/", "debug.log", ".*", ".git"],
             "watch_options": {
                 "followSymlinks": false
             },
