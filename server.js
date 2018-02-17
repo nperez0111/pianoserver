@@ -6,7 +6,7 @@ const ipc = require('node-ipc'),
     log = logger.trace,
     currentTime = new History(20),
     current = new History(120),
-    pastSongs = new History(50),
+    pastSongs = new History(50, { key: 'coverArt' }),
     isPlaying = new History(1),
     spawnInstance = new Spawner(true, {
         onExit: function (exitCode, signal) {
@@ -59,7 +59,7 @@ socket.on('connection', function (client) {
     })
     client.on('getCurrentStatus', (howMany) => {
         log('got a request for current status')
-        client.emit('getCurrentStatus', [current.getNewest(parseInt(howMany)), isPlaying.getNewest()])
+        client.emit('getCurrentStatus', current.getNewest(parseInt(howMany)), isPlaying.getNewest())
     })
     client.on('getPastSongs', (howMany) => {
         log('got a request for past Songs')
@@ -79,6 +79,8 @@ socket.on('connection', function (client) {
         //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
         if (isPlaying.getNewest() === false) {
             spawnInstance.writeCommand("play")
+        } else {
+            client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
         }
         currentTime.clear()
         isPlaying.push(true)
@@ -89,6 +91,9 @@ socket.on('connection', function (client) {
         //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
         if (isPlaying.getNewest() === true) {
             spawnInstance.writeCommand("pause")
+        } else {
+            //client is out of sync send them an update
+            client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
         }
         isPlaying.push(false)
     })
@@ -97,6 +102,9 @@ socket.on('connection', function (client) {
         //make sure to like the right song
         if (clientStatus.title === current.getNewest().title) {
             spawnInstance.writeCommand("likeSong")
+        } else {
+            //client is out of sync send them an update
+            client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
         }
 
     })
@@ -105,17 +113,24 @@ socket.on('connection', function (client) {
         //make sure to dislike the right song
         if (clientStatus.title === current.getNewest().title) {
             spawnInstance.writeCommand("dislikeSong")
+        } else {
+            //client is out of sync send them an update
+            client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
         }
         isPlaying.push(true)
     })
 
     client.on('nextSong', (clientStatus, clientTime) => {
-        log('got a request to skip')
-        //make sure to dislike the right song
+        log('got a request to skip', clientStatus.title, "current song is", current.getNewest().title)
+        //make sure to skip the correct song
         if (clientStatus.title === current.getNewest().title) {
             spawnInstance.writeCommand("nextSong")
+            isPlaying.push(true)
+        } else {
+            //client is out of sync send them an update
+            client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
         }
-        isPlaying.push(true)
+
     })
     client.on('selectStation', (stationID) => {
         logger.info('got a request to change station to ' + stationID)
@@ -218,10 +233,7 @@ ipc.serve(
                 if (command in commands) {
                     const status = splitter(stdin)
                     current.push(status)
-                    if (status.coverArt && !pastSongs.has('coverArt', status.covertArt)) {
-                        //console.log('pushing', status)
-                        pastSongs.push(status)
-                    }
+                    pastSongs.push(status)
                     //log(status)
                 } else {
                     commands.defaultCommand(stdin)

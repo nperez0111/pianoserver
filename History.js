@@ -1,8 +1,9 @@
 class History {
-    constructor(size = 100) {
+    constructor(size = 100, { key = false } = {}) {
         this.size = size
         this.store = []
         this.pushTo = []
+        this.key = key
         //store will be
     }
     onpush(cb) {
@@ -15,6 +16,11 @@ class History {
     push(state) {
         if (this.store.length === this.size) {
             this.store.pop()
+        }
+        if (this.key !== false) {
+            if (this.has(this.key, state[this.key]) || !state[this.key]) {
+                return false
+            }
         }
 
         this.store.push(state)
@@ -32,6 +38,7 @@ class History {
         if (howMany === 1) {
             return ret[0]
         }
+        ret.reverse()
         return ret
     }
     getOldest(howMany = 1) {

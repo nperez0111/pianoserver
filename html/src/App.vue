@@ -26,6 +26,7 @@
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
+    
     <v-toolbar color="primary" dense fixed clipped-left app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-icon class="mx-3">fa-youtube</v-icon>
@@ -33,41 +34,10 @@
         <span class="title" v-text="currentStation">Pandora</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      
     </v-toolbar>
+
     <v-content>
       <router-view/>
-      <!--bottom sheet for navigating to other pages-->
-      <v-bottom-sheet inset :value="showBottomPlayer">
-      <v-card tile>
-        <v-progress-linear height="3" :value="50" class="my-0"></v-progress-linear>
-        <v-list>
-          <v-list-tile>
-            <v-list-tile-content>
-              <v-list-tile-title>The Walker</v-list-tile-title>
-              <v-list-tile-sub-title>Fitz & The Trantrums</v-list-tile-sub-title>
-            </v-list-tile-content>
-            <v-spacer></v-spacer>
-            <v-list-tile-action>
-              <v-btn icon>
-                <v-icon>fast_rewind</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-            <v-list-tile-action :class="{ 'mx-5': $vuetify.breakpoint.mdAndUp }">
-              <v-btn icon>
-                <v-icon>pause</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-            <v-list-tile-action :class="{ 'mr-3': $vuetify.breakpoint.mdAndUp }">
-              <v-btn icon>
-                <v-icon>fast_forward</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-          </v-list-tile>
-        </v-list>
-      </v-card>
-    </v-bottom-sheet>
-    <!-- END BOTTOM SHEET -->
     </v-content>
   </v-app>
 </template>

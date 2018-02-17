@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-slide-y-transition mode="out-in">
       <v-layout column align-center>
-        <img :src="status.coverArt" alt="Album Cover" class="mb-5">
+        <AlbumCoverViewer class="mb-5" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" />
         <h2>{{status.title}} by {{status.artist}}</h2>
         <v-subheader>on {{status.album}}</v-subheader>
         <v-flex xs12>
@@ -28,7 +28,7 @@
               </v-btn>
             </v-progress-circular>
 
-            <v-btn icon fab large>
+            <v-btn icon fab large @click="nextSong">
               <v-icon>fast_forward</v-icon>
             </v-btn>
       </v-layout></v-flex>
@@ -38,7 +38,7 @@
   </v-container>
 </template>
 <script>
-
+import AlbumCoverViewer from './AlbumCoverViewer'
   export default{
   mounted(){
     window.player = this
@@ -47,20 +47,15 @@
     this.$socket.on("status", this.onStatus.bind(this))
     this.$socket.on("currentTime", this.onCurrentTime.bind(this))
     this.$socket.on("isPlaying", this.isPlaying.bind(this))
+    this.$socket.on('getPastSongs',this.onGetPastSongs.bind(this))
 
     //try to initialize with some values
-    this.$socket.on("getCurrentStatus", ([statuses, isPlaying]) => {
+    this.$socket.on("getCurrentStatus", (statuses, isPlaying) => {
       const state = statuses.some(status => {
-        if (status && parseInt(status.stationCount) > 0 && status.coverArt) {
+        if (status && parseInt(status.stationCount) > 0 && status.coverArt && status.stationName) {
           this.stations = this.getStations(status)
-          this.$station.setStations(this.stations)
-          this.$station.setStation(status.stationName)
-          if(typeof status == 'string'){
-            this.status = JSON.parse(status)
-          }else{
-            this.status = status
-          }
-          this.setUpSong(status)
+          
+          this.onStatus(status)
           this.isPlaying(isPlaying)
           return true
         }
@@ -76,6 +71,7 @@
 
     //trigger initialize
     this.$socket.emit("getCurrentStatus", 6)
+    this.$socket.emit("getPastSongs")
   },
   data(){
     this.$station.onchangeStation(station=>{
@@ -86,6 +82,7 @@
       liked:false,
       disliked:false,
       loadingNextSong:false,
+      pastSongs:[],
       currentTime:{now:null,ofTotal:null},
       stations:this.$station.getStations(),
       station:this.$station.getStation(),
@@ -106,8 +103,10 @@
       }else{
         this.status = status
       }
-      this.$station.setStations(this.stations)
-      this.$station.setStation(status.stationName)
+      this.$station.setStations(this.getStations(this.status))
+      if( status.statonName !== "" ){
+        this.$station.setStation(status.stationName)
+      }
       this.setUpSong(status)
       //console.log(status)
     },
@@ -141,10 +140,15 @@
     nextSong(){
       this.loadingNextSong=true
       this.$socket.emit("nextSong",this.status,this.currentTime)
+      this.$socket.emit("getCurrentStatus", 6)
     },
     isPlaying(playing){
       //console.log('set playing to',playing)
       this.playing=playing
+    },
+    onGetPastSongs(statuses){
+      this.pastSongs = statuses
+      console.log("past songs",this.pastSongs)
     }
   },
   computed:{
@@ -156,7 +160,8 @@
             totalSeconds= parseInt(this.currentTime.ofTotal.split(":")[0]) * 60 + parseInt(this.currentTime.ofTotal.split(":")[1])
       return (1-(nowSeconds / totalSeconds)) * 100
     }
-  }
+  },
+  components:{AlbumCoverViewer}
   }
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
