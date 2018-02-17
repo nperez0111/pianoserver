@@ -2,23 +2,10 @@
   <v-app dark id="inspire">
     <v-navigation-drawer fixed clipped v-model="drawer" app>
       <v-list dense>
-        <v-list-tile v-for="item in items" :key="item.text" @click="">
-          <v-list-tile-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>
-              {{ item.text }}
-            </v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-subheader class="mt-3 grey--text text--darken-1">STATIONS</v-subheader>
-        <v-list>
-          <v-list-tile v-for="item in items2" :key="item.text" avatar @click="">
-            <v-list-tile-avatar>
-              <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt="">
-            </v-list-tile-avatar>
-            <v-list-tile-title v-text="item.text"></v-list-tile-title>
+        <v-subheader class="mt-3 grey--text text--darken-1">STATIONS ({{stations.length}})</v-subheader>
+        <v-list dense>
+          <v-list-tile v-for="(item,i) in stations" :key="i" @click="">
+            <v-list-tile-title v-text="item"></v-list-tile-title>
           </v-list-tile>
         </v-list>
         <v-list-tile class="mt-3" @click="">
@@ -39,72 +26,66 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-icon class="mx-3">fa-youtube</v-icon>
       <v-toolbar-title class="mr-5 align-center">
-        <span class="title">Pandora</span>
+        <span class="title" v-text="$station.current">Pandora</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-layout row align-center style="max-width: 650px">
-        <v-text-field placeholder="Search..." single-line append-icon="search" :append-icon-cb="() => {}" color="white" hide-details></v-text-field>
-      </v-layout>
+      
     </v-toolbar>
     <v-content>
       <router-view/>
+      <!--bottom sheet for navigating to other pages-->
+      <v-bottom-sheet inset :value="showBottomPlayer">
+      <v-card tile>
+        <v-progress-linear height="3" :value="50" class="my-0"></v-progress-linear>
+        <v-list>
+          <v-list-tile>
+            <v-list-tile-content>
+              <v-list-tile-title>The Walker</v-list-tile-title>
+              <v-list-tile-sub-title>Fitz & The Trantrums</v-list-tile-sub-title>
+            </v-list-tile-content>
+            <v-spacer></v-spacer>
+            <v-list-tile-action>
+              <v-btn icon>
+                <v-icon>fast_rewind</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+            <v-list-tile-action :class="{ 'mx-5': $vuetify.breakpoint.mdAndUp }">
+              <v-btn icon>
+                <v-icon>pause</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+            <v-list-tile-action :class="{ 'mr-3': $vuetify.breakpoint.mdAndUp }">
+              <v-btn icon>
+                <v-icon>fast_forward</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+        </v-list>
+      </v-card>
+    </v-bottom-sheet>
+    <!-- END BOTTOM SHEET -->
     </v-content>
   </v-app>
 </template>
 <script>
-import io from 'socket.io-client'
-window.io=io
+
 export default {
-  mount(){
-    this.socket=io('ws://localhost:8081')
-    this.socket.on("status",this.onStatus)
-    this.socket.on("currentTime",this.onCurrentTime)
+  data: function() {
+    this.$station.onchangeStations(stations=>{
+      this.stations=stations
+    })
+    return {
+      drawer: true,
+      showBottomPlayer:false,
+      stations:this.$station.getStations()
+    }
   },
-  data: () => ({
-    socket:null,
-    drawer: true,
-    items: [{
-      icon: 'trending_up',
-      text: 'Most Popular'
-    }, {
-      icon: 'subscriptions',
-      text: 'Subscriptions'
-    }, {
-      icon: 'history',
-      text: 'History'
-    }, {
-      icon: 'featured_play_list',
-      text: 'Playlists'
-    }, {
-      icon: 'watch_later',
-      text: 'Watch Later'
-    }],
-    items2: [{
-      picture: 28,
-      text: 'Joseph'
-    }, {
-      picture: 38,
-      text: 'Apple'
-    }, {
-      picture: 48,
-      text: 'Xbox Ahoy'
-    }, {
-      picture: 58,
-      text: 'Nokia'
-    }, {
-      picture: 78,
-      text: 'MKBHD'
-    }]
-  }),
   props: {
     source: String
   },
   methods:{
-    onStatus(status){
-
-    },
-    onCurrentTime(time){
-      
+    setStations(stations){
+      this.stations=stations
     }
   }
 }
