@@ -10,7 +10,7 @@ Vue.use(StationPlugin, {})
 Vue.use(SocketPlugin, {})
 Vue.use(Vuetify, {
   theme: {
-    primary: '#ee44aa',
+    primary: '#386aff',
     secondary: '#424242',
     accent: '#82B1FF',
     error: '#FF5252',

@@ -19,7 +19,7 @@
               </v-btn>
             </v-layout>
             
-            <v-progress-circular :size="250" :width="15" :rotate="180" v-model="percentage" color="pink">
+            <v-progress-circular :size="250" :width="15" :rotate="180" v-model="percentage" color="primary">
               <v-btn icon fab large @click="play" v-if="!playing">
                 <v-icon>play_arrow</v-icon>
               </v-btn>
@@ -86,7 +86,7 @@
       liked:false,
       disliked:false,
       loadingNextSong:false,
-      currentTime:{now:"0:0",ofTotal:"0:0"},
+      currentTime:{now:null,ofTotal:null},
       stations:this.$station.getStations(),
       station:this.$station.getStation(),
       playing:true
@@ -109,10 +109,11 @@
       this.$station.setStations(this.stations)
       this.$station.setStation(status.stationName)
       this.setUpSong(status)
-      console.log(status)
+      //console.log(status)
     },
-    onCurrentTime(time){
+    onCurrentTime(time,isPlaying){
       this.currentTime = time
+      this.isPlaying(isPlaying)
     },
     getStations(state){
       const amount=state.stationCount

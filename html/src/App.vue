@@ -10,7 +10,10 @@
           <v-list-tile-title class="grey--text">QuickMix</v-list-tile-title>
         </v-list-tile>
         <v-list dense>
-          <v-list-tile v-for="(item,i) in stations" :key="i" @click="changeStationTo(i)">
+          <v-list-tile v-for="(item,i) in stations" :key="i" @click="changeStationTo(i)" avatar>
+            <v-list-tile-avatar>
+                <img :src="albumCovers[i]||'https://lh3.googleusercontent.com/PPRgtbBG6Blerg-13m_RbAiQyTcrVIalJVkafFEaNLf0HZu-FVNPs14AJb-IuDtQqQ=rw'">
+              </v-list-tile-avatar>
             <v-list-tile-title v-text="item"></v-list-tile-title>
           </v-list-tile>
         </v-list>
@@ -23,7 +26,7 @@
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
-    <v-toolbar color="red" dense fixed clipped-left app>
+    <v-toolbar color="primary" dense fixed clipped-left app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-icon class="mx-3">fa-youtube</v-icon>
       <v-toolbar-title class="mr-5 align-center">
@@ -69,18 +72,27 @@
   </v-app>
 </template>
 <script>
-
+import LastFM from '@/lib/LastFM'
 export default {
   data: function() {
     this.$station.onchangeStations(stations=>{
+      if(!this.loadedAlbumCovers){
+        window.LastFM=LastFM
+        LastFM.getImagesForStations(stations).then(images=>{
+          this.albumCovers=images
+        })
+      }
       this.stations = stations
     })
     this.$station.onchangeStation(stationName=>{
       this.currentStation = stationName
     })
+    window.App=this
     return {
+      loadedAlbumCovers:false,
       drawer: true,
       showBottomPlayer:false,
+      albumCovers:[],
       stations:this.$station.getStations(),
       currentStation:this.$station.getStation()
     }
