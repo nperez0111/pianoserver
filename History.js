@@ -45,7 +45,7 @@ class History {
         return this.store
     }
     has(key, value) {
-        return this.store.some(item => item[key] === value)
+        return this.store.some(item => item[key] == value)
     }
     clear() {
         this.store = []

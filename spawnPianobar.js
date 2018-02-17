@@ -44,7 +44,9 @@ class Spawner {
     setUpPianobar() {
         if (this.options.takeInput) {
             // without this, we would only get streams once enter is pressed
-            stdin.setRawMode(true);
+            if (stdin.setRawMode) {
+                stdin.setRawMode(true);
+            }
 
             // resume stdin in the parent process (node app won't quit all by itself
             // unless an error or process.exit() happens)
@@ -79,6 +81,9 @@ class Spawner {
             process.on('exit', () => {
                 this.pianobar.kill()
             })
+            process.on('SIGINT', () => {
+                this.pianobar.kill()
+            });
         }
 
     }

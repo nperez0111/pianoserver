@@ -27,8 +27,8 @@ const ipc = require('node-ipc'),
                 currentTime.push({ now, ofTotal })
                 //ipc.server.emit('currentTime',currentTime)
                 const lastTimes = currentTime.getNewest(7)
-                if (lastTimes.every(({ now }) => now === lastTimes[0].now) && isPlaying.getNewest() === true) {
-                    //isPlaying.push(false)
+                if (lastTimes.every(({ now }) => now === lastTimes[0].now) && isPlaying.getNewest() === true && lastTimes.length == 7) {
+                    isPlaying.push(false)
                 }
 
             } else {
@@ -51,7 +51,7 @@ const socket = io.listen(server);
 // Add a connect listener
 socket.on('connection', function (client) {
     const timeInterval = setInterval(function () {
-        client.volatile.emit('currentTime', currentTime.getNewest());
+        client.volatile.emit('currentTime', currentTime.getNewest(), isPlaying.getNewest());
     }, 1000)
     client.on('getCurrentTime', (howMany) => {
         log('got a request for current time')
@@ -66,7 +66,7 @@ socket.on('connection', function (client) {
         if (howMany) {
             client.emit('getPastSongs', pastSongs.getNewest(parseInt(howMany)))
         } else {
-            client.emit('getPastSongs', pastSongs.store())
+            client.emit('getPastSongs', pastSongs.getAll())
         }
 
     })
@@ -219,6 +219,7 @@ ipc.serve(
                     const status = splitter(stdin)
                     current.push(status)
                     if (status.coverArt && !pastSongs.has('coverArt', status.covertArt)) {
+                        //console.log('pushing', status)
                         pastSongs.push(status)
                     }
                     //log(status)
