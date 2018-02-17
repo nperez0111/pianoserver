@@ -79,3 +79,44 @@
 16:04:09.469 INFO  got a request for current status 
 16:05:20.867 INFO  got a request for current status 
 16:05:56.753 INFO  got a request for current status 
+16:08:46.654 INFO  got a request for current status 
+16:50:00.484 INFO  {"0":"artist=N.A.S.A.\ntitle=Hide (Tropkillaz Remix)\nalbum=Hide (Tropkillaz Remix) (Single)\ncoverArt=http://cont-1.p-cdn.com/images/public/gracenote/albumart/8/3/1/0/800040138_500W_500H.jpg\nstationName=QuickMix\nsongStationName=Trap Radio\npRet=1\npRetStr=Everything is fine :)\nwRet=0\nwRetStr=No error\nsongDuration=201\nsongPlayed=3\nrating=1\ndetailUrl=http://www.pandora.com/nasa/hide-tropkillaz-remix-single/hide-tropkillaz-remix/TR2tktknlh6jjXP?dc=232&ad=1:23:1:94118::0:0:0:1:807:009:CA:06075:2:0:0:0:813:0\nstationCount=95\nstation0=311 Radio\nstation1=90s Alternative  Radio\nstation2=Adventure Club Radio\nstation3=Ambulance Radio\nstation4=Arctic Monkeys Radio\nstation5=AWOLNATION Radio\nstation6=Bailando (Spanish Version) (Feat. Descemer Bueno & Gente De Zon\nstation7=Bassnectar Radio\nstation8=Beastie Boys Radio\nstation9=Bitter Sweet Symphony Radio\nstation10=Blue Foundation Radio\nstation11=Bob Marley Radio\nstation12=Bruno Mars Radio\nstation13=Chet Baker Radio\nstation14=Chill Out Radio\nstation15=Chillstep Radio\nstation16=Chillwave Radio\nstation17=Clocks Radio\nstation18=Coldplay Radio\nstation19=Cream Radio\nstation20=David Guetta Radio\nstation21=Deadmau5 Radio\nstation22=Deep House Radio\nstation23=Devin The Dude Radio\nstation24=Die Antwoord Radio\nstation25=Disclosure Radio\nstation26=DJ Fresh (UK) Radio\nstation27=Dub FX Radio\nstation28=Dubstep Radio\nstation29=Ekolu Radio\nstation30=Ellie Goulding Radio\nstation31=Eminem Radio\nstation32=Fanfarlo Radio\nstation33=Flume Radio\nstation34=Flux Pavilion Radio\nstation35=Foster The People Radio\nstation36=G-Eazy Radio\nstation37=Gorillaz Radio\nstation38=Handlebars Radio\nstation39=Ho Hey Radio\nstation40=Imagine Dragons Radio\nstation41=Indie Dance Radio\nstation42=John Mayer Radio\nstation43=Kendrick Lamar Radio\nstation44=Keys N Krates Radio\nstation45=Klaypex Radio\nstation46=Knife Party Radio\nstation47=Linkin Park Radio\nstation48=Location Radio\nstation49=Lorde Radio\nstation50=Mac Demarco Radio\nstation51=Marcy Playground Radio\nstation52=Maroon 5 Radio\nstation53=marshmello Radio\nstation54=Mi Gente (Feat. Willy William) Radio\nstation55=Modestep Radio\nstation56=Monster Cat Radio\nstation57=Mumford & Sons Radio\nstation58=Nerd Rage & Sluggo Radio\nstation59=OneRepublic Radio\nstation60=Outkast Radio\nstation61=Pandora Invasion: Madeon*\nstation62=Pretty Lights Radio\nstation63=Purity Ring Radio\nstation64=QuickMix\nstation65=Red Hot Chili Peppers Radio\nstation66=Reggae Radio\nstation67=Secondhand Serenade Radio\nstation68=Snow Patrol Radio\nstation69=Somebody That I Used To Know Radio\nstation70=Sublime Radio\nstation71=Sublime With Rome Radio\nstation72=T-Pain Radio\nstation73=The Black Keys Radio\nstation74=The Doors Radio\nstation75=The Fray Radio\nstation76=The Glitch Mob Radio\nstation77=The Green Radio\nstation78=The Hood Internet Radio\nstation79=The Killers Radio\nstation80=The Neighbourhood Radio\nstation81=The Postal Service Radio\nstation82=The Script Radio\nstation83=The White Stripes Radio\nstation84=The xx Radio\nstation85=Thumbprint Radio\nstation86=Today's Alternative Radio\nstation87=Today's Comedy Radio\nstation88=Trap Radio\nstation89=Trina Radio\nstation90=Twenty One Pilots Radio\nstation91=White Town Radio\nstation92=XXYYXX Radio\nstation93=Yeah Yeah Yeahs Radio\nstation94=Zomboy Radio\n"} 
+16:51:55.942 INFO  got a request for current status 
+16:52:07.278 INFO  got a request for current status 
+16:52:17.005 INFO  got a request for current status 
+16:52:30.365 INFO  got a request for current status 
+16:59:50.466 INFO  got a request for current status 
+17:01:13.611 INFO  got a request for current status 
+17:01:49.102 INFO  got a request for current status 
+17:02:15.237 INFO  got a request for current status 
+17:03:02.855 INFO  got a request for current status 
+17:04:42.334 INFO  got a request for current status 
+17:04:54.106 INFO  got a request for current status 
+17:05:35.041 INFO  got a request for current status 
+17:07:59.793 INFO  got a request for current status 
+17:10:30.055 INFO  got a request for current status 
+17:11:46.778 INFO  got a request for current status 
+17:12:24.376 INFO  got a request for current status 
+17:12:34.695 INFO  got a request for current status 
+17:13:05.733 INFO  got a request for current status 
+17:14:39.286 INFO  got a request for current status 
+17:18:39.317 INFO  got a request for current status 
+17:20:48.513 INFO  got a request for current status 
+17:21:15.235 INFO  got a request for current status 
+17:21:54.347 INFO  got a request for current status 
+17:22:11.939 INFO  got a request for current status 
+17:24:26.425 INFO  got a request for current status 
+17:26:23.478 INFO  got a request for current status 
+17:26:36.167 INFO  got a request to pause 
+17:26:46.112 INFO  got a request to play 
+17:28:03.688 INFO  got a request for current status 
+17:35:32.185 INFO  got a request for current status 
+17:36:33.308 INFO  got a request for current status 
+17:37:02.399 INFO  got a request for current status 
+17:40:00.002 INFO  got a request for current status 
+17:40:08.567 INFO  got a request to play 
+17:40:57.391 INFO  got a request for current status 
+17:41:09.839 INFO  got a request to play 
+17:41:43.856 INFO  got a request for current status 
+17:42:05.453 INFO  got a request for current status 
+17:42:11.967 INFO  got a request to play 

@@ -7,20 +7,27 @@
         <v-subheader>on {{status.album}}</v-subheader>
         <v-flex xs12>
           <v-layout row align-center>
-              <v-btn icon fab large>
-                <v-icon>fast_rewind</v-icon>
+            <v-layout column>
+              <v-btn icon fab large slot="activator" @click="likeSong">
+                <v-icon>thumb_up</v-icon>
               </v-btn>
+              <v-btn icon fab large slot="activator" @click="dislikeSong" :class="{light:!disliked,red:disliked}">
+                <v-icon>thumb_down</v-icon>
+              </v-btn>
+            </v-layout>
+            
             <v-progress-circular :size="250" :width="15" :rotate="180" v-model="percentage" color="pink">
-              <v-btn icon fab large @click="play" v-if="paused">
+              <v-btn icon fab large @click="play" v-if="!paused">
                 <v-icon>play_arrow</v-icon>
               </v-btn>
               <v-btn icon fab large @click="pause" v-else>
                 <v-icon>pause</v-icon>
               </v-btn>
             </v-progress-circular>
-              <v-btn icon fab large>
-                <v-icon>fast_forward</v-icon>
-              </v-btn>
+
+            <v-btn icon fab large>
+              <v-icon>fast_forward</v-icon>
+            </v-btn>
       </v-layout></v-flex>
         
       </v-layout>
@@ -35,13 +42,16 @@ window.io=io
     this.socket=io('ws://localhost:8081')
     this.socket.on("status",this.onStatus.bind(this))
     this.socket.on("currentTime",this.onCurrentTime.bind(this))
-    this.socket.on("getCurrentStatus",statuses=>{
+    this.socket.on("isPlaying",this.isPlaying.bind(this))
+    this.socket.on("getCurrentStatus",([statuses,isPlaying])=>{
       const state = statuses.some(status=>{
         if(status && parseInt(status.stationCount) > 0 && status.coverArt){
           this.stations = this.getStations(status)
           this.$station.setStations(this.stations)
           this.$station.setStation(status.songStationName)
           this.status=status
+          this.setUpSong(status)
+          this.isPlaying(isPlaying)
           return true
         }
       })
@@ -64,6 +74,9 @@ window.io=io
     return {
       socket:null,
       status:{},
+      liked:false,
+      disliked:false,
+      loadingNextSong:false,
       currentTime:{now:"0:0",ofTotal:"0:0"},
       stations:this.$station.getStations(),
       station:this.$station.getStation(),
@@ -71,6 +84,11 @@ window.io=io
     }
   },
   methods:{
+    setUpSong(status){
+      this.liked=status.rating==='1'
+      this.disliked=false
+      this.loadingNextSong=false
+    },
     onStatus(status){
       this.status=status
       console.log(status)
@@ -87,13 +105,34 @@ window.io=io
     },
     play(){
       this.paused=false
+      this.socket.emit("play",this.status,this.currentTime)
     },
     pause(){
       this.paused=true
+      this.socket.emit("pause",this.status,this.currentTime)
+    },
+    likeSong(){
+      this.liked=true
+      this.socket.emit("likeSong",this.status,this.currentTime)
+    },
+    dislikeSong(){
+      this.disliked=true
+      this.socket.emit("dislikeSong",this.status,this.currentTime)
+    },
+    nextSong(){
+      this.loadingNextSong=true
+      this.socket.emit("nextSong",this.status,this.currentTime)
+    },
+    isPlaying(playing){
+      console.log('set paused to',!playing)
+      this.paused=!playing
     }
   },
   computed:{
     percentage(){
+      if(this.currentTime.now==null){
+        return 0
+      }
       const nowSeconds= parseInt(this.currentTime.now.split(":")[0]) * 60 + parseInt(this.currentTime.now.split(":")[1]),
             totalSeconds= parseInt(this.currentTime.ofTotal.split(":")[0]) * 60 + parseInt(this.currentTime.ofTotal.split(":")[1])
       return (1-(nowSeconds / totalSeconds)) * 100

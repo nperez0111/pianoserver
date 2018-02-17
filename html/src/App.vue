@@ -2,18 +2,19 @@
   <v-app dark id="inspire">
     <v-navigation-drawer fixed clipped v-model="drawer" app>
       <v-list dense>
-        <v-subheader class="mt-3 grey--text text--darken-1">STATIONS ({{stations.length}})</v-subheader>
+        <v-subheader class="mt-3 grey--text">STATIONS ({{stations.length}})</v-subheader>
+        <v-list-tile class="mt-3" @click="">
+          <v-list-tile-action>
+            <v-icon color="grey">shuffle</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title class="grey--text">QuickMix</v-list-tile-title>
+        </v-list-tile>
         <v-list dense>
           <v-list-tile v-for="(item,i) in stations" :key="i" @click="">
             <v-list-tile-title v-text="item"></v-list-tile-title>
           </v-list-tile>
         </v-list>
-        <v-list-tile class="mt-3" @click="">
-          <v-list-tile-action>
-            <v-icon color="grey darken-1">add_circle_outline</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">Browse Channels</v-list-tile-title>
-        </v-list-tile>
+        
         <v-list-tile @click="">
           <v-list-tile-action>
             <v-icon color="grey darken-1">settings</v-icon>
