@@ -2,12 +2,11 @@
     <v-slide-y-transition mode="out-in">
       <div v-resize="onResize">
       <Full-Height class="blue darken-4" v-show="!vertical">
-        <v-layout wrap :column="$vuetify.breakpoint.smAndDown">
-          <v-flex offset-md4 offset-lg0 md4 lg5 v-show="$vuetify.breakpoint.mdAndUp">
+        <v-layout wrap justify-center>
+          <v-flex xs5 md5 lg5>
               <AlbumCoverViewer :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullwidth class="px-2 layout column justify-center fill-height"></AlbumCoverViewer>
           </v-flex>
-          <AlbumCoverViewer class="mb-3 layout spacer fullwidth grow" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullheight v-show="$vuetify.breakpoint.smAndDown"></AlbumCoverViewer>
-          <v-flex md12 lg7>
+          <v-flex xs7 md12 lg7>
             <v-layout column justify-center fill-height class="px-3">
               <v-spacer></v-spacer>
 
@@ -48,7 +47,7 @@
           </v-flex>
         </v-layout>
       </Full-Height>
-      <Full-Height class="blue darken-3" v-show="vertical">
+      <Full-Height class="blue darken-4" v-show="vertical">
         <v-layout column align-center fill-height>
           <AlbumCoverViewer class="mb-3 layout spacer fullwidth" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullheight></AlbumCoverViewer>
           <h1 class="headline">{{status.title}}</h1>
@@ -152,7 +151,7 @@ import FullHeight from './Full-Height'
         this.status = status
       }
       this.$station.setStations(this.getStations(this.status))
-      if( status.statonName !== "" ){
+      if( status.stationName && status.statonName !== "" ){
         this.$station.setStation(status.stationName)
       }
       this.setUpSong(status)
