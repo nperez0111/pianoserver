@@ -2,8 +2,8 @@ import io from 'socket.io-client'
 window.io = io
 const socket = {
   socket: null,
-  init() {
-    this.socket = io('ws://localhost:8081')
+  init(url) {
+    this.socket = io(url)
 
     this.socket.on('disconnect', () => {
       this.socket.on("connect", () => {
@@ -14,7 +14,6 @@ const socket = {
   },
   install(Vue, options) {
     Vue.prototype.$socket = this
-    window.socket = this.init()
   },
   on(key, cb) {
     return this.socket.on(key, cb)
