@@ -7,7 +7,7 @@ const socket = {
 
     this.socket.on('disconnect', () => {
       this.socket.on("connect", () => {
-        this.socket.emit('getCurrentStatus')
+        this.socket.emit('getCurrentStatus', 6)
       })
     })
     return this.socket
