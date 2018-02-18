@@ -1,17 +1,63 @@
 <template>
-  <v-container fluid>
     <v-slide-y-transition mode="out-in">
-      <v-layout column align-center>
-        <AlbumCoverViewer class="mb-5" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" />
-        <h2>{{status.title}} by {{status.artist}}</h2>
-        <v-subheader>on {{status.album}}</v-subheader>
-        <v-flex xs12>
-          <v-layout row align-center>
+      <div v-resize="onResize">
+      <Full-Height class="blue darken-4" v-show="!vertical">
+        <v-layout wrap :column="$vuetify.breakpoint.smAndDown">
+          <v-flex offset-md4 offset-lg0 md4 lg5 v-show="$vuetify.breakpoint.mdAndUp">
+              <AlbumCoverViewer :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullwidth class="px-2 layout column justify-center fill-height"></AlbumCoverViewer>
+          </v-flex>
+          <AlbumCoverViewer class="mb-3 layout spacer fullwidth grow" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullheight v-show="$vuetify.breakpoint.smAndDown"></AlbumCoverViewer>
+          <v-flex md12 lg7>
+            <v-layout column justify-center fill-height class="px-3">
+              <v-spacer></v-spacer>
+
+              <h1 class="headline">{{status.title}}</h1>
+              <h3 class="subheading"><span class="light-blue--text accent-2">by</span> {{status.artist}}</h3>
+              <h3 class="subheading"><span class="light-blue--text accent-2">on</span> {{status.album}}</h3>
+              <v-spacer v-show="$vuetify.breakpoint.smAndDown"></v-spacer>
+              <v-layout row class="not-flex">
+                <span class="ma-2">
+                  {{currentMinutes}}
+                </span>
+                <v-flex>
+                  <v-progress-linear v-model="percentage"></v-progress-linear>
+                </v-flex> 
+                <span class="ma-2">
+                  -{{currentTime.now}}
+                </span>
+              </v-layout>
+
+              <v-layout row class="px-3 not-flex" justify-space-around>
+                <v-btn icon fab large flat slot="activator" @click="dislikeSong" color="red lighten-2">
+                  <v-icon>thumb_down</v-icon>
+                </v-btn>
+                <v-btn icon fab large flat slot="activator" @click="likeSong" :color="liked?'blue lighten-2':''">
+                  <v-icon>thumb_up</v-icon>
+                </v-btn>
+                <v-btn icon fab large @click="playPause">
+                  <v-icon v-if="!playing">play_arrow</v-icon>
+                  <v-icon v-else>pause</v-icon>
+                </v-btn>
+                <v-btn icon fab large @click="nextSong">
+                  <v-icon>fast_forward</v-icon>
+                </v-btn>
+              </v-layout>
+
+              <v-spacer></v-spacer>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </Full-Height>
+      <Full-Height class="blue darken-3" v-show="vertical">
+        <v-layout column align-center fill-height>
+          <AlbumCoverViewer class="mb-3 layout spacer fullwidth" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullheight></AlbumCoverViewer>
+          <h1 class="headline">{{status.title}}</h1>
+          <h3 class="subheading"><span class="light-blue--text accent-2">by</span> {{status.artist}}</h3>
+          <h3 class="subheading"><span class="light-blue--text accent-2">on</span> {{status.album}}</h3>
+          <div>
+          <v-layout row align-center class="mt-3">
             <v-layout column>
-              <v-btn icon fab large flat slot="activator" @click="likeSong" v-if="liked" color="blue lighten-2">
-                <v-icon>thumb_up</v-icon>
-              </v-btn>
-              <v-btn icon fab large flat slot="activator" @click="likeSong" v-else>
+              <v-btn icon fab large flat slot="activator" @click="likeSong" :color="liked?'blue lighten-2':''">
                 <v-icon>thumb_up</v-icon>
               </v-btn>
               <v-btn icon fab large flat slot="activator" @click="dislikeSong" color="red lighten-2">
@@ -19,26 +65,25 @@
               </v-btn>
             </v-layout>
             
-            <v-progress-circular :size="250" :width="15" :rotate="180" v-model="percentage" color="primary">
-              <v-btn icon fab large @click="play" v-if="!playing">
-                <v-icon>play_arrow</v-icon>
-              </v-btn>
-              <v-btn icon fab large @click="pause" v-else>
-                <v-icon>pause</v-icon>
+            <v-progress-circular :size="$vuetify.breakpoint.mdAndDown?150:250" :width="15" :rotate="180" v-model="percentage" color="primary">
+              <v-btn icon fab large @click="playPause">
+                <v-icon v-if="!playing">play_arrow</v-icon>
+                <v-icon v-else>pause</v-icon>
               </v-btn>
             </v-progress-circular>
 
             <v-btn icon fab large @click="nextSong">
               <v-icon>fast_forward</v-icon>
             </v-btn>
-      </v-layout></v-flex>
-        
-      </v-layout>
+          </v-layout></div>
+        </v-layout>
+      </Full-Height>
+    </div>
     </v-slide-y-transition>
-  </v-container>
 </template>
 <script>
 import AlbumCoverViewer from './AlbumCoverViewer'
+import FullHeight from './Full-Height'
   export default{
   mounted(){
     window.player = this
@@ -72,6 +117,8 @@ import AlbumCoverViewer from './AlbumCoverViewer'
     //trigger initialize
     this.$socket.emit("getCurrentStatus", 6)
     this.$socket.emit("getPastSongs")
+    this.$emit('hideoverflow')
+    this.onResize()
   },
   data(){
     this.$station.onchangeStation(station=>{
@@ -86,7 +133,8 @@ import AlbumCoverViewer from './AlbumCoverViewer'
       currentTime:{now:null,ofTotal:null},
       stations:this.$station.getStations(),
       station:this.$station.getStation(),
-      playing:true
+      playing:true,
+      vertical:true
     }
   },
   methods:{
@@ -121,6 +169,13 @@ import AlbumCoverViewer from './AlbumCoverViewer'
       }
       return null
     },
+    playPause(){
+      if(this.playing){
+        this.pause()
+      }else{
+        this.play()
+      }
+    },
     play(){
       this.playing=true
       this.$socket.emit("play",this.status,this.currentTime)
@@ -149,35 +204,55 @@ import AlbumCoverViewer from './AlbumCoverViewer'
     onGetPastSongs(statuses){
       this.pastSongs = statuses
       console.log("past songs",this.pastSongs)
+    },
+    onResize(){
+      const size= {
+                x: window.innerWidth,
+                y: window.innerHeight
+            }
+      this.vertical = size.y > size.x
     }
   },
   computed:{
-    percentage(){
+    nowSeconds(){
       if(this.currentTime.now==null){
         return 0
       }
-      const nowSeconds= parseInt(this.currentTime.now.split(":")[0]) * 60 + parseInt(this.currentTime.now.split(":")[1]),
-            totalSeconds= parseInt(this.currentTime.ofTotal.split(":")[0]) * 60 + parseInt(this.currentTime.ofTotal.split(":")[1])
-      return (1-(nowSeconds / totalSeconds)) * 100
+      return parseInt(this.currentTime.now.split(":")[0]) * 60 + parseInt(this.currentTime.now.split(":")[1])
+    },
+    totalSeconds(){
+     if(this.currentTime.now==null){
+        return 0
+      }
+      return parseInt(this.currentTime.ofTotal.split(":")[0]) * 60 + parseInt(this.currentTime.ofTotal.split(":")[1])
+    },
+    currentSeconds(){
+      return this.totalSeconds - this.nowSeconds
+    },
+    percentage(){
+      
+      return (this.currentSeconds / this.totalSeconds) * 100
+    },
+    currentMinutes(){
+      const cur=this.currentSeconds,
+       secs=cur%60,
+       minutes = (cur-secs)/60
+       return `${minutes < 10 ? "0"+minutes : minutes}:${ secs < 10 ? "0"+secs : secs}`
     }
+    
   },
-  components:{AlbumCoverViewer}
+  components:{AlbumCoverViewer,'Full-Height':FullHeight}
   }
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
+.not-flex{
+  flex:none;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+.fullwidth{
+  width:100%;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+.grow{
+  flex-grow:1000 !important;
 }
 </style>

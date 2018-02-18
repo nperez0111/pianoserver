@@ -37,7 +37,7 @@
     </v-toolbar>
 
     <v-content>
-      <router-view/>
+      <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow"/>
     </v-content>
 
     <v-dialog
@@ -92,14 +92,14 @@ export default {
     this.$station.onchangeStation(stationName=>{
       this.currentStation = stationName
     })
-    const url='ws://pkzjiayypn.localtunnel.me'
-    window.socket = this.$socket.init('ws://localhost:8081')
+    const url='ws://pmfqfntqsu.localtunnel.me'
+    window.socket = this.$socket.init(window.location.hostname==='localhost'?'ws://localhost:8081':url)
     setTimeout(()=>{
       if(socket.disconnected===true){
         socket.disconnect()
         this.prompt=true
       }
-    },500)
+    },1000)
     window.App=this
     return {
       error:false,
@@ -126,6 +126,12 @@ export default {
     },
     changeStationTo(index){
       this.$socket.emit('selectStation',index)
+    },
+    hideOverflow(){
+      document.getElementsByTagName('html')[0].style.overflow='hidden'
+    },
+    showOverflow(){
+      document.getElementsByTagName('html')[0].style.overflow='auto'
     },
     sayError(){
       
