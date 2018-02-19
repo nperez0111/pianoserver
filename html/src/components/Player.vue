@@ -49,7 +49,7 @@
       </Full-Height>
       <Full-Height class="blue darken-4" v-show="vertical">
         <v-layout column align-center fill-height>
-          <AlbumCoverViewer class="mb-3 layout spacer fullwidth" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullheight></AlbumCoverViewer>
+          <AlbumCoverViewer class="my-3 layout spacer fullwidth" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullheight></AlbumCoverViewer>
           <h1 class="headline">{{status.title}}</h1>
           <h3 class="subheading"><span class="light-blue--text accent-2">by</span> {{status.artist}}</h3>
           <h3 class="subheading"><span class="light-blue--text accent-2">on</span> {{status.album}}</h3>
