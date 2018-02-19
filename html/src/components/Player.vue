@@ -147,16 +147,18 @@ import FullHeight from './Full-Height'
       this.loadingNextSong = false
     },
     onStatus(status){
-
+     
       
       if(typeof status == 'string'){
         this.status = JSON.parse(status)
       }else{
         this.status = status
       }
+       const {stationName=false,songStationName}=this.status
+
       this.$station.setStations(this.getStations(this.status))
-      if( status.stationName && status.statonName !== "" ){
-        this.$station.setStation(status.stationName)
+      if( stationName && stationName !== "" ){
+        this.$station.setStation(stationName==="QuickMix"?`${stationName} - ${songStationName}`:stationName)
       }
       this.setUpSong(status)
       //console.log(status)
