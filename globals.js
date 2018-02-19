@@ -17,6 +17,7 @@ const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
         url: require('url'),
         fs: require('fs'),
         path: require('path'),
-        ipcResponse: require('./ipcResponse')
+        ipcResponse: require('./ipcResponse'),
+        notifier: require('./showStatus')
     }
 module.exports = globals

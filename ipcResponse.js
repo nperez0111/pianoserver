@@ -6,7 +6,7 @@ const commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songs
 
 function ipcResponse(globals) {
 
-    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response } = globals,
+    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier } = globals,
     ipcResponse = {
         cli: function ([command, stdin], socket) {
             //log('command:', command)

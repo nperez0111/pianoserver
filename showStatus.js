@@ -1,29 +1,68 @@
 #!/usr/local/bin/node
 
-const notifier = require('node-notifier'),
+const notifie = require('node-notifier').NotificationCenter,
+    notifier = new notifie(),
     Connector = require('./Connector'),
     server = new Connector(),
     download = require('image-downloader'),
     homedir = require('homedir')(),
-    imageLoc = homedir + '/.config/pianobar/notificationImage.jpg'
+    imageLoc = homedir + '/.config/pianobar/notificationImage.jpg',
+    notifications = {
+        nowPlaying: {
+            getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
+            downloadImage([resp]) {
+                //console.log(resp)
+                return { url: resp[1].coverArt, dest: imageLoc }
+            },
+            cb([resp]) {
+                if (resp.length == 1) {
+                    return 'response was empty' + JSON.stringify(resp)
+                }
+                const [label, status, isPlaying] = resp, { artist, title, album, coverArt, stationName, songStationName, detailUrl } = status
 
-function Notify() {
-    return server.getAll([{ name: 'getCurrentStatus', args: [1] }]).then(([resp]) => {
-        if (resp.length == 1) {
-            throw Error('response was empty' + JSON.stringify(resp))
-        }
-        const [label, status, isPlaying] = resp, { artist, title, album, coverArt, stationName, songStationName } = status
+                return {
+                    message: `On:${album} @${stationName.includes('Radio')?stationName.slice(0,-6):stationName}`,
+                    title: `${isPlaying?'Now Playing:':'Paused:'} ${title}`,
+                    subtitle: `By: ${artist}`,
+                    icon: imageLoc,
+                    contentImage: imageLoc
+                }
 
-        return download.image({ url: coverArt, dest: imageLoc }).then(() => {
-            return {
-                message: `by:${artist} on:${album} @${stationName}`,
-                title,
-                icon: imageLoc
             }
-        }).catch(err => console.log(err))
+        },
+        selectStations: {
+            getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
+            cb([resp]) {
+                if (resp.length == 1) {
+                    return 'response was empty' + JSON.stringify(resp)
+                }
+                const [label, status, isPlaying] = resp, { stationCount } = status
+                const stations = (new Array(parseInt(stationCount))).fill(false).map((c, i) => status[`station${i}`])
+                console.log(stations)
+                return {
+                    title: 'Select Station',
+                    message: 'What station would you like to play?',
+                    reply: true,
+                    timeout: 30,
+                    replied: function (a) {
+                        const getVal = obj => obj.activationValue
+                        const val = getVal(a)
+                        console.log(val)
+                    },
+                    activate: function (action) {
+                        if (action.activationType == 'actionClicked') {
+                            const val = action.activationValue
+                            console.log(val)
 
-    }).catch(err => console.log(err))
-}
+                        }
+                        console.log("user clicked", action)
+                    },
+                    actions: ['a', 'b'],
+                    dropDownLabel: 'Station List'
+                }
+            }
+        }
+    }
 
 class Notifier {
     constructor() {
@@ -62,7 +101,7 @@ class Notifier {
 
         }
         current.then(result => {
-            return notifier.notify(notification || result)
+            return notifier.notify(notification || result, function () { console.log(arguments) })
         })
         return current
     }
@@ -70,26 +109,7 @@ class Notifier {
 
 if (!module.parent) {
     const noti = new Notifier()
-    noti.notify({
-        getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
-        downloadImage([resp]) {
-            //console.log(resp)
-            return { url: resp[1].coverArt, dest: imageLoc }
-        },
-        cb([resp]) {
-            if (resp.length == 1) {
-                return 'response was empty' + JSON.stringify(resp)
-            }
-            const [label, status, isPlaying] = resp, { artist, title, album, coverArt, stationName, songStationName } = status
-
-            return {
-                message: `On:${album} @${stationName.includes('Radio')?stationName.slice(0,-6):stationName}`,
-                title: `${isPlaying?'Now Playing:':'Paused:'} ${title} By: ${artist}`,
-                icon: imageLoc
-            }
-
-        }
-    })
+    noti.notify(notifications['selectStations'])
 }
 
-module.exports = Notify
+module.exports = Notifier
