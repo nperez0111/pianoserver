@@ -1,88 +1,95 @@
 #!/usr/local/bin/node
 
-const ipc = require('node-ipc'),
-    notifier = require('node-notifier'),
-    serverName = 'pianobar-server'
+const notifier = require('node-notifier'),
+    Connector = require('./Connector'),
+    server = new Connector(),
+    download = require('image-downloader'),
+    homedir = require('homedir')(),
+    imageLoc = homedir + '/.config/pianobar/notificationImage.jpg'
 
-ipc.config.id = 'pianobar-stdin'
-ipc.config.retry = 1500
-ipc.config.silent = true
+function Notify() {
+    return server.getAll([{ name: 'getCurrentStatus', args: [1] }]).then(([resp]) => {
+        if (resp.length == 1) {
+            throw Error('response was empty' + JSON.stringify(resp))
+        }
+        const [label, status, isPlaying] = resp, { artist, title, album, coverArt, stationName, songStationName } = status
 
+        return download.image({ url: coverArt, dest: imageLoc }).then(() => {
+            return {
+                message: `by:${artist} on:${album} @${stationName}`,
+                title,
+                icon: imageLoc
+            }
+        }).catch(err => console.log(err))
 
+    }).catch(err => console.log(err))
+}
 
-ipc.connectTo(serverName, () => {
-    //console.log('yet to connect')
-    ipc.of[serverName].on('connect', () => {
-        //console.log('connected')
-        ipc.of[serverName].emit('getCurrentTime');
-
-    });
-
-    ipc.of[serverName].on('getCurrentTime', (currentTime) => {
-        console.log(currentTime)
-        ipc.of[serverName].emit('getStatus', "Dope");
-        //ipc.disconnect(serverName)
-    })
-
-    ipc.of[serverName].on('getStatus', (current) => {
-        console.log(current)
-        //ipc.of[serverName].emit('nowPlaying', "Dope");
-        ipc.disconnect(serverName)
-    })
-})
-let lastConnection = null
-
-class Connector {
-    connectToServer(cb) {
-        return new Promise((resolve, reject) => {
-            ipc.connectTo(serverName, function () {
-
-                lastConnection = Promise.resolve([ipc.of[serverName], ipc])
-                resolve([ipc.of[serverName], ipc])
-
-            })
-        })
+class Notifier {
+    constructor() {
 
     }
-    callAndResponse(eventName, once = true, connected = false) {
-        return new Promise((resolve, reject) => {
-            (connected || lastConnection || this.connectToServer()).then(([client, ipc]) => {
-                if (connected === false) {
-                    client.on('connect', () => {
-                        client.emit(eventName)
-                    })
-                }
-                let timeout = setTimeout(() => { reject("Too Long To Respond") }, 2000)
-                client.on(eventName, (response) => {
-                    if (once) {
-                        ipc.disconnect()
-                    }
-                    clearTimeout(timeout)
-                    resolve([response, client, ipc])
+    getFromServer(data, map = (a => a)) {
+        return server.getAll(data).then(map)
+    }
+    downloadImage({ url, dest }) {
+        return download.image({ url, dest })
+    }
+    notify({ promise = true, cb, getFromServer = false, getFromServerMap = (a => a), downloadImage = false, notification = false }) {
+        let current = Promise.resolve(),
+            resp = null
+        if (getFromServer) {
+            current = current.then(() => {
+                return this.getFromServer(getFromServer, getFromServerMap).then(response => {
+                    resp = response
+                    return response
                 })
+            })
+        }
+        if (downloadImage) {
+            current = current.then(() => this.downloadImage(downloadImage(resp)))
+        }
+        if (cb) {
+            current = current.then(() => cb(resp)).then(notification => {
+                //console.log(notification)
+                if (typeof notification === 'string') {
+                    const err = new Error(notification)
+                    throw err
+                    return err
+                }
+                return notification
+            })
 
-            })
+        }
+        current.then(result => {
+            return notifier.notify(notification || result)
         })
-    }
-    getCurrentTime(once = true) {
-        return this.callAndResponse('getCurrentTime', once)
-    }
-    getCurrentStatus(once = true) {
-        return this.callAndResponse('getStatus', once)
-    }
-    getStatusAndTime(once = true) {
-        return this.getCurrentStatus(false).then((status, client, ipc) => {
-            const resp = this.callAndResponse('getCurrentTime', once, Promise.resolve([client, ipc]))
-            client.emit('getCurrentTime')
-            return resp.then((currentTime, client, ipc) => {
-                return [status, currentTime, client, ipc]
-            })
-        })
-    }
-    on(eventName, cb, alreadyConnected) {
-        (alreadyConnected || lastConnection || this.connectToServer()).then(([client, ipc]) => {
-            client.on(eventName, cb)
-        })
+        return current
     }
 }
-module.exports = Connector
+
+if (!module.parent) {
+    const noti = new Notifier()
+    noti.notify({
+        getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
+        downloadImage([resp]) {
+            //console.log(resp)
+            return { url: resp[1].coverArt, dest: imageLoc }
+        },
+        cb([resp]) {
+            if (resp.length == 1) {
+                return 'response was empty' + JSON.stringify(resp)
+            }
+            const [label, status, isPlaying] = resp, { artist, title, album, coverArt, stationName, songStationName } = status
+
+            return {
+                message: `On:${album} @${stationName.includes('Radio')?stationName.slice(0,-6):stationName}`,
+                title: `${isPlaying?'Now Playing:':'Paused:'} ${title} By: ${artist}`,
+                icon: imageLoc
+            }
+
+        }
+    })
+}
+
+module.exports = Notify

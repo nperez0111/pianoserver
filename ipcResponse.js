@@ -81,7 +81,7 @@ function ipcResponse(globals) {
                         }
                     }, globals)
 
-                    //console.log(func.apply(null, args))
+                    func.apply(null, args)
                 })
 
             })).then(responses => {

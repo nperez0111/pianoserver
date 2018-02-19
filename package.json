@@ -12,6 +12,8 @@
   "dependencies": {
     "express": "^4.16.2",
     "get-stdin": "^5.0.1",
+    "homedir": "^0.6.0",
+    "image-downloader": "^3.3.0",
     "node-cleanup": "^2.1.2",
     "node-ipc": "^9.1.1",
     "node-notifier": "^5.2.1",
