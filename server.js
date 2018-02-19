@@ -35,16 +35,65 @@ const ipc = require('node-ipc'),
                 console.log(data.trim())
             }
         }
-    })
-http = require('http'),
+    }),
+    http = require('http'),
     port = 8081,
+    url = require('url'),
+    fs = require('fs'),
+    path = require('path'),
     server = http.createServer(function (req, res) {
-        // Send HTML headers and message
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end('<h1>Hello Socket Lover!</h1>');
-    });
+        console.log(`${req.method} ${req.url}`);
 
-server.listen(port);
+        // parse URL
+        const parsedUrl = url.parse(req.url);
+        // extract URL path
+        let pathname = `./html/dist/${parsedUrl.pathname}`;
+        // based on the URL path, extract the file extention. e.g. .js, .doc, ...
+        const ext = path.parse(pathname).ext;
+        // maps file extention to MIME typere
+        const map = {
+            '.ico': 'image/x-icon',
+            '.html': 'text/html',
+            '.js': 'text/javascript',
+            '.json': 'application/json',
+            '.css': 'text/css',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.wav': 'audio/wav',
+            '.mp3': 'audio/mpeg',
+            '.svg': 'image/svg+xml',
+            '.pdf': 'application/pdf',
+            '.doc': 'application/msword'
+        }
+
+        fs.exists(pathname, function (exist) {
+            if (!exist) {
+                // if the file is not found, return 404
+                res.statusCode = 404;
+                res.end(`File ${pathname} not found!`);
+                return;
+            }
+
+            // if is a directory search for index file matching the extention
+            if (fs.statSync(pathname).isDirectory())
+                pathname += '/index' + ext;
+
+            // read file from file system
+            fs.readFile(pathname, function (err, data) {
+                if (err) {
+                    res.statusCode = 500;
+                    res.end(`Error getting the file: ${err}.`);
+                } else {
+                    // if the file is found, set Content-type and send data
+                    res.setHeader('Content-type', map[ext] || 'text/plain');
+                    res.end(data);
+                }
+            });
+        });
+
+
+    })
+server.listen(port)
 
 const socket = io.listen(server);
 
@@ -100,7 +149,7 @@ socket.on('connection', function (client) {
     client.on('likeSong', (clientStatus, clientTime) => {
         log('got a request to like')
         //make sure to like the right song
-        if (clientStatus.title === current.getNewest().title) {
+        if (clientStatus && clientStatus.title === current.getNewest().title) {
             spawnInstance.writeCommand("likeSong")
         } else {
             //client is out of sync send them an update
@@ -111,7 +160,7 @@ socket.on('connection', function (client) {
     client.on('dislikeSong', (clientStatus, clientTime) => {
         log('got a request to dislike')
         //make sure to dislike the right song
-        if (clientStatus.title === current.getNewest().title) {
+        if (clientStatus && clientStatus.title === current.getNewest().title) {
             spawnInstance.writeCommand("dislikeSong")
         } else {
             //client is out of sync send them an update
@@ -121,9 +170,9 @@ socket.on('connection', function (client) {
     })
 
     client.on('nextSong', (clientStatus, clientTime) => {
-        log('got a request to skip', clientStatus.title, "current song is", current.getNewest().title)
+        log('got a request to skip', clientStatus && clientStatus.title, "current song is", current.getNewest().title)
         //make sure to skip the correct song
-        if (clientStatus.title === current.getNewest().title) {
+        if (clientStatus && clientStatus.title === current.getNewest().title) {
             spawnInstance.writeCommand("nextSong")
             isPlaying.push(true)
         } else {
@@ -173,42 +222,7 @@ const splitter = stdin => stdin.split("\n").map(str => str.split("=")).reduce((o
         obj[key] = value
         return obj
     }, {}),
-    commands = {
-        userlogin: function (stdin) {
-
-            current.push(splitter(stdin))
-            ipc.server.emit('status', current)
-            log(current)
-        },
-        usergetstations: function (stdin) {
-            current.push(splitter(stdin))
-            ipc.server.emit('status', current)
-            log(current)
-        },
-        stationfetchplaylist: function (stdin) {
-            current.push(splitter(stdin))
-            ipc.server.emit('status', current)
-            log(current)
-
-        },
-        songstart: function (stdin) {
-            current.push(splitter(stdin))
-            ipc.server.emit('status', current)
-            log(current)
-
-        },
-        songfinish: function (stdin) {
-            current.push(splitter(stdin))
-            ipc.server.emit('status', current)
-            log(current)
-
-        },
-        defaultCommand: function () {
-            log(arguments)
-
-        }
-    }
-
+    commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songstart', 'songfinish', 'defaultCommand']
 
 ipc.serve(
     function () {
@@ -230,13 +244,14 @@ ipc.serve(
             'cli',
             function ([command, stdin], socket) {
                 //log('command:', command)
-                if (command in commands) {
+                if (commands.includes(command)) {
                     const status = splitter(stdin)
                     current.push(status)
                     pastSongs.push(status)
                     //log(status)
                 } else {
-                    commands.defaultCommand(stdin)
+                    console.log(command, "called with nothing to handle it")
+                    //commands.defaultCommand(stdin)
                 }
             }
         )

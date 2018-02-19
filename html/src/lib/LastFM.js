@@ -1,4 +1,4 @@
-const prefix = "http://ws.audioscrobbler.com/2.0/?api_key=3fdcfe1792c25cf66520c046cece5199&format=json&method="
+const prefix = "https://ws.audioscrobbler.com/2.0/?api_key=3fdcfe1792c25cf66520c046cece5199&format=json&method="
 import * as ls from 'local-storage'
 
 export default class LastFM {

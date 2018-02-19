@@ -92,7 +92,7 @@ export default {
     this.$station.onchangeStation(stationName=>{
       this.currentStation = stationName
     })
-    const url='ws://pmfqfntqsu.localtunnel.me'
+    const url='wss://pmfqfntqsu.localtunnel.me'
     window.socket = this.$socket.init(window.location.hostname==='localhost'?'ws://localhost:8081':url)
     setTimeout(()=>{
       if(socket.disconnected===true){
