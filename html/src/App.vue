@@ -12,7 +12,8 @@
         <v-list dense>
           <v-list-tile v-for="(item,i) in stations" :key="i" @click="changeStationTo(i)" avatar>
             <v-list-tile-avatar>
-                <img :src="albumCovers[i]||'https://lh3.googleusercontent.com/PPRgtbBG6Blerg-13m_RbAiQyTcrVIalJVkafFEaNLf0HZu-FVNPs14AJb-IuDtQqQ=rw'">
+                <img :src="albumCovers[i]" v-if="albumCovers[i]">
+                <v-icon large v-else>music_note</v-icon>
               </v-list-tile-avatar>
             <v-list-tile-title v-text="item"></v-list-tile-title>
           </v-list-tile>
@@ -58,7 +59,7 @@
               <h1 class="text-xs-center">We need to know what you are trying to play from</h1>
               <v-layout row justify-center class="mt-5" v-show="!chosen">
                 <v-btn @click="enterPort=true">
-                  This computer
+                  This Computer
                 </v-btn>
                 <v-btn @click="chosen=true">
                   Another Computer <v-icon right>arrow_forward</v-icon>
@@ -80,7 +81,7 @@
         </v-card>
       </v-dialog>
       <v-snackbar color="error" v-model="error" :timeout="10000" vertical>
-      Whoops seems like we can't connect to your pandora, check to see that the url is correct and that you have the server running
+        Whoops seems like we can't connect to your pandora, check to see that the url is correct and that you have the server running
       <v-btn dark flat @click.native="error = false">Close</v-btn>
     </v-snackbar>
   </v-app>
@@ -106,15 +107,9 @@ export default {
     port=8081,
     choice = ls.get('socket') || (window.location.hostname==='localhost'?'ws://localhost:'+port:url)
 
-    window.socket = this.$socket.init(choice)
-    setTimeout(()=>{
-      if(socket.disconnected===true){
-        socket.disconnect()
-        this.prompt=true
-      }else{
-        ls.set('socket',choice)
-      }
-    },1000)
+    //try to reconnect to past connect or defaults
+    this.tryReconnect(choice)
+
     window.App=this
     return {
       loading:false,
