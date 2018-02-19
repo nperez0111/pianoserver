@@ -57,7 +57,7 @@
             <v-container>
               <h1 class="text-xs-center">We need to know what you are trying to play from</h1>
               <v-layout row justify-center class="mt-5" v-show="!chosen">
-                <v-btn @click="sayError">
+                <v-btn @click="enterPort=true">
                   This computer
                 </v-btn>
                 <v-btn @click="chosen=true">
@@ -65,7 +65,13 @@
                 </v-btn>
               </v-layout>
               <v-layout row class="mt-5" v-show="chosen">
-                <v-text-field v-model="url"></v-text-field><v-btn @click="tryReconnect">Try reconnect</v-btn>
+                <v-text-field v-model="url" :error="error"></v-text-field><v-btn @click="tryReconnect">Try reconnect</v-btn>
+              </v-layout>
+              <v-layout row class="mt-5" v-show="enterPort&&!chosen">
+                <v-text-field v-model="port" type="number" :error="error"></v-text-field><v-btn @click="tryReconnect('ws://localhost:'+port)">Try reconnect</v-btn>
+              </v-layout>
+              <v-layout row justify-center>
+                <v-progress-circular indeterminate :size="70" :width="7" color="light-blue" v-if="loading"></v-progress-circular>
               </v-layout>
             </v-container>
           </v-card-text>
@@ -73,7 +79,10 @@
           <div style="flex: 1 1 auto;"/>
         </v-card>
       </v-dialog>
-
+      <v-snackbar color="error" v-model="error" :timeout="10000" vertical>
+      Whoops seems like we can't connect to your pandora, check to see that the url is correct and that you have the server running
+      <v-btn dark flat @click.native="error = false">Close</v-btn>
+    </v-snackbar>
   </v-app>
 </template>
 <script>
@@ -94,7 +103,8 @@ export default {
       this.currentStation = stationName
     })
     const url='wss://pandora.localtunnel.me',
-    choice = ls.get('socket') || (window.location.hostname==='localhost'?'ws://localhost:8081':url)
+    port=8081,
+    choice = ls.get('socket') || (window.location.hostname==='localhost'?'ws://localhost:'+port:url)
 
     window.socket = this.$socket.init(choice)
     setTimeout(()=>{
@@ -108,6 +118,7 @@ export default {
     window.App=this
     return {
       loading:false,
+      enterPort:false,
       error:false,
       prompt:false,
       chosen:false,
@@ -117,7 +128,8 @@ export default {
       albumCovers:[],
       stations:this.$station.getStations(),
       currentStation:this.$station.getStation(),
-      url:url
+      port,
+      url:choice
     }
   },
   props: {
@@ -139,21 +151,20 @@ export default {
     showOverflow(){
       document.getElementsByTagName('html')[0].style.overflow='auto'
     },
-    sayError(){
-      
-
-    },
-    tryReconnect(){
+    tryReconnect(url){
       this.loading=true
-      window.socket=this.$socket.init(this.url)
+      window.socket=this.$socket.init(typeof url==='string'?url:this.url)
       setTimeout(()=>{
       if(socket.connected===true){
         this.prompt=false
+        this.error=false
         player.socketSetup()
         ls.set('socket',this.url)
       }else{
         socket.disconnect()
+        this.error=true
       }
+      this.loading=false
     },1000)
     }
   }
