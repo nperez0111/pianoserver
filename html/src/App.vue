@@ -65,7 +65,7 @@
                 </v-btn>
               </v-layout>
               <v-layout row class="mt-5" v-show="chosen">
-                <v-text-field v-model="url"></v-text-field>
+                <v-text-field v-model="url"></v-text-field><v-btn @click="tryReconnect">Try reconnect</v-btn>
               </v-layout>
             </v-container>
           </v-card-text>
@@ -78,6 +78,7 @@
 </template>
 <script>
 import LastFM from '@/lib/LastFM'
+import * as ls from 'local-storage'
 export default {
   data: function() {
     this.$station.onchangeStations(stations=>{
@@ -92,16 +93,21 @@ export default {
     this.$station.onchangeStation(stationName=>{
       this.currentStation = stationName
     })
-    const url='wss://pmfqfntqsu.localtunnel.me'
-    window.socket = this.$socket.init(window.location.hostname==='localhost'?'ws://localhost:8081':url)
+    const url='wss://pandora.localtunnel.me',
+    choice = ls.get('socket') || (window.location.hostname==='localhost'?'ws://localhost:8081':url)
+
+    window.socket = this.$socket.init(choice)
     setTimeout(()=>{
       if(socket.disconnected===true){
         socket.disconnect()
         this.prompt=true
+      }else{
+        ls.set('socket',choice)
       }
     },1000)
     window.App=this
     return {
+      loading:false,
       error:false,
       prompt:false,
       chosen:false,
@@ -136,6 +142,19 @@ export default {
     sayError(){
       
 
+    },
+    tryReconnect(){
+      this.loading=true
+      window.socket=this.$socket.init(this.url)
+      setTimeout(()=>{
+      if(socket.connected===true){
+        this.prompt=false
+        player.socketSetup()
+        ls.set('socket',this.url)
+      }else{
+        socket.disconnect()
+      }
+    },1000)
     }
   }
 }

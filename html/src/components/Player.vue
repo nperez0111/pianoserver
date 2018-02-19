@@ -87,7 +87,30 @@ import FullHeight from './Full-Height'
   mounted(){
     window.player = this
 
-    //server emitted events
+    this.socketSetup()
+    this.$emit('hideoverflow')
+    this.onResize()
+  },
+  data(){
+    this.$station.onchangeStation(station=>{
+      this.station=station
+    })
+    return {
+      status:{},
+      liked:false,
+      disliked:false,
+      loadingNextSong:false,
+      pastSongs:[],
+      currentTime:{now:null,ofTotal:null},
+      stations:this.$station.getStations(),
+      station:this.$station.getStation(),
+      playing:true,
+      vertical:true
+    }
+  },
+  methods:{
+    socketSetup(){
+      //server emitted events
     this.$socket.on("status", this.onStatus.bind(this))
     this.$socket.on("currentTime", this.onCurrentTime.bind(this))
     this.$socket.on("isPlaying", this.isPlaying.bind(this))
@@ -116,27 +139,8 @@ import FullHeight from './Full-Height'
     //trigger initialize
     this.$socket.emit("getCurrentStatus", 6)
     this.$socket.emit("getPastSongs")
-    this.$emit('hideoverflow')
-    this.onResize()
-  },
-  data(){
-    this.$station.onchangeStation(station=>{
-      this.station=station
-    })
-    return {
-      status:{},
-      liked:false,
-      disliked:false,
-      loadingNextSong:false,
-      pastSongs:[],
-      currentTime:{now:null,ofTotal:null},
-      stations:this.$station.getStations(),
-      station:this.$station.getStation(),
-      playing:true,
-      vertical:true
-    }
-  },
-  methods:{
+
+    },
     setUpSong(status){
       this.liked = status.rating==='1'
       this.disliked = false
