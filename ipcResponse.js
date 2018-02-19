@@ -4,7 +4,7 @@ const commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songs
         return obj
     }, {})
 
-function ipcResponse({ ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger }) {
+function ipcResponse({ ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response } = globals) {
 
     const ipcResponse = {
         cli: function ([command, stdin], socket) {
@@ -36,8 +36,31 @@ function ipcResponse({ ipc, current, pastSongs, log, currentTime, isPlaying, spa
         },
         connect: function () {
 
+        },
+        play: function (command, socket) {
+            response.play({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+        },
+        pause: function (command, socket) {
+            response.pause({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+        },
+        nextSong: function (command, socket) {
+            response.nextSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
+        },
+        likeSong: function (command, socket) {
+            response.likeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
+        },
+        dislikeSong: function (command, socket) {
+            response.dislikeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
+        },
+        selectStation: function (command, socket) {
+            response.selectStation({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
+        },
+        shuffle: function (command, socket) {
+            response.shuffle({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+        },
+        getPastSongs: function (command, socket) {
+            response.getPastSongs({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
         }
-
     }
     return ipcResponse
 }

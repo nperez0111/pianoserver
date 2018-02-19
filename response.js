@@ -43,7 +43,7 @@ const Response = {
         return () => client.emit('getIsPlaying', isPlaying.getNewest())
     },
     play: (client, { spawnInstance, isPlaying, current, currentTime, log }) => {
-        return (clientStatus, clientTime) => {
+        return () => {
             log('got a request to play')
             //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
             if (isPlaying.getNewest() === false) {
@@ -70,7 +70,7 @@ const Response = {
         }
     },
     likeSong: (client, { spawnInstance, current, isPlaying, log }) => {
-        return (clientStatus, clientTime) => {
+        return (clientStatus) => {
             log('got a request to like')
             //make sure to like the right song
             if (clientStatus && clientStatus.title === current.getNewest().title) {
