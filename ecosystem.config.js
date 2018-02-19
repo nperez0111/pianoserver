@@ -13,7 +13,7 @@ module.exports = {
                 NODE_ENV: 'production'
             },
             watch: true,
-            ignore_watch: ["node_modules", "html", "debug.log", ".git"],
+            ignore_watch: ["node_modules", "html", "debug.log", ".git", ".gitignore", "response.js"],
             watch_options: {
                 followSymlinks: false
             },
