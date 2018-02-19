@@ -222,7 +222,7 @@ const splitter = stdin => stdin.split("\n").map(str => str.split("=")).reduce((o
         obj[key] = value
         return obj
     }, {}),
-    commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songstart', 'songfinish', 'defaultCommand']
+    commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songstart', 'songfinish', 'defaultCommand', 'songlove']
 
 ipc.serve(
     function () {
