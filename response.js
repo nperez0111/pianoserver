@@ -48,11 +48,11 @@ const Response = {
             //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
             if (isPlaying.getNewest() === false) {
                 spawnInstance.writeCommand("play")
+                currentTime.clear()
+                isPlaying.push(true)
             } else {
                 client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
             }
-            currentTime.clear()
-            isPlaying.push(true)
 
         }
     },
@@ -62,11 +62,12 @@ const Response = {
             //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
             if (isPlaying.getNewest() === true) {
                 spawnInstance.writeCommand("pause")
+                currentTime.clear()
+                isPlaying.push(false)
             } else {
                 client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
             }
-            currentTime.clear()
-            isPlaying.push(true)
+
         }
     },
     likeSong: (client, { spawnInstance, current, isPlaying, log }) => {

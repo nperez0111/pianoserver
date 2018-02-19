@@ -4,9 +4,10 @@ const commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songs
         return obj
     }, {})
 
-function ipcResponse({ ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response } = globals) {
+function ipcResponse(globals) {
 
-    const ipcResponse = {
+    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response } = globals,
+    ipcResponse = {
         cli: function ([command, stdin], socket) {
             //log('command:', command)
             if (commands.includes(command)) {
@@ -27,7 +28,7 @@ function ipcResponse({ ipc, current, pastSongs, log, currentTime, isPlaying, spa
         getStatus: function (command, socket) {
             log('got a request for current status')
 
-            ipc.server.emit(socket, 'getStatus', current.getNewest())
+            ipc.server.emit(socket, 'getStatus', current.getNewest(command))
         },
         getAllStatus: function (command, socket) {
             log('got a request for current status')
@@ -60,6 +61,33 @@ function ipcResponse({ ipc, current, pastSongs, log, currentTime, isPlaying, spa
         },
         getPastSongs: function (command, socket) {
             response.getPastSongs({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
+        },
+        getIsPlaying: function (command, socket) {
+            response.getisPlaying({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+        },
+        get: function (commandsToGet, socket) {
+            Promise.all(commandsToGet.map(({ name, args }) => {
+                //console.log(commandsToGet)
+                return new Promise((resolve, reject) => {
+                    const time = setTimeout(() => { resolve('timed out') }, 200)
+                    if (!response[name]) {
+                        resolve(name + 'is not a function on response')
+                        return
+                    }
+                    const func = response[name]({
+                        emit: function () {
+                            clearTimeout(time)
+                            resolve(Array.from(arguments))
+                        }
+                    }, globals)
+
+                    //console.log(func.apply(null, args))
+                })
+
+            })).then(responses => {
+                //console.log(JSON.stringify(responses))
+                ipc.server.emit(socket, 'get', responses)
+            })
         }
     }
     return ipcResponse
