@@ -59,6 +59,10 @@ class Spawner {
             stdin.on('data', key => {
                 // ctrl-c ( end of text )
                 if (key === '\u0003') {
+                    this.options.onExit()
+                    if (this.options.onExitCloseChild) {
+                        this.pianobar.kill()
+                    }
                     process.exit();
                 }
 

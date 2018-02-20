@@ -7,7 +7,7 @@ const notifie = require('node-notifier').NotificationCenter,
     download = require('image-downloader'),
     homedir = require('homedir')(),
     imageLoc = homedir + '/.config/pianobar/notificationImage.jpg',
-    notifications = {
+    possibleNotifications = {
         nowPlaying: {
             getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
             downloadImage([resp]) {
@@ -66,7 +66,7 @@ const notifie = require('node-notifier').NotificationCenter,
 
 class Notifier {
     constructor() {
-
+        this.notificationTypes = possibleNotifications
     }
     getFromServer(data, map = (a => a)) {
         return server.getAll(data).then(map)
@@ -109,7 +109,7 @@ class Notifier {
 
 if (!module.parent) {
     const noti = new Notifier()
-    noti.notify(notifications['selectStations'])
+    noti.notify(possibleNotifications['selectStations'])
 }
 
 module.exports = Notifier

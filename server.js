@@ -5,14 +5,15 @@ const globals = require('./globals'),
         onExit: function (exitCode, signal) {
             if (signal === 'SIGINT')
                 process.kill(process.pid, 'SIGINT');
+            globals.shortcuts.destroy()
             process.exit()
         },
         onEnd: function () {
-            //this one is not foing to work
+            //maybe dont stop the server but restart pianobar?
             ipc.server.stop()
+            globals.shortcuts.destroy()
         },
         onData: function (data) {
-            //this one is not foing to work
             const getTime = /(\d\d:\d\d).(\d\d:\d\d)/
             if (getTime.test(data)) {
                 const [now, ofTotal] = Array.from(data.match(getTime)).slice(1)
@@ -30,7 +31,7 @@ const globals = require('./globals'),
         }
     }),
     server = http.createServer(function (req, res) {
-        console.log(`${req.method} ${req.url}`);
+        //console.log(`${req.method} ${req.url}`);
 
         // parse URL
         const parsedUrl = url.parse(req.url);
@@ -80,7 +81,10 @@ const globals = require('./globals'),
         });
 
 
-    })
+    }),
+    shortcuts = require('./shortcuts')
+
+globals.shortcuts = shortcuts({ spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, response })
 server.listen(port)
 
 const socket = io.listen(server);
