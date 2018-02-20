@@ -72,6 +72,7 @@ class Notifier {
         this.notify = this.notify.bind(this)
     }
     getFromServer(data, map = (a => a)) {
+        //need to actually pull from the server rather than connect to it
         return server.getAll(data).then(map)
     }
     downloadImage({ url, dest }) {
@@ -86,7 +87,7 @@ class Notifier {
                     resp = response
                     return response
                 })
-            })
+            }).catch(err => {})
         }
         if (downloadImage) {
             current = current.then(() => this.downloadImage(downloadImage(resp)))

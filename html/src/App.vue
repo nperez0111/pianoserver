@@ -16,6 +16,11 @@
                 <v-icon large v-else>music_note</v-icon>
               </v-list-tile-avatar>
             <v-list-tile-title v-text="item"></v-list-tile-title>
+            <v-list-tile-action>
+              <v-btn icon ripple @click.stop="stationSettings(i)">
+                <v-icon color="grey lighten-1">settings</v-icon>
+              </v-btn>
+            </v-list-tile-action>
           </v-list-tile>
         </v-list>
         
@@ -139,6 +144,19 @@ export default {
     },
     shuffle(){
       this.$socket.emit('shuffle')
+    },
+    stationSettings(index){
+      this.$router.push(`/station-settings/${index}`)
+      /*
+      +    love song
+      -    ban song
+      a    add music to station
+      c    create new station
+      d    delete station
+      e    explain why this song is played
+      g    add genre station
+      h    song history
+      */
     },
     changeStationTo(index){
       this.$socket.emit('selectStation',index)

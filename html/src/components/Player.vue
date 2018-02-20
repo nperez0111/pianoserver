@@ -48,7 +48,7 @@
       </Full-Height>
       <Full-Height class="blue darken-4" v-show="vertical">
         <v-layout column align-center fill-height>
-          <v-layout class="my-3 spacer fullwidth">
+          <v-layout class="my-3 spacer fullwidth" ref="container">
             <img :src="status.coverArt" class="contain elevation-1 mx-auto" ref="vertImage">
           </v-layout>
           <h1 class="headline">{{status.title}}</h1>
@@ -232,7 +232,14 @@ export default {
           y: window.innerHeight
         }
         this.vertical = size.y > size.x
-        this.$refs.vertImage.width = this.$refs.vertImage.clientHeight
+        const height=this.$refs.container.clientHeight
+        //console.log(height)
+        if(height>0){
+          this.$refs.vertImage.style.width = height+'px'
+          //console.log('setting',height,this.$refs.vertImage)
+        }else{
+          setTimeout(this.onResize.bind(this),50)
+        }
       }
     },
     computed: {
@@ -283,6 +290,9 @@ export default {
    }
    
    .contain {
-     object-fit: contain
+        width: auto;
+        height: auto;
+        min-height: 100%;
+     /*object-fit: contain*/
     }
 </style>

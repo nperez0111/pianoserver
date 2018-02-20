@@ -81,3 +81,26 @@ module.exports = function (globals, shortcutMappings) {
         methods
     }
 }
+
+if (!module.parent) {
+    //module.exports({})
+    ioHook.start()
+    ioHook.on("keydown", function (msg) { console.log(msg); });
+    const CTRL = 29,
+        SHIFT = 42,
+        P = 25,
+        ALT = 56,
+        F1 = 59,
+        F7 = 65;
+
+    ioHook.registerShortcut([CTRL, SHIFT, P], (keys) => {
+        console.log('Shortcut pressed with keys:', keys);
+    });
+
+    let shId = ioHook.registerShortcut([ALT, F7], (keys) => {
+        console.log('This shortcut will be called once. Keys:', keys);
+        ioHook.unregisterShortcut(shId);
+    })
+
+    console.log('Hook started. Try type something or move mouse');
+}
