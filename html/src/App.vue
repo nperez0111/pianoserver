@@ -3,11 +3,11 @@
     <v-navigation-drawer fixed clipped v-model="drawer" app>
       <v-list dense>
         <v-subheader class="mt-3 grey--text">STATIONS ({{stations.length}})</v-subheader>
-        <v-list-tile class="mt-3" @click="shuffle">
+        <v-list-tile class="my-1" @click="shuffle">
           <v-list-tile-action>
-            <v-icon color="grey">shuffle</v-icon>
+            <v-icon large>shuffle</v-icon>
           </v-list-tile-action>
-          <v-list-tile-title class="grey--text">QuickMix</v-list-tile-title>
+          <v-list-tile-title>QuickMix</v-list-tile-title>
         </v-list-tile>
         <v-list dense>
           <v-list-tile v-for="(item,i) in stations" :key="i" @click="changeStationTo(i)" avatar>
@@ -19,22 +19,24 @@
           </v-list-tile>
         </v-list>
         
-        <v-list-tile @click="">
+        <v-list-tile to="/settings">
           <v-list-tile-action>
             <v-icon color="grey darken-1">settings</v-icon>
           </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">Manage Subscriptions</v-list-tile-title>
+          <v-list-tile-title class="grey--text text--darken-1">Manage Settings</v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
 
     <v-toolbar color="primary" dense fixed clipped-left app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-icon class="mx-3">fa-youtube</v-icon>
-      <v-toolbar-title class="mr-5 align-center">
-        <span class="title" v-text="currentStation">Pianobar</span>
+      <v-toolbar-title>
+        <router-link to="/">
+          <span class="title white--text" v-text="currentStation">Pianobar</span>
+        </router-link>
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn icon @click="refresh"><v-icon>refresh</v-icon></v-btn>
     </v-toolbar>
 
     <v-content>
@@ -124,7 +126,8 @@ export default {
       stations:this.$station.getStations(),
       currentStation:this.$station.getStation(),
       port,
-      url:choice
+      url:choice,
+      popularStations:ls.get('pastStations')||{}
     }
   },
   props: {
@@ -139,12 +142,22 @@ export default {
     },
     changeStationTo(index){
       this.$socket.emit('selectStation',index)
+      const s=this.popularStations[this.stations[index]]
+      if(s){
+        this.popularStations[this.stations[index]]+=1
+      }else{
+        this.popularStations[this.stations[index]]=1
+      }
+      ls.set('pastStations',this.popularStations)
     },
     hideOverflow(){
       document.getElementsByTagName('html')[0].style.overflow='hidden'
     },
     showOverflow(){
       document.getElementsByTagName('html')[0].style.overflow='auto'
+    },
+    refresh(){
+      this.$socket.emit('getCurrentStatus')
     },
     tryReconnect(url){
       this.loading=true
@@ -158,6 +171,7 @@ export default {
       }else{
         socket.disconnect()
         this.error=true
+        this.prompt=true
       }
       this.loading=false
     },1000)

@@ -17,9 +17,17 @@ export default class LastFM {
   }
   static getImagesForStations(stations) {
     return Promise.all(stations.map(station => {
-      const stored = ls.get(station) || false
+      const stored = ls.get(station) || false,
+        hasTried = ls.get('has tried') || false
       if (stored) {
         return stored
+      }
+
+      if (localStorage.getItem(station) === '""' && !hasTried) {
+        //try to get something as a song instead
+        //console.log(station, 'trying')
+        ls.set('has tried', true)
+        return LastFM.getPossibleTracks(station)
       }
 
       if (station.includes('Radio')) {
@@ -40,6 +48,7 @@ export default class LastFM {
           return false
         }
         const ret = result[0].image.slice(1, 2)[0]['#text']
+
         ls.set(stations[i], ret)
         return ret
       })

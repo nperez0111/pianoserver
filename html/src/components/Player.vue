@@ -124,6 +124,7 @@ import FullHeight from './Full-Height'
           
           this.onStatus(status)
           this.isPlaying(isPlaying)
+          this.setUpSong(status)
           return true
         }
       })
@@ -190,8 +191,17 @@ import FullHeight from './Full-Height'
       this.$socket.emit("pause",this.status,this.currentTime)
     },
     likeSong(){
+      if(this.liked){
+        return
+      }
       this.liked=true
       this.$socket.emit("likeSong",this.status,this.currentTime)
+      setTimeout(()=>{
+        this.$socket.emit('getCurrentStatus')
+        setTimeout(()=>{
+          console.log(this.liked)
+        },1000)
+      },1000)
     },
     dislikeSong(){
       this.disliked=true
