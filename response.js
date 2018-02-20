@@ -73,25 +73,29 @@ const Response = {
     likeSong: (client, { spawnInstance, current, isPlaying, log }) => {
         return (clientStatus) => {
             log('got a request to like')
+            const curStatus = current.getNewest()
             //make sure to like the right song
-            if (clientStatus && clientStatus.title === current.getNewest().title) {
+            if (clientStatus && clientStatus.title === curStatus.title) {
                 spawnInstance.writeCommand("likeSong")
-            } else {
-                //client is out of sync send them an update
-                client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
+                curStatus.rating = "1"
+                current.push(curStatus)
             }
+            //client is out of sync send them an update
+            //client.emit('getCurrentStatus', [curStatus, isPlaying.getNewest()])
         }
     },
     dislikeSong: (client, { spawnInstance, current, isPlaying, log }) => {
         return (clientStatus, clientTime) => {
             log('got a request to dislike')
+            const curStatus = current.getNewest()
             //make sure to like the right song
-            if (clientStatus && clientStatus.title === current.getNewest().title) {
+            if (clientStatus && clientStatus.title === curStatus.title) {
                 spawnInstance.writeCommand("dislikeSong")
-            } else {
-                //client is out of sync send them an update
-                client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
+                curStatus.rating = "-1"
+                current.push(curStatus)
             }
+            //client is out of sync send them an update
+            //client.emit('getCurrentStatus', [curStatus, isPlaying.getNewest()])
         }
     },
     nextSong: (client, { spawnInstance, current, isPlaying, log }) => {
