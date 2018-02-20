@@ -48,7 +48,9 @@
       </Full-Height>
       <Full-Height class="blue darken-4" v-show="vertical">
         <v-layout column align-center fill-height>
-          <AlbumCoverViewer class="my-3 layout spacer fullwidth" :current="status.coverArt" :songs="pastSongs" :loading="loadingNextSong" fullheight></AlbumCoverViewer>
+          <v-layout class="my-3 spacer fullwidth">
+            <img :src="status.coverArt" class="contain elevation-1 mx-auto" ref="vertImage">
+          </v-layout>
           <h1 class="headline">{{status.title}}</h1>
           <h3 class="subheading"><span class="light-blue--text accent-2">by</span> {{status.artist}}</h3>
           <h3 class="subheading"><span class="light-blue--text accent-2">on</span> {{status.album}}</h3>
@@ -79,7 +81,6 @@
   </v-slide-y-transition>
 </template>
 <script>
-import AlbumCoverViewer from './AlbumCoverViewer'
 import FullHeight from './Full-Height'
 export default {
   mounted() {
@@ -87,7 +88,9 @@ export default {
 
       this.socketSetup()
       this.$emit('hideoverflow')
-      this.onResize()
+      setTimeout(() => {
+        this.onResize()
+      }, 500)
     },
     data() {
       this.$station.onchangeStation(station => {
@@ -229,6 +232,7 @@ export default {
           y: window.innerHeight
         }
         this.vertical = size.y > size.x
+        this.$refs.vertImage.width = this.$refs.vertImage.clientHeight
       }
     },
     computed: {
@@ -267,7 +271,7 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-   .not-flex {
+    .not-flex {
   flex: none;
  }
  
@@ -278,4 +282,8 @@ export default {
   .grow {
     flex-grow: 1000 !important;
    }
+   
+   .contain {
+     object-fit: contain
+    }
 </style>
