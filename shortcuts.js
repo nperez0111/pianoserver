@@ -68,7 +68,12 @@ module.exports = function (globals, shortcutMappings) {
 
     return {
         destroy: () => {
+            allShortcutHandlers.forEach(id => {
+                ioHook.unregisterShortcut(id)
+            })
+            ioHook.unload()
             ioHook.unregisterAllShortcuts()
+            ioHook.stop()
         },
         shortcuts,
         allShortcutHandlers,

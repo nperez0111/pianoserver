@@ -14,6 +14,12 @@ function ipcResponse(globals) {
                 const status = splitter(stdin)
                 current.push(status)
                 pastSongs.push(status)
+                switch (command) {
+                    case 'songstart':
+                        const { notify, notificationTypes } = new notifier()
+                        notify(notificationTypes['nowPlaying']).catch(err => {})
+                        break;
+                }
                 //log(status)
             } else {
                 console.log(command, "called with nothing to handle it")

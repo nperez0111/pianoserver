@@ -67,6 +67,9 @@ const notifie = require('node-notifier').NotificationCenter,
 class Notifier {
     constructor() {
         this.notificationTypes = possibleNotifications
+        this.getFromServer = this.getFromServer.bind(this)
+        this.downloadImage = this.downloadImage.bind(this)
+        this.notify = this.notify.bind(this)
     }
     getFromServer(data, map = (a => a)) {
         return server.getAll(data).then(map)
@@ -101,7 +104,7 @@ class Notifier {
 
         }
         current.then(result => {
-            return notifier.notify(notification || result, function () { console.log(arguments) })
+            return notifier.notify(notification || result, function () { /*console.log(arguments)*/ })
         })
         return current
     }
