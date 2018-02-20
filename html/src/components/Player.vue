@@ -264,7 +264,6 @@ export default {
 
     },
     components: {
-      AlbumCoverViewer,
       'Full-Height': FullHeight
     }
 }
