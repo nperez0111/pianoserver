@@ -5,7 +5,9 @@
         <v-layout wrap justify-center>
           <v-flex xs5 md5 lg5>
             <v-layout column justify-center fill-height class="px-2">
-              <img :src="status.coverArt" class="fullwidth elevation-1">
+              <transition name="v-fade-transition">
+                <img :src="status.coverArt" :key="status.coverArt" class="fullwidth elevation-1">
+              </transition>
             </v-layout>
           </v-flex>
           <v-flex xs7 md12 lg7>
