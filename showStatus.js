@@ -2,8 +2,6 @@
 
 const notifie = require('node-notifier').NotificationCenter,
     notifier = new notifie(),
-    Connector = require('./Connector'),
-    server = new Connector(),
     download = require('image-downloader'),
     homedir = require('homedir')(),
     imageLoc = homedir + '/.config/pianobar/notificationImage.jpg',
@@ -11,7 +9,6 @@ const notifie = require('node-notifier').NotificationCenter,
         nowPlaying: {
             getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
             downloadImage([resp]) {
-                //console.log(resp)
                 return { url: resp[1].coverArt, dest: imageLoc }
             },
             cb([resp]) {
@@ -65,15 +62,36 @@ const notifie = require('node-notifier').NotificationCenter,
     }
 
 class Notifier {
-    constructor() {
+    constructor(globals) {
         this.notificationTypes = possibleNotifications
         this.getFromServer = this.getFromServer.bind(this)
         this.downloadImage = this.downloadImage.bind(this)
         this.notify = this.notify.bind(this)
+        this.globals = globals
     }
-    getFromServer(data, map = (a => a)) {
+    getFromServer(commandsToGet, map = (a => a)) {
+        const { response } = this.globals
         //need to actually pull from the server rather than connect to it
-        return server.getAll(data).then(map)
+        return Promise.all(commandsToGet.map(({ name, args }) => {
+            //console.log(commandsToGet)
+            return new Promise((resolve, reject) => {
+                const time = setTimeout(() => { reject('timed out') }, 200)
+                if (!response[name]) {
+                    reject(name + 'is not a function on response')
+                    return
+                }
+                const func = response[name]({
+                    emit: function () {
+                        clearTimeout(time)
+                        resolve(Array.from(arguments))
+                    }
+                }, this.globals)
+
+                func.apply(response, args)
+            })
+
+        }))
+
     }
     downloadImage({ url, dest }) {
         return download.image({ url, dest })
@@ -87,10 +105,10 @@ class Notifier {
                     resp = response
                     return response
                 })
-            }).catch(err => {})
+            }).catch(err => { console.log(err) })
         }
         if (downloadImage) {
-            current = current.then(() => this.downloadImage(downloadImage(resp)))
+            current = current.then(() => this.downloadImage(downloadImage(resp))).catch(err => { console.log(err) })
         }
         if (cb) {
             current = current.then(() => cb(resp)).then(notification => {
@@ -101,12 +119,12 @@ class Notifier {
                     return err
                 }
                 return notification
-            })
+            }).catch(err => { console.log(err) })
 
         }
         current.then(result => {
             return notifier.notify(notification || result, function () { /*console.log(arguments)*/ })
-        })
+        }).catch(err => { console.log(err) })
         return current
     }
 }

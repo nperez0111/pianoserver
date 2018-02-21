@@ -21,7 +21,7 @@ function ipcResponse(globals) {
                 pastSongs.push(status)
                 switch (command) {
                     case 'songstart':
-                        const { notify, notificationTypes } = new notifier()
+                        const { notify, notificationTypes } = new notifier(globals)
                         notify(notificationTypes['nowPlaying']).catch(err => {})
                         break;
                 }
