@@ -6,7 +6,7 @@
           <v-flex xs5 md5 lg5>
             <v-layout column justify-center fill-height class="px-2">
               <transition name="v-fade-transition">
-                <img :src="status.coverArt" :key="status.coverArt" class="fullwidth elevation-1">
+                <img :src="status.coverArt" :key="status.coverArt" class="fullwidth elevation-2">
               </transition>
             </v-layout>
           </v-flex>
@@ -50,8 +50,8 @@
       </Full-Height>
       <Full-Height class="blue darken-4" v-show="vertical">
         <v-layout column align-center fill-height>
-          <v-layout class="my-3 spacer fullwidth" ref="container">
-            <img :src="status.coverArt" class="contain elevation-1 mx-auto" ref="vertImage">
+          <v-layout class="my-3 spacer fullwidth" ref="container" justify-center column>
+            <img :src="status.coverArt" class="contain elevation-2 mx-auto" ref="vertImage">
           </v-layout>
           <h1 class="headline">{{status.title}}</h1>
           <h3 class="subheading"><span class="light-blue--text accent-2">by</span> {{status.artist}}</h3>
@@ -88,16 +88,24 @@ export default {
   mounted() {
       window.player = this
 
-      this.socketSetup()
       this.$emit('hideoverflow')
       setTimeout(() => {
         this.onResize()
       }, 500)
     },
     data() {
+      const clearAll=[
       this.$station.onchangeStation(station => {
         this.station = station
+      }),this.$player.onchangeStatus(state=>{
+        const {status,currentTime,playing,liked,disliked,pastSongs}=state
+        this.status=status
+        this.liked=liked
+        this.disliked=disliked
+        this.currentTime=currentTime
+        this.pastSongs=pastSongs
       })
+      ]
       return {
         status: {},
         liked: false,
@@ -111,122 +119,33 @@ export default {
         stations: this.$station.getStations(),
         station: this.$station.getStation(),
         playing: true,
-        vertical: true
+        vertical: true,
+        clearAll
       }
     },
+    destroy(){
+      this.clearAll.forEach(clear=>{
+        clear.dispose()
+      })
+    },
     methods: {
-      socketSetup() {
-        //server emitted events
-        this.$socket.on("status", this.onStatus.bind(this))
-        this.$socket.on("currentTime", this.onCurrentTime.bind(this))
-        this.$socket.on("isPlaying", this.isPlaying.bind(this))
-        this.$socket.on('getPastSongs', this.onGetPastSongs.bind(this))
-
-        //try to initialize with some values
-        this.$socket.on("getCurrentStatus", (statuses, isPlaying) => {
-          const state = statuses.some(status => {
-            if (status && parseInt(status.stationCount) > 0 && status.coverArt && status.stationName) {
-              this.stations = this.getStations(status)
-
-              this.onStatus(status)
-              this.isPlaying(isPlaying)
-              this.setUpSong(status)
-              return true
-            }
-          })
-
-          if (this.stations === null) {
-            setTimeout(() => {
-              this.$socket.emit("getCurrentStatus", 10)
-            }, 1000)
-          }
-
-        })
-
-        //trigger initialize
-        this.$socket.emit("getCurrentStatus", 6)
-        this.$socket.emit("getPastSongs")
-
-      },
-      setUpSong(status) {
-        this.liked = status.rating === '1'
-        this.disliked = false
-        this.loadingNextSong = false
-      },
-      onStatus(status) {
-
-
-        if (typeof status == 'string') {
-          this.status = JSON.parse(status)
-        } else {
-          this.status = status
-        }
-        const {
-          stationName = false, songStationName
-        } = this.status
-
-        this.$station.setStations(this.getStations(this.status))
-        if (stationName && stationName !== "") {
-          this.$station.setStation(stationName === "QuickMix" ? `${stationName} - ${songStationName}` : stationName)
-        }
-        this.setUpSong(status)
-          //console.log(status)
-      },
-      onCurrentTime(time, isPlaying) {
-        this.currentTime = time
-        this.isPlaying(isPlaying)
-      },
-      getStations(state) {
-        const amount = state.stationCount
-        if (amount) {
-          return (new Array(parseInt(amount))).fill(false).map((c, i) => state[`station${i}`])
-        }
-        return null
-      },
       playPause() {
-        if (this.playing) {
-          this.pause()
-        } else {
-          this.play()
-        }
+        this.$player.playPause()
       },
       play() {
-        this.playing = true
-        this.$socket.emit("play", this.status, this.currentTime)
+        this.$player.play()
       },
       pause() {
-        this.playing = false
-        this.$socket.emit("pause", this.status, this.currentTime)
+        this.$player.pause()
       },
       likeSong() {
-        if (this.liked) {
-          return
-        }
-        this.liked = true
-        this.$socket.emit("likeSong", this.status, this.currentTime)
-        setTimeout(() => {
-          this.$socket.emit('getCurrentStatus')
-          setTimeout(() => {
-            console.log(this.liked)
-          }, 1000)
-        }, 1000)
+        this.$player.likeSong()
       },
       dislikeSong() {
-        this.disliked = true
-        this.$socket.emit("dislikeSong", this.status, this.currentTime)
+        this.$player.dislikeSong()
       },
       nextSong() {
-        this.loadingNextSong = true
-        this.$socket.emit("nextSong", this.status, this.currentTime)
-        this.$socket.emit("getCurrentStatus", 6)
-      },
-      isPlaying(playing) {
-        //console.log('set playing to',playing)
-        this.playing = playing
-      },
-      onGetPastSongs(statuses) {
-        this.pastSongs = statuses
-        console.log("past songs", this.pastSongs)
+        this.$player.nextSong()
       },
       onResize() {
         const size = {
@@ -234,10 +153,19 @@ export default {
           y: window.innerHeight
         }
         this.vertical = size.y > size.x
-        const height=this.$refs.container.clientHeight
+        if(!this.$refs.container){
+          return
+        }
+        const height=this.$refs.container.clientHeight,
+        width=this.$refs.container.clientWidth
         //console.log(height)
         if(height>0){
-          this.$refs.vertImage.style.width = height+'px'
+          if(height>width){
+            this.$refs.vertImage.style.maxHeight = width+'px'
+          }
+          else{
+          this.$refs.vertImage.style.maxWidth = height+'px'
+        }
           //console.log('setting',height,this.$refs.vertImage)
         }else{
           setTimeout(this.onResize.bind(this),50)
@@ -292,9 +220,9 @@ export default {
    }
    
    .contain {
-        width: auto;
-        height: auto;
+        width: 100%;
+     /*   height: auto;
         min-height: 100%;
-     /*object-fit: contain*/
+     object-fit: contain*/
     }
 </style>

@@ -15,8 +15,10 @@
                 <img :src="albumCovers[i]" v-if="albumCovers[i]">
                 <v-icon large v-else>music_note</v-icon>
               </v-list-tile-avatar>
-            <v-list-tile-title v-text="item"></v-list-tile-title>
-            <v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title v-text="item"></v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action class="tile-action">
               <v-btn icon ripple @click.stop="stationSettings(i)">
                 <v-icon color="grey lighten-1">settings</v-icon>
               </v-btn>
@@ -180,11 +182,11 @@ export default {
     tryReconnect(url){
       this.loading=true
       window.socket=this.$socket.init(typeof url==='string'?url:this.url)
+      this.$player.init(window.socket,this.$station)
       setTimeout(()=>{
       if(socket.connected===true){
         this.prompt=false
         this.error=false
-        player.socketSetup()
         ls.set('socket',this.url)
       }else{
         socket.disconnect()
@@ -200,5 +202,8 @@ export default {
 <style>
  .input-group__details:after {
   background-color: rgba(255, 255, 255, 0.32) !important;
+ }
+ .tile-action{
+  min-width: 32px;
  }
 </style>

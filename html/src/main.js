@@ -5,9 +5,11 @@ import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import StationPlugin from './plugins/station'
 import SocketPlugin from './plugins/socket'
+import PlayerPlugin from './plugins/player'
 
 Vue.use(StationPlugin, {})
 Vue.use(SocketPlugin, {})
+Vue.use(PlayerPlugin, {})
 Vue.use(Vuetify, {
   theme: {
     primary: '#386aff',
