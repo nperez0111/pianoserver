@@ -35,7 +35,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-toolbar color="primary" dense fixed clipped-left app>
+    <v-toolbar color="primary" dense fixed clipped-left app v-if="toolbar">
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>
         <router-link to="/">
@@ -47,7 +47,7 @@
     </v-toolbar>
 
     <v-content>
-      <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow"/>
+      <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:hideToolbar="hideToolbar" v-on:showToolbar="showToolbar"/>
     </v-content>
 
     <v-dialog
@@ -134,13 +134,20 @@ export default {
       currentStation:this.$station.getStation(),
       port,
       url:choice,
-      popularStations:ls.get('pastStations')||{}
+      popularStations:ls.get('pastStations')||{},
+      toolbar:true
     }
   },
   props: {
     source: String
   },
   methods:{
+    hideToolbar(){
+      this.toolbar=false
+    },
+    showToolbar(){
+      this.toolbar=true
+    },
     setStations(stations){
       this.stations=stations
     },

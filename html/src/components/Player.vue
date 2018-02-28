@@ -89,6 +89,7 @@ export default {
       window.player = this
 
       this.$emit('hideoverflow')
+      this.$emit('showToolbar')
       setTimeout(() => {
         this.onResize()
       }, 500)
