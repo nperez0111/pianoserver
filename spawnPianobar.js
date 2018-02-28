@@ -9,10 +9,13 @@ const spawn = require('child_process').spawn,
         quit: 'q',
         selectStation: 's ',
         playPauseSong: 'p',
-        play: 'p',
+        play: 'P',
         pause: 'p',
         playOrPauseSong: 'p',
-        shuffle: 'x'
+        shuffle: 'x',
+        createStation: 'c',
+        createGenreStation: 'g',
+        deleteStation: 'd'
     }
 let once = true
 class Spawner {

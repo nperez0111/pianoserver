@@ -45,14 +45,10 @@ const Response = {
     play: (client, { spawnInstance, isPlaying, current, currentTime, log }) => {
         return () => {
             log('got a request to play')
-            //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
-            if (isPlaying.getNewest() === false) {
-                spawnInstance.writeCommand("play")
-                currentTime.clear()
-                isPlaying.push(true)
-            } else {
-                client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
-            }
+
+            spawnInstance.writeCommand("play")
+            currentTime.clear()
+            isPlaying.push(true)
 
         }
     },
@@ -126,6 +122,40 @@ const Response = {
             log('got a request to change station to shuffle')
             spawnInstance.writeCommand("shuffle")
             isPlaying.push(true)
+        }
+    },
+    deleteStation: (client, { spawnInstance, isPlaying, logger }) => {
+        return (stationID) => {
+            logger.info('got a request to delete station: ' + stationID)
+
+            spawnInstance.writeCommand("deleteStation")
+            spawnInstance.writeCommand(stationID)
+        }
+    },
+    createGenreStation: (client, { spawnInstance, isPlaying, logger }) => {
+        return (genre) => {
+            logger.info('got a request to add genre station ' + genre)
+
+            spawnInstance.writeCommand("createGenreStation")
+            spawnInstance.writeCommand(genre)
+            isPlaying.push(true)
+        }
+    },
+    createStation: (client, { spawnInstance, isPlaying, logger }) => {
+        return (stationName) => {
+            logger.info('got a request to add station ' + stationName)
+
+            spawnInstance.writeCommand("createStation")
+            spawnInstance.writeCommand(stationName)
+            isPlaying.push(true)
+        }
+    },
+    addMusicToStation: (client, { spawnInstance, logger }) => {
+        return (artistOrSongName) => {
+            logger.info('got a request to add station ' + artistOrSongName)
+
+            spawnInstance.writeCommand("addToStation")
+            spawnInstance.writeCommand(artistOrSongName)
         }
     },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {

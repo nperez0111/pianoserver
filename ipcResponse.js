@@ -11,7 +11,7 @@ function ipcResponse(globals) {
         cli: function ([command, stdin], socket) {
             //log('command:', command)
             if (commands.includes(command)) {
-                console.log(command)
+                //console.log(command)
 
                 const status = splitter(stdin)
                 if (command == 'stationfetchplaylist' || command == 'usergetstations') {
