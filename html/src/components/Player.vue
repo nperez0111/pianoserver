@@ -107,6 +107,7 @@ export default {
         this.disliked=disliked
         this.currentTime=currentTime
         this.pastSongs=pastSongs
+        this.playing=playing
       })
       ]
       return {
