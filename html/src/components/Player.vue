@@ -5,7 +5,7 @@
         <v-layout wrap justify-center>
           <v-flex xs5 md5 lg5>
             <v-layout column justify-center fill-height class="px-2">
-              <transition name="v-fade-transition">
+              <transition name="dialog-transition" mode="out-in">
                 <img :src="status.coverArt" :key="status.coverArt" class="fullwidth elevation-2">
               </transition>
             </v-layout>
@@ -51,7 +51,9 @@
       <Full-Height class="blue darken-4" v-show="vertical">
         <v-layout column align-center fill-height>
           <v-layout class="my-3 spacer fullwidth" ref="container" justify-center column>
-            <img :src="status.coverArt" class="contain elevation-2 mx-auto" ref="vertImage">
+            <transition name="dialog-transition" mode="out-in">
+              <img :src="status.coverArt" :key="status.coverArt" class="contain elevation-2 mx-auto" ref="vertImage">
+            </transition>
           </v-layout>
           <h1 class="headline">{{status.title}}</h1>
           <h3 class="subheading"><span class="light-blue--text accent-2">by</span> {{status.artist}}</h3>
@@ -66,7 +68,7 @@
                   <v-icon>thumb_down</v-icon>
                 </v-btn>
               </v-layout>
-              <v-progress-circular :size="$vuetify.breakpoint.mdAndDown?150:250" :width="15" :rotate="180" v-model="percentage" color="primary">
+              <v-progress-circular :size="$vuetify.breakpoint.mdAndDown?150:250" :width="16" :rotate="180" v-model="percentage" color="primary">
                 <v-btn icon fab large @click="playPause">
                   <v-icon v-if="!playing">play_arrow</v-icon>
                   <v-icon v-else>pause</v-icon>
@@ -92,7 +94,7 @@ export default {
       this.$emit('showToolbar')
       setTimeout(() => {
         this.onResize()
-      }, 500)
+      }, 400)
     },
     data() {
       const clearAll=[
@@ -154,9 +156,10 @@ export default {
           y: window.innerHeight
         }
         this.vertical = size.y > size.x
-        if(!this.$refs.container){
-          return
+        if(!this.$refs.vertImage){
+          return setTimeout(this.onResize.bind(this),10)
         }
+
         const height=this.$refs.container.clientHeight,
         width=this.$refs.container.clientWidth
         //console.log(height)
@@ -200,6 +203,13 @@ export default {
         return `${minutes < 10 ? "0"+minutes : minutes}:${ secs < 10 ? "0"+secs : secs}`
       }
 
+    },
+    watch:{
+      status(newStatus,oldStatus){
+        if(newStatus.title!=oldStatus.title){
+          setTimeout(this.onResize.bind(this),500)
+        }
+      }
     },
     components: {
       'Full-Height': FullHeight

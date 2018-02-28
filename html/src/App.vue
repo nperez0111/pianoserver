@@ -2,7 +2,14 @@
   <v-app dark id="inspire">
     <v-navigation-drawer fixed clipped v-model="drawer" app>
       <v-list dense>
-        <v-subheader class="mt-3 grey--text">STATIONS ({{stations.length}})</v-subheader>
+        <v-list-tile to="/settings" class="mt-2">
+          <v-list-tile-action>
+            <v-icon color="grey lighten-2">settings</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-title class="grey--text text--lighten-2">Manage Settings</v-list-tile-title>
+        </v-list-tile>
+
+        <v-subheader class="grey--text"><span class="mx-auto">STATIONS ({{stations.length}})</span></v-subheader>
         <v-list-tile class="my-1" @click="shuffle">
           <v-list-tile-action>
             <v-icon large>shuffle</v-icon>
@@ -26,12 +33,6 @@
           </v-list-tile>
         </v-list>
         
-        <v-list-tile to="/settings">
-          <v-list-tile-action>
-            <v-icon color="grey darken-1">settings</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">Manage Settings</v-list-tile-title>
-        </v-list-tile>
       </v-list>
     </v-navigation-drawer>
 
@@ -127,7 +128,7 @@ export default {
       prompt:false,
       chosen:false,
       loadedAlbumCovers:false,
-      drawer: true,
+      drawer: false,
       showBottomPlayer:false,
       albumCovers:[],
       stations:this.$station.getStations(),

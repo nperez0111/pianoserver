@@ -67,11 +67,11 @@ const dev = true,
     },
     play() {
       this.setPlaying(true)
-      this.socket.emit("play", this.status, this.currentTime)
+      this.socket.emit("play", this.state.status, this.state.currentTime)
     },
     pause() {
       this.setPlaying(false)
-      this.socket.emit("pause", this.status, this.currentTime)
+      this.socket.emit("pause", this.state.status, this.state.currentTime)
     },
     likeSong() {
       if (this.liked) {
@@ -79,7 +79,7 @@ const dev = true,
       }
       this.state.liked = true
       this.pub.publish(STATE, this.state)
-      this.socket.emit("likeSong", this.status, this.currentTime)
+      this.socket.emit("likeSong", this.state.status, this.state.currentTime)
       setTimeout(() => {
         this.socket.emit('getCurrentStatus')
       }, 1000)
@@ -87,12 +87,12 @@ const dev = true,
     dislikeSong() {
       this.state.disliked = true
       this.pub.publish(STATE, this.state)
-      this.socket.emit("dislikeSong", this.status, this.currentTime)
+      this.socket.emit("dislikeSong", this.state.status, this.state.currentTime)
     },
     nextSong() {
       this.state.loadingNextSong = true
       this.pub.publish(STATE, this.state)
-      this.socket.emit("nextSong", this.status, this.currentTime)
+      this.socket.emit("nextSong", this.state.status, this.state.currentTime)
       this.socket.emit("getCurrentStatus", 6)
     },
     getStations(state) {
