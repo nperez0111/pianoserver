@@ -19,11 +19,10 @@ function ipcResponse(globals) {
                 }
                 current.push(status)
                 pastSongs.push(status)
-                switch (command) {
-                    case 'songstart':
-                        const { notify, notificationTypes } = new notifier(globals)
-                        notify(notificationTypes['nowPlaying']).catch(err => {})
-                        break;
+                const map = { songstart: 'nowPlaying', songlove: 'songLiked', userlogin: 'login' }
+                if (command in map) {
+                    const { notify, notificationTypes } = new notifier(globals)
+                    notify(notificationTypes[map[command]]).catch(err => {})
                 }
                 //log(status)
             } else {

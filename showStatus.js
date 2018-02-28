@@ -6,6 +6,32 @@ const notifie = require('node-notifier').NotificationCenter,
     homedir = require('homedir')(),
     imageLoc = homedir + '/.config/pianobar/notificationImage.jpg',
     possibleNotifications = {
+        login: {
+            notification: {
+                title: `Welcome back to Pianobar!`
+            }
+        },
+        songLiked: {
+            getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
+            downloadImage([resp]) {
+                return { url: resp[1].coverArt, dest: imageLoc }
+            },
+            cb([resp]) {
+                if (resp.length == 1) {
+                    return 'response was empty' + JSON.stringify(resp)
+                }
+                const [label, status, isPlaying] = resp, { artist, title, album, coverArt, stationName, songStationName, detailUrl } = status
+
+                return {
+                    message: `On:${album} @${stationName.includes('Radio')?stationName.slice(0,-6):stationName}`,
+                    title: `${title} By: ${artist}`,
+                    subtitle: `Has been liked! `,
+                    icon: imageLoc,
+                    contentImage: imageLoc
+                }
+
+            }
+        },
         nowPlaying: {
             getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
             downloadImage([resp]) {
