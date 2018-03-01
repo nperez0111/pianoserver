@@ -1,5 +1,5 @@
 const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
-    History = require('./History'),
+    History = require('./lib/History'),
     globals = {
         ipc: require('node-ipc'),
         Spawner: require('./spawnPianobar'),
@@ -18,6 +18,6 @@ const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
         fs: require('fs'),
         path: require('path'),
         ipcResponse: require('./ipcResponse'),
-        notifier: require('./showStatus')
+        notifier: require('./lib/Notifier')
     }
 module.exports = globals

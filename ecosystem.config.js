@@ -8,12 +8,12 @@ module.exports = {
         // First application
         {
             name: 'Server',
-            script: 'server.js',
+            script: 'index.js',
             env_production: {
                 NODE_ENV: 'production'
             },
             watch: true,
-            ignore_watch: ["node_modules", "html", "debug.log", ".git", ".gitignore", "response.js"],
+            ignore_watch: ["node_modules", "html", "server", ".git", ".gitignore"],
             watch_options: {
                 followSymlinks: false
             },

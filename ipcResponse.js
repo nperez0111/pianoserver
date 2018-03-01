@@ -48,19 +48,19 @@ function ipcResponse(globals) {
         connect: function () {
 
         },
-        play: function (command, socket) {
+        play: function (socket) {
             response.play({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
         },
-        pause: function (command, socket) {
+        pause: function (socket) {
             response.pause({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
         },
-        nextSong: function (command, socket) {
+        nextSong: function (socket) {
             response.nextSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
         },
-        likeSong: function (command, socket) {
+        likeSong: function (socket) {
             response.likeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
         },
-        dislikeSong: function (command, socket) {
+        dislikeSong: function (socket) {
             response.dislikeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
         },
         selectStation: function (command, socket) {
