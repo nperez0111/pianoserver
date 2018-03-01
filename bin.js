@@ -24,7 +24,7 @@ const pm2 = require('pm2'),
     settings = {
         openOnStart: true
     },
-    ipcCommands = ['play', 'pause', 'likeSong', 'nextSong', 'dislikeSong', 'shuffle']
+    ipcCommands = { play: 'Play song', pause: 'Pause song', likeSong: 'Like the current song', dislikeSong: 'Dislike the current song', nextSong: 'Play next song', shuffle: 'Shuffle all songs' }
 
 
 function startServer(subdomain) {
@@ -67,6 +67,26 @@ function restartServer() {
     })
 }
 
+function checkIfRunning(cb) {
+    pm2.connect(function (err) {
+        if (err) {
+            cb.notRunning()
+            return
+        }
+        pm2.describe(serverName, (err, description) => {
+            if (err) {
+                cb.notRunning()
+                return
+            }
+            cb.running()
+        })
+    })
+}
+
+function connectToConsole() {
+
+}
+
 function quitServer() {
     pm2.connect(function (err) {
         if (err) {
@@ -79,7 +99,7 @@ function quitServer() {
 
 function tryServerCommand(command, args) {
 
-    if (ipcCommands.includes(command)) {
+    if (command in ipcCommands) {
         const connection = new Connector()
         connection.on(command, args).then(() => {
             //console.log(`Ran: ${command}`)
@@ -91,13 +111,13 @@ function tryServerCommand(command, args) {
 
 }
 
-ipcCommands.forEach(command => {
-    program.command(command).action(function () {
+Object.keys(ipcCommands).forEach(command => {
+    program.command(command).description(ipcCommands[command]).action(function () {
         tryServerCommand(command)
     })
 })
 
-program.command('selectStation <station>').action(function (station) {
+program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {
@@ -106,11 +126,24 @@ program.command('quit').description('Stops the PM2 Process').action(() => {
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
     restartServer()
 })
-program.command('start <subdomain>').description('Starts the server for both pianobar console and the web app').action((subdomain) => {
+program.command('start [subdomain]').description('Starts the server for both pianobar console and the web app. Allows you to specify the subdomain you would like to use. Otherwise will try to use pandora or if unavailable will try to use a random one.').action((subdomain) => {
     startServer(subdomain)
 })
-program.command('*').description('Starts the server or if the server is running lets you use the console interface of pianobar').action(() => {
+program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.').action(() => {
     startServer()
 })
 
 program.version('0.0.1').parse(process.argv)
+
+const NO_COMMAND_SPECIFIED = program.args.length === 0;
+
+if (NO_COMMAND_SPECIFIED) {
+    checkIfRunning({
+        running() {
+            connectToConsole()
+        },
+        notRunning() {
+            startServer()
+        }
+    })
+}
