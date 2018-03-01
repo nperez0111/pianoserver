@@ -27,8 +27,8 @@ const pm2 = require('pm2'),
     ipcCommands = ['play', 'pause', 'likeSong', 'nextSong', 'dislikeSong', 'shuffle']
 
 
-function startServer() {
-    localtunnel(port, { subdomain: 'pandora' }, function (err, tunnel) {
+function startServer(subdomain) {
+    localtunnel(port, { subdomain: subdomain || 'pandora' }, function (err, tunnel) {
         if (err) {
             console.error(err)
             process.exit(2)
@@ -49,7 +49,7 @@ function startServer() {
 
         pm2.start({
             name: serverName,
-            script: 'ecosystem.config.js', // Script to be run
+            script: 'index.js', // Script to be run
         }, function (err, apps) {
             pm2.disconnect(); // Disconnects from PM2
             if (err) throw err
@@ -106,8 +106,8 @@ program.command('quit').description('Stops the PM2 Process').action(() => {
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
     restartServer()
 })
-program.command('start').description('Starts the server for both pianobar console and the web app').action(() => {
-    startServer()
+program.command('start <subdomain>').description('Starts the server for both pianobar console and the web app').action((subdomain) => {
+    startServer(subdomain)
 })
 program.command('*').description('Starts the server or if the server is running lets you use the console interface of pianobar').action(() => {
     startServer()
