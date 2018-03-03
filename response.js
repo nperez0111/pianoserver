@@ -12,7 +12,7 @@ const Response = {
                 client.emit('isPlaying', state)
             })
 
-            obj.timeInterval = setInterval(function () {
+            obj.timeInterval = setInterval(function() {
                 client.volatile.emit('currentTime', currentTime.getNewest(), isPlaying.getNewest());
             }, 1000)
         }
@@ -156,6 +156,12 @@ const Response = {
 
             spawnInstance.writeCommand("addToStation")
             spawnInstance.writeCommand(artistOrSongName)
+        }
+    },
+    writeCommand: (client, { spawnInstance, logger }) => {
+        return command => {
+            logger.info("Writing command to pianobar instance", command)
+            spawnInstance.writeCommand(command)
         }
     },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {

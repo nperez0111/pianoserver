@@ -25,7 +25,9 @@ ipc.connectTo(serverName, () => {
 
     ipc.of[serverName].on('getStatus', (current) => {
         console.log(current)
-        //ipc.of[serverName].emit('nowPlaying', "Dope");
-        ipc.disconnect(serverName)
+        //ipc.disconnect(serverName)
+    })
+    ipc.of[serverName].on('getLine', line => {
+        console.log(line)
     })
 })

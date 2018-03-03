@@ -28,7 +28,7 @@ const pm2 = require('pm2'),
 
 
 function startServer(subdomain) {
-    localtunnel(port, { subdomain: subdomain || 'pandora' }, function (err, tunnel) {
+    localtunnel(port, { subdomain: subdomain || 'pandora' }, function(err, tunnel) {
         if (err) {
             console.error(err)
             process.exit(2)
@@ -41,7 +41,7 @@ function startServer(subdomain) {
             opn(tunnel.url)
         }
     })
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             console.error(err)
             process.exit(2)
@@ -50,7 +50,7 @@ function startServer(subdomain) {
         pm2.start({
             name: serverName,
             script: 'index.js', // Script to be run
-        }, function (err, apps) {
+        }, function(err, apps) {
             pm2.disconnect(); // Disconnects from PM2
             if (err) throw err
         })
@@ -58,7 +58,7 @@ function startServer(subdomain) {
 }
 
 function restartServer() {
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             console.error(err)
             process.exit(2)
@@ -68,7 +68,7 @@ function restartServer() {
 }
 
 function checkIfRunning(cb) {
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             cb.notRunning()
             return
@@ -84,11 +84,57 @@ function checkIfRunning(cb) {
 }
 
 function connectToConsole() {
+    const ipc = require('node-ipc'),
+        serverName = 'pianobar-server',
+        stdin = process.stdin
 
+    ipc.config.id = 'pianobar-stdin'
+    ipc.config.retry = 1500
+    ipc.config.silent = true
+
+
+
+    ipc.connectTo(serverName, () => {
+        ipc.of[serverName].on('connect', () => {
+            console.log(`Welcome to Pianobar`)
+        })
+        ipc.of[serverName].on('getLine', line => {
+            console.log(line)
+        })
+    })
+    // without this, we would only get streams once enter is pressed
+    if (stdin.setRawMode) {
+        stdin.setRawMode(true);
+    }
+
+    // resume stdin in the parent process (node app won't quit all by itself
+    // unless an error or process.exit() happens)
+    stdin.resume();
+
+    // i don't want binary, do you?
+    stdin.setEncoding('utf8');
+
+    // on any data into stdin
+    stdin.on('data', key => {
+        // ctrl-c ( end of text )
+        if (key === '\u0003') {
+            this.options.onExit()
+            if (this.options.onExitCloseChild) {
+                this.pianobar.kill()
+            }
+            process.exit();
+        }
+
+        //send single char and flush stdin
+        this.pianobar.stdin.write(key + "\n")
+
+        // write the key to stdout all normal like
+        process.stdout.write(key)
+    })
 }
 
 function quitServer() {
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             console.error(err)
             process.exit(2)
@@ -112,12 +158,12 @@ function tryServerCommand(command, args) {
 }
 
 Object.keys(ipcCommands).forEach(command => {
-    program.command(command).description(ipcCommands[command]).action(function () {
+    program.command(command).description(ipcCommands[command]).action(function() {
         tryServerCommand(command)
     })
 })
 
-program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
+program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function(station) {
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {

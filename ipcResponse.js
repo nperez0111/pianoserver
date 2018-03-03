@@ -6,9 +6,9 @@ const commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songs
 
 function ipcResponse(globals) {
 
-    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier } = globals,
+    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, pianobarLog } = globals,
     ipcResponse = {
-        cli: function ([command, stdin], socket) {
+        cli: function([command, stdin], socket) {
             //log('command:', command)
             if (commands.includes(command)) {
                 //console.log(command)
@@ -30,52 +30,58 @@ function ipcResponse(globals) {
                 //commands.defaultCommand(stdin)
             }
         },
-        getCurrentTime: function (command, socket) {
+        getCurrentTime: function(command, socket) {
             log('got a request for current time')
 
             ipc.server.emit(socket, 'getCurrentTime', currentTime.getNewest())
         },
-        getStatus: function (command, socket) {
+        getStatus: function(command, socket) {
             log('got a request for current status')
 
             ipc.server.emit(socket, 'getStatus', current.getNewest(command))
         },
-        getAllStatus: function (command, socket) {
+        getAllStatus: function(command, socket) {
             log('got a request for current status')
 
             ipc.server.emit(socket, 'getAllStatus', current.getAll())
         },
-        connect: function () {
-
+        connect: function(socket) {
+            pianobarLog.onpush(line => {
+                ipc.server.emit(socket, 'getLine', line)
+                ipc.server.emit(socket, 'getAllLines', pianobarLog.getAll())
+            })
         },
-        play: function (socket) {
+        sendLine: function(command, socket) {
+            response.writeCommand({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
+        },
+        play: function(socket) {
             response.play({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
         },
-        pause: function (socket) {
+        pause: function(socket) {
             response.pause({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
         },
-        nextSong: function (socket) {
+        nextSong: function(socket) {
             response.nextSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
         },
-        likeSong: function (socket) {
+        likeSong: function(socket) {
             response.likeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
         },
-        dislikeSong: function (socket) {
+        dislikeSong: function(socket) {
             response.dislikeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
         },
-        selectStation: function (command, socket) {
+        selectStation: function(command, socket) {
             response.selectStation({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
         },
-        shuffle: function (command, socket) {
+        shuffle: function(command, socket) {
             response.shuffle({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
         },
-        getPastSongs: function (command, socket) {
+        getPastSongs: function(command, socket) {
             response.getPastSongs({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
         },
-        getIsPlaying: function (command, socket) {
+        getIsPlaying: function(command, socket) {
             response.getisPlaying({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
         },
-        get: function (commandsToGet, socket) {
+        get: function(commandsToGet, socket) {
             Promise.all(commandsToGet.map(({ name, args }) => {
                 //console.log(commandsToGet)
                 return new Promise((resolve, reject) => {
@@ -85,7 +91,7 @@ function ipcResponse(globals) {
                         return
                     }
                     const func = response[name]({
-                        emit: function () {
+                        emit: function() {
                             clearTimeout(time)
                             resolve(Array.from(arguments))
                         }
