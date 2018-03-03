@@ -1,19 +1,19 @@
 const globals = require('./globals'),
-    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, port, url, fs, path, ipcResponse } = globals,
+    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, port, url, fs, path, ipcResponse, shortcuts } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
-        onExit: function (exitCode, signal) {
+        onExit: function(exitCode, signal) {
             if (signal === 'SIGINT')
                 process.kill(process.pid, 'SIGINT');
             globals.shortcuts.destroy()
             process.exit()
         },
-        onEnd: function () {
+        onEnd: function() {
             //maybe dont stop the server but restart pianobar?
             ipc.server.stop()
             globals.shortcuts.destroy()
         },
-        onData: function (data) {
+        onData: function(data) {
             const getTime = /(\d\d:\d\d).(\d\d:\d\d)/
             if (getTime.test(data)) {
                 const [now, ofTotal] = Array.from(data.match(getTime)).slice(1)
@@ -33,18 +33,17 @@ const globals = require('./globals'),
     express = require('express'),
     app = express(),
     server = http.Server(app),
-    socket = io.listen(server),
-    shortcuts = require('./shortcuts')
+    socket = io.listen(server)
 
 
 globals.shortcuts = shortcuts({ spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, response })
 globals.spawnInstance = spawnInstance
 
 app.use(express.static('html/dist'))
-server.listen(8081)
+server.listen(port)
 
 // Add a connect listener
-socket.on('connection', function (client) {
+socket.on('connection', function(client) {
     const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger }
     //needs to be seperate from globals because attachments work per instance of connection
 

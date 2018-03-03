@@ -11,6 +11,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "commander": "^2.14.1",
+    "configstore": "^3.1.1",
     "express": "^4.16.2",
     "get-stdin": "^5.0.1",
     "homedir": "^0.6.0",
