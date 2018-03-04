@@ -164,6 +164,11 @@ const Response = {
             spawnInstance.writeCommand(command)
         }
     },
+    config: (client, { config }) => {
+        return (key, value) => {
+            config.conf.set(key, value)
+        }
+    },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {
         return () => {
             clearInterval(timeInterval)

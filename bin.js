@@ -166,8 +166,8 @@ program.command('start [port] [subdomain]').description('Starts the server for b
         subdomain = port
         port = defaultPort
     }
-    console.log(subdomain, Number(port))
-    //startServer(subdomain, port)
+    //console.log(subdomain, Number(port))
+    startServer(subdomain, port)
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.').action(() => {
     startServer()

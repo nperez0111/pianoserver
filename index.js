@@ -1,5 +1,5 @@
 const globals = require('./globals'),
-    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn } = globals,
+    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
         onExit: function(exitCode, signal) {
@@ -47,7 +47,7 @@ server.listen(port)
 
 // Add a connect listener
 socket.on('connection', function(client) {
-    const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, pianobarLog }
+    const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, pianobarLog, config }
     //needs to be seperate from globals because attachments work per instance of connection
 
     Object.keys(response).forEach(key => {

@@ -6,7 +6,7 @@ const commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songs
 
 function ipcResponse(globals) {
 
-    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, pianobarLog } = globals,
+    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, pianobarLog, config } = globals, { conf } = comfig,
     ipcResponse = {
         cli: function([command, stdin], socket) {
             //log('command:', command)
@@ -20,7 +20,7 @@ function ipcResponse(globals) {
                 current.push(status)
                 pastSongs.push(status)
                 const map = { songstart: 'nowPlaying', songlove: 'songLiked', userlogin: 'login' }
-                if (command in map) {
+                if (command in map && conf.get('showNotifications')) {
                     const { notify, notificationTypes } = new notifier(globals)
                     notify(notificationTypes[map[command]]).catch(err => {})
                 }
