@@ -20,27 +20,14 @@ const pm2 = require('pm2'),
     Connector = require('./lib/Connector'),
     program = require('commander'),
     serverName = 'Pianobar Server',
-    port = 8081,
+    defaultPort = 8081,
     settings = {
         openOnStart: true
     },
     ipcCommands = { play: 'Play song', pause: 'Pause song', likeSong: 'Like the current song', dislikeSong: 'Dislike the current song', nextSong: 'Play next song', shuffle: 'Shuffle all songs' }
 
 
-function startServer(subdomain) {
-    localtunnel(port, { subdomain: subdomain || 'pandora' }, function(err, tunnel) {
-        if (err) {
-            console.error(err)
-            process.exit(2)
-        }
-
-
-        console.log(`Your local tunnel URL: \n${tunnel.url}`)
-
-        if (settings.openOnStart) {
-            opn(tunnel.url)
-        }
-    })
+function startServer(subdomain, port) {
     pm2.connect(function(err) {
         if (err) {
             console.error(err)
@@ -50,6 +37,7 @@ function startServer(subdomain) {
         pm2.start({
             name: serverName,
             script: 'index.js', // Script to be run
+            args: [port, subdomain],
         }, function(err, apps) {
             pm2.disconnect(); // Disconnects from PM2
             if (err) throw err
@@ -92,45 +80,46 @@ function connectToConsole() {
     ipc.config.retry = 1500
     ipc.config.silent = true
 
-
+    console.log(`Welcome to Pianobar!`)
 
     ipc.connectTo(serverName, () => {
         ipc.of[serverName].on('connect', () => {
-            console.log(`Welcome to Pianobar`)
+            console.log(`Reconnected to Server`)
         })
         ipc.of[serverName].on('getLine', line => {
             console.log(line)
         })
-    })
-    // without this, we would only get streams once enter is pressed
-    if (stdin.setRawMode) {
-        stdin.setRawMode(true);
-    }
 
-    // resume stdin in the parent process (node app won't quit all by itself
-    // unless an error or process.exit() happens)
-    stdin.resume();
-
-    // i don't want binary, do you?
-    stdin.setEncoding('utf8');
-
-    // on any data into stdin
-    stdin.on('data', key => {
-        // ctrl-c ( end of text )
-        if (key === '\u0003') {
-            this.options.onExit()
-            if (this.options.onExitCloseChild) {
-                this.pianobar.kill()
-            }
-            process.exit();
+        // without this, we would only get streams once enter is pressed
+        if (stdin.setRawMode) {
+            stdin.setRawMode(true);
         }
 
-        //send single char and flush stdin
-        this.pianobar.stdin.write(key + "\n")
+        // resume stdin in the parent process (node app won't quit all by itself
+        // unless an error or process.exit() happens)
+        stdin.resume();
 
-        // write the key to stdout all normal like
-        process.stdout.write(key)
+        // i don't want binary, do you?
+        stdin.setEncoding('utf8');
+
+        // on any data into stdin
+        stdin.on('data', key => {
+            // ctrl-c ( end of text )
+            if (key === '\u0003') {
+                //ipc.of[serverName].emit('quitPianobar')
+                process.exit();
+            }
+
+            //send single char and flush stdin
+
+            ipc.of[serverName].emit('sendLine', key)
+
+            // write the key to stdout all normal like
+            process.stdout.write(key)
+        })
+
     })
+
 }
 
 function quitServer() {
@@ -172,8 +161,13 @@ program.command('quit').description('Stops the PM2 Process').action(() => {
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
     restartServer()
 })
-program.command('start [subdomain]').description('Starts the server for both pianobar console and the web app. Allows you to specify the subdomain you would like to use. Otherwise will try to use pandora or if unavailable will try to use a random one.').action((subdomain) => {
-    startServer(subdomain)
+program.command('start [port] [subdomain]').description('Starts the server for both pianobar console and the web app. Allows you to specify the subdomain you would like to use. Otherwise will try to use pandora or if unavailable will try to use a random one.').action((port, subdomain) => {
+    if (port !== Number(port).toString()) {
+        subdomain = port
+        port = defaultPort
+    }
+    console.log(subdomain, Number(port))
+    //startServer(subdomain, port)
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.').action(() => {
     startServer()

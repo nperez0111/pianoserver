@@ -20,6 +20,8 @@ const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
         path: require('path'),
         ipcResponse: require('./ipcResponse'),
         notifier: require('./lib/Notifier'),
-        shortcuts: require('./lib/Shortcuts')
+        shortcuts: require('./lib/Shortcuts'),
+        localtunnel: require('localtunnel'),
+        opn: require('opn')
     }
 module.exports = globals

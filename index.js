@@ -1,5 +1,5 @@
 const globals = require('./globals'),
-    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, port, url, fs, path, ipcResponse, shortcuts, pianobarLog } = globals,
+    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
         onExit: function(exitCode, signal) {
@@ -34,7 +34,9 @@ const globals = require('./globals'),
     express = require('express'),
     app = express(),
     server = http.Server(app),
-    socket = io.listen(server)
+    socket = io.listen(server),
+    subdomain = process.argv[3] || process.argv[2] || 'pandora',
+    port = process.argv[2] || globals.port
 
 
 globals.shortcuts = shortcuts({ spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, response })
@@ -69,3 +71,17 @@ ipc.serve(() => {
     })
 })
 ipc.server.start()
+
+localtunnel(port, { subdomain }, function(err, tunnel) {
+    if (err) {
+        console.error(err)
+        process.exit(2)
+    }
+
+
+    console.log(`Your local tunnel URL: \n${tunnel.url}`)
+
+    if (true) {
+        opn(tunnel.url)
+    }
+})

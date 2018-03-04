@@ -160,7 +160,7 @@ const Response = {
     },
     writeCommand: (client, { spawnInstance, logger }) => {
         return command => {
-            logger.info("Writing command to pianobar instance", command)
+            //logger.info("Writing command to pianobar instance", command)
             spawnInstance.writeCommand(command)
         }
     },

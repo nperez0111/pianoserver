@@ -51,6 +51,9 @@ function ipcResponse(globals) {
                 ipc.server.emit(socket, 'getAllLines', pianobarLog.getAll())
             })
         },
+        quitPianobar: function(socket) {
+            response.writeCommand({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)('q')
+        },
         sendLine: function(command, socket) {
             response.writeCommand({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
         },
