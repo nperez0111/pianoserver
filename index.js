@@ -5,6 +5,7 @@ const globals = require('./globals'),
         onExit: function(exitCode, signal) {
             if (signal === 'SIGINT')
                 process.kill(process.pid, 'SIGINT');
+            ipc.server.stop()
             globals.shortcuts.destroy()
             process.exit()
         },
@@ -77,9 +78,17 @@ localtunnel(port, { subdomain }, function(err, tunnel) {
         console.error(err)
         //process.exit(2)
     }
+    const message = `Your local tunnel URL: ${tunnel.url}`
 
 
-    console.log(`Your local tunnel URL: ${tunnel.url}`)
+    console.log(message)
+
+    pianobarLog.store.unshift(message)
+    pianobarLog.onpush((state, length) => {
+        if (length === pianobarLog.size) {
+            pianobarLog.store.unshift(message)
+        }
+    })
 
     if (config.config.get('openTunnelURL')) {
         opn(tunnel.url)

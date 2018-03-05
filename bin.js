@@ -95,6 +95,9 @@ function connectToConsole() {
             console.log(`Reconnected to Server`)
 
         })
+        ipc.of[serverName].on('killProcess', () => {
+            process.exit(0)
+        })
         ipc.of[serverName].on('getLine', line => {
             console.log(line)
         })
@@ -118,16 +121,17 @@ function connectToConsole() {
 
         // on any data into stdin
         stdin.on('data', key => {
-            // ctrl-c ( end of text )
+
             if (key === '\u0003') {
-                //ipc.of[serverName].emit('quitPianobar')
-                process.exit();
+                // ctrl-c ( end of text )
+                process.exit()
             }
 
             //send single char and flush stdin
-
             ipc.of[serverName].emit('sendLine', key)
-
+            if (key.trim() === 'q') {
+                process.exit()
+            }
             // write the key to stdout all normal like
             process.stdout.write(key)
         })
