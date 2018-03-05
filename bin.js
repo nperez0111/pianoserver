@@ -21,9 +21,6 @@ const pm2 = require('pm2'),
     program = require('commander'),
     serverName = 'Pianobar Server',
     defaultPort = 8081,
-    settings = {
-        openOnStart: true
-    },
     ipcCommands = { play: 'Play song', pause: 'Pause song', likeSong: 'Like the current song', dislikeSong: 'Dislike the current song', nextSong: 'Play next song', shuffle: 'Shuffle all songs' }
 
 

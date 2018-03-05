@@ -36,6 +36,13 @@ const CTRL = 29,
     conf = new Configstore(pkg.name, {
         showNotifications: true,
         openTunnelURL: true,
+        listenShortcuts: true,
+        shortcuts: {
+            playPause: [CTRL, SHIFT, LEFT],
+            nextSong: [CTRL, SHIFT, RIGHT],
+            likeSong: [CTRL, SHIFT, UP],
+            dislikeSong: [CTRL, SHIFT, DOWN]
+        },
         keys: {
             CTRL,
             SHIFT,
@@ -111,12 +118,6 @@ const CTRL = 29,
 
 module.exports = {
     config: conf,
-    shortcuts: {
-        playPause: [CTRL, SHIFT, LEFT],
-        nextSong: [CTRL, SHIFT, RIGHT],
-        likeSong: [CTRL, SHIFT, UP],
-        dislikeSong: [CTRL, SHIFT, DOWN]
-    },
     notifications: {
         login: {
             notification: {

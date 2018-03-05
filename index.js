@@ -40,15 +40,19 @@ const globals = require('./globals'),
     port = process.argv[2] || globals.port
 
 
-globals.shortcuts = shortcuts({ spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, response })
+globals.shortcuts = shortcuts({ spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, response, config })
 globals.spawnInstance = spawnInstance
+
+if (config.config.get('listenShortcuts')) {
+    globals.shortcuts.init()
+}
 
 app.use(express.static('html/dist'))
 server.listen(port)
 
 // Add a connect listener
 socket.on('connection', function(client) {
-    const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, pianobarLog, config }
+    const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, pianobarLog, config, shortcuts: globals.shortcuts }
     //needs to be seperate from globals because attachments work per instance of connection
 
     Object.keys(response).forEach(key => {

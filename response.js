@@ -169,7 +169,19 @@ const Response = {
             client.emit('getConfig', config.config.all)
         }
     },
-    config: (client, { config }) => {
+    setAllConfig: (client, { config, shortcuts }) => {
+        return (newConfig) => {
+            const before = config.config.get('listenShortcuts')
+            config.config.all = newConfig
+            if (before === true && newConfig.listenShortcuts === false && shortcuts.active) {
+                shortcuts.destroy()
+            }
+            if (before === false && newConfig.listenShortcuts === true && shortcuts.active === false) {
+                shortcuts.init()
+            }
+        }
+    },
+    setConfig: (client, { config }) => {
         return (key, value) => {
             config.config.set(key, value)
         }
