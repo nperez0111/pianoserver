@@ -139,7 +139,7 @@ export default {
       },
       saveEdit(shortcut) {
         const newShortcut = this.editing
-        this.config.shortcuts[shortcut] = newShortcut
+        this.config.shortcuts[shortcut] = newShortcut.map(key => this.config.keys[key])
         this.editing = false
       },
       toShortcutCodes(key) {
