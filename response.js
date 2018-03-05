@@ -164,9 +164,14 @@ const Response = {
             spawnInstance.writeCommand(command)
         }
     },
+    getConfig: (client, { config }) => {
+        return () => {
+            client.emit('getConfig', config.config.all)
+        }
+    },
     config: (client, { config }) => {
         return (key, value) => {
-            config.conf.set(key, value)
+            config.config.set(key, value)
         }
     },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {
