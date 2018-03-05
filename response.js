@@ -8,7 +8,7 @@ const Response = {
             })
 
             obj.isPlayingHandler = isPlaying.onpush((state) => {
-                console.log(state ? 'is playing' : 'is not playing')
+                console.log(state ? 'now playing\n' : 'paused\n')
                 client.emit('isPlaying', state)
             })
 
@@ -19,19 +19,19 @@ const Response = {
     },
     getCurrentTime: (client, { currentTime, log }) => {
         return (howMany) => {
-            log('got a request for current time')
+            //log('got a request for current time')
             client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
         }
     },
     getCurrentStatus: (client, { current, isPlaying, log }) => {
         return howMany => {
-            log('got a request for current status')
+            //log('got a request for current status')
             client.emit('getCurrentStatus', current.getNewest(parseInt(howMany)), isPlaying.getNewest())
         }
     },
     getPastSongs: (client, { pastSongs, log }) => {
         return (howMany) => {
-            log('got a request for past Songs')
+            //log('got a request for past Songs')
             if (howMany) {
                 client.emit('getPastSongs', pastSongs.getNewest(parseInt(howMany)))
             } else {
@@ -44,7 +44,7 @@ const Response = {
     },
     play: (client, { spawnInstance, isPlaying, current, currentTime, log }) => {
         return () => {
-            log('got a request to play')
+            //log('got a request to play')
 
             spawnInstance.writeCommand("play")
             currentTime.clear()
@@ -54,7 +54,7 @@ const Response = {
     },
     pause: (client, { spawnInstance, isPlaying, current, currentTime, log }) => {
         return (clientStatus, clientTime) => {
-            log('got a request to pause')
+            //log('got a request to pause')
             //client.emit('getCurrentTime', currentTime.getNewest(parseInt(howMany)))
             if (isPlaying.getNewest() === true) {
                 spawnInstance.writeCommand("pause")
@@ -68,7 +68,7 @@ const Response = {
     },
     likeSong: (client, { spawnInstance, current, isPlaying, log }) => {
         return (clientStatus) => {
-            log('got a request to like')
+            //log('got a request to like')
             const curStatus = current.getNewest()
             //make sure to like the right song
             if (clientStatus && clientStatus.title === curStatus.title) {
@@ -82,7 +82,7 @@ const Response = {
     },
     dislikeSong: (client, { spawnInstance, current, isPlaying, log }) => {
         return (clientStatus, clientTime) => {
-            log('got a request to dislike')
+            //log('got a request to dislike')
             const curStatus = current.getNewest()
             //make sure to like the right song
             if (clientStatus && clientStatus.title === curStatus.title) {
@@ -96,7 +96,7 @@ const Response = {
     },
     nextSong: (client, { spawnInstance, current, isPlaying, log }) => {
         return (clientStatus, clientTime) => {
-            log('got a request to skip', clientStatus && clientStatus.title, "current song is", current.getNewest().title)
+            //log('got a request to skip', clientStatus && clientStatus.title, "current song is", current.getNewest().title)
             //make sure to skip the correct song
             if (clientStatus && clientStatus.title === current.getNewest().title) {
                 spawnInstance.writeCommand("nextSong")
@@ -110,7 +110,7 @@ const Response = {
     },
     selectStation: (client, { spawnInstance, isPlaying, logger }) => {
         return (stationID) => {
-            logger.info('got a request to change station to ' + stationID)
+            //logger.info('got a request to change station to ' + stationID)
 
             spawnInstance.writeCommand("selectStation")
             spawnInstance.writeCommand(stationID)
@@ -119,14 +119,14 @@ const Response = {
     },
     shuffle: (client, { isPlaying, spawnInstance, log }) => {
         return () => {
-            log('got a request to change station to shuffle')
+            //log('got a request to change station to shuffle')
             spawnInstance.writeCommand("shuffle")
             isPlaying.push(true)
         }
     },
     deleteStation: (client, { spawnInstance, isPlaying, logger }) => {
         return (stationID) => {
-            logger.info('got a request to delete station: ' + stationID)
+            //logger.info('got a request to delete station: ' + stationID)
 
             spawnInstance.writeCommand("deleteStation")
             spawnInstance.writeCommand(stationID)
@@ -134,7 +134,7 @@ const Response = {
     },
     createGenreStation: (client, { spawnInstance, isPlaying, logger }) => {
         return (genre) => {
-            logger.info('got a request to add genre station ' + genre)
+            //logger.info('got a request to add genre station ' + genre)
 
             spawnInstance.writeCommand("createGenreStation")
             spawnInstance.writeCommand(genre)
@@ -143,7 +143,7 @@ const Response = {
     },
     createStation: (client, { spawnInstance, isPlaying, logger }) => {
         return (stationName) => {
-            logger.info('got a request to add station ' + stationName)
+            //logger.info('got a request to add station ' + stationName)
 
             spawnInstance.writeCommand("createStation")
             spawnInstance.writeCommand(stationName)
@@ -152,7 +152,7 @@ const Response = {
     },
     addMusicToStation: (client, { spawnInstance, logger }) => {
         return (artistOrSongName) => {
-            logger.info('got a request to add station ' + artistOrSongName)
+            //logger.info('got a request to add station ' + artistOrSongName)
 
             spawnInstance.writeCommand("addToStation")
             spawnInstance.writeCommand(artistOrSongName)

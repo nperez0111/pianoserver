@@ -13,7 +13,10 @@ const CTRL = 29,
     imageLoc = homedir + '/.config/pianobar/notificationImage.jpg',
     Configstore = require('configstore'),
     pkg = require('./package.json'),
-    conf = new Configstore(pkg.name, { showNotifications: true })
+    conf = new Configstore(pkg.name, {
+        showNotifications: true,
+        openTunnelURL: true
+    })
 
 module.exports = {
     config: conf,

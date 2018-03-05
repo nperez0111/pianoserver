@@ -76,18 +76,32 @@ function connectToConsole() {
         serverName = 'pianobar-server',
         stdin = process.stdin
 
-    ipc.config.id = 'pianobar-stdin'
+    ipc.config.id = 'pianobar-console'
     ipc.config.retry = 1500
     ipc.config.silent = true
+    let hasRun = false
 
-    console.log(`Welcome to Pianobar!`)
+    //console.log(`Welcome to Pianobar!\n`)
 
     ipc.connectTo(serverName, () => {
         ipc.of[serverName].on('connect', () => {
+
+            if (hasRun === false) {
+                ipc.of[serverName].emit('getPastLines', 200)
+                hasRun = true
+                return
+            }
+
             console.log(`Reconnected to Server`)
+
         })
         ipc.of[serverName].on('getLine', line => {
             console.log(line)
+        })
+        ipc.of[serverName].on('getPastLines', lines => {
+            lines.forEach(line => {
+                console.log(line)
+            })
         })
 
         // without this, we would only get streams once enter is pressed

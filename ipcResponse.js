@@ -6,109 +6,114 @@ const commands = ['userlogin', 'usergetstations', 'stationfetchplaylist', 'songs
 
 function ipcResponse(globals) {
 
-    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, pianobarLog, config } = globals, { conf } = comfig,
-    ipcResponse = {
-        cli: function([command, stdin], socket) {
-            //log('command:', command)
-            if (commands.includes(command)) {
-                //console.log(command)
+    const { ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, pianobarLog } = globals, { config } = globals.config,
+        ipcResponse = {
+            cli: function([command, stdin], socket) {
+                //log('command:', command)
+                if (commands.includes(command)) {
+                    //console.log(command)
 
-                const status = splitter(stdin)
-                if (command == 'stationfetchplaylist' || command == 'usergetstations') {
-                    //console.log(status)
-                }
-                current.push(status)
-                pastSongs.push(status)
-                const map = { songstart: 'nowPlaying', songlove: 'songLiked', userlogin: 'login' }
-                if (command in map && conf.get('showNotifications')) {
-                    const { notify, notificationTypes } = new notifier(globals)
-                    notify(notificationTypes[map[command]]).catch(err => {})
-                }
-                //log(status)
-            } else {
-                console.log(command, "called with nothing to handle it")
-                //commands.defaultCommand(stdin)
-            }
-        },
-        getCurrentTime: function(command, socket) {
-            log('got a request for current time')
-
-            ipc.server.emit(socket, 'getCurrentTime', currentTime.getNewest())
-        },
-        getStatus: function(command, socket) {
-            log('got a request for current status')
-
-            ipc.server.emit(socket, 'getStatus', current.getNewest(command))
-        },
-        getAllStatus: function(command, socket) {
-            log('got a request for current status')
-
-            ipc.server.emit(socket, 'getAllStatus', current.getAll())
-        },
-        connect: function(socket) {
-            pianobarLog.onpush(line => {
-                ipc.server.emit(socket, 'getLine', line)
-                ipc.server.emit(socket, 'getAllLines', pianobarLog.getAll())
-            })
-        },
-        quitPianobar: function(socket) {
-            response.writeCommand({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)('q')
-        },
-        sendLine: function(command, socket) {
-            response.writeCommand({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
-        },
-        play: function(socket) {
-            response.play({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
-        },
-        pause: function(socket) {
-            response.pause({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
-        },
-        nextSong: function(socket) {
-            response.nextSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
-        },
-        likeSong: function(socket) {
-            response.likeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
-        },
-        dislikeSong: function(socket) {
-            response.dislikeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
-        },
-        selectStation: function(command, socket) {
-            response.selectStation({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
-        },
-        shuffle: function(command, socket) {
-            response.shuffle({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
-        },
-        getPastSongs: function(command, socket) {
-            response.getPastSongs({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
-        },
-        getIsPlaying: function(command, socket) {
-            response.getisPlaying({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
-        },
-        get: function(commandsToGet, socket) {
-            Promise.all(commandsToGet.map(({ name, args }) => {
-                //console.log(commandsToGet)
-                return new Promise((resolve, reject) => {
-                    const time = setTimeout(() => { resolve('timed out') }, 200)
-                    if (!response[name]) {
-                        resolve(name + 'is not a function on response')
-                        return
+                    const status = splitter(stdin)
+                    if (command == 'stationfetchplaylist' || command == 'usergetstations') {
+                        //console.log(status)
                     }
-                    const func = response[name]({
-                        emit: function() {
-                            clearTimeout(time)
-                            resolve(Array.from(arguments))
-                        }
-                    }, globals)
+                    current.push(status)
+                    pastSongs.push(status)
+                    const map = { songstart: 'nowPlaying', songlove: 'songLiked', userlogin: 'login' }
+                    if (command in map && config.get('showNotifications')) {
+                        const { notify, notificationTypes } = new notifier(globals)
+                        notify(notificationTypes[map[command]]).catch(err => {})
+                    }
+                    //log(status)
+                } else {
+                    console.log(command, "called with nothing to handle it")
+                    //commands.defaultCommand(stdin)
+                }
+            },
+            getCurrentTime: function(command, socket) {
+                //log('got a request for current time')
 
-                    func.apply(null, args)
+                ipc.server.emit(socket, 'getCurrentTime', currentTime.getNewest())
+            },
+            getStatus: function(command, socket) {
+                //log('got a request for current status')
+
+                ipc.server.emit(socket, 'getStatus', current.getNewest(command))
+            },
+            getAllStatus: function(command, socket) {
+                //log('got a request for current status')
+
+                ipc.server.emit(socket, 'getAllStatus', current.getAll())
+            },
+            connect: function(socket) {
+                pianobarLog.onpush(line => {
+                    ipc.server.emit(socket, 'getLine', line)
+                    ipc.server.emit(socket, 'getAllLines', pianobarLog.getAll())
                 })
+            },
+            quitPianobar: function(socket) {
+                response.writeCommand({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)('q')
+            },
+            sendLine: function(command, socket) {
+                response.writeCommand({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
+            },
+            getPastLines: function(amountOfLines = 1, socket) {
+                const lines = pianobarLog.getNewest(amountOfLines)
+                lines.reverse()
+                ipc.server.emit(socket, 'getPastLines', lines)
+            },
+            play: function(socket) {
+                response.play({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+            },
+            pause: function(socket) {
+                response.pause({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+            },
+            nextSong: function(socket) {
+                response.nextSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
+            },
+            likeSong: function(socket) {
+                response.likeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
+            },
+            dislikeSong: function(socket) {
+                response.dislikeSong({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(current.getNewest())
+            },
+            selectStation: function(command, socket) {
+                response.selectStation({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
+            },
+            shuffle: function(command, socket) {
+                response.shuffle({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+            },
+            getPastSongs: function(command, socket) {
+                response.getPastSongs({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)(command)
+            },
+            getIsPlaying: function(command, socket) {
+                response.getisPlaying({ emit: ipc.server.emit.bind(ipc.server, socket) }, globals)()
+            },
+            get: function(commandsToGet, socket) {
+                Promise.all(commandsToGet.map(({ name, args }) => {
+                    //console.log(commandsToGet)
+                    return new Promise((resolve, reject) => {
+                        const time = setTimeout(() => { resolve('timed out') }, 200)
+                        if (!response[name]) {
+                            resolve(name + 'is not a function on response')
+                            return
+                        }
+                        const func = response[name]({
+                            emit: function() {
+                                clearTimeout(time)
+                                resolve(Array.from(arguments))
+                            }
+                        }, globals)
 
-            })).then(responses => {
-                //console.log(JSON.stringify(responses))
-                ipc.server.emit(socket, 'get', responses)
-            })
+                        func.apply(null, args)
+                    })
+
+                })).then(responses => {
+                    //console.log(JSON.stringify(responses))
+                    ipc.server.emit(socket, 'get', responses)
+                })
+            }
         }
-    }
     return ipcResponse
 }
 

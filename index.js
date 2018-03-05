@@ -56,7 +56,7 @@ socket.on('connection', function(client) {
     response.init(client, obj)()
 });
 
-currentTime.push({ now: null, ofTotal: null })
+currentTime.push({ now: '00:01', ofTotal: '99:99' })
 isPlaying.push(true)
 
 ipc.config.id = 'pianobar-server';
@@ -75,13 +75,13 @@ ipc.server.start()
 localtunnel(port, { subdomain }, function(err, tunnel) {
     if (err) {
         console.error(err)
-        process.exit(2)
+        //process.exit(2)
     }
 
 
-    console.log(`Your local tunnel URL: \n${tunnel.url}`)
+    console.log(`Your local tunnel URL: ${tunnel.url}`)
 
-    if (true) {
+    if (config.config.get('openTunnelURL')) {
         opn(tunnel.url)
     }
 })
