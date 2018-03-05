@@ -150,6 +150,11 @@ export default {
         })
       }
     },
+    watch: {
+      active() {
+        this.editing = false
+      }
+    },
     computed: {
       shortcutNames() {
         return Object.keys(this.config.shortcuts)
