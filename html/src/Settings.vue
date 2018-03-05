@@ -55,7 +55,44 @@
             <v-list-tile-sub-title>Use Shortcuts to control pianobar</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-subheader v-show="config.listenShortcuts">Shortcut Settings</v-subheader>
       </v-list>
+      <v-tabs v-model="active" color="primary" dark slider-color="white" v-show="config.listenShortcuts">
+        <v-tab v-for="shortcut in shortcutNames" :key="shortcut" ripple>
+          {{ shortcut | splitWord }}
+        </v-tab>
+        <v-tab-item v-for="shortcut in shortcutNames" :key="shortcut">
+          <v-card flat>
+            <v-card-title v-if="!editing">Current Shortcut:
+              <code v-for="code in toShortcutCodes(shortcut)" v-text="code" class="mx-1" v-if="config.shortcuts[shortcut]"></code>
+              <span v-else>None Specified</span>
+            </v-card-title>
+            <v-card-title v-else>
+              Current Shortcut:
+              <v-chip v-for="(code,i) in editing" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
+              <span v-if="editing.length==0">&nbsp;Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}}</span>
+            </v-card-title>
+            <v-card-text>
+              <v-btn @click="editing=[]" v-if="!editing">
+                <v-icon left>edit</v-icon>
+                Edit Shortcut
+              </v-btn>
+              <div v-else>
+                <code v-for="code in keyNames" class="mx-1" @click="editing.push(code)" v-text="code" :key="code" v-show="!editing.includes(code)"></code>
+                <v-layout justify-space-between>
+                  <v-btn @click="saveEdit(shortcut)" flat color="green">
+                    <v-icon left>save</v-icon>
+                    Save
+                  </v-btn>
+                  <v-btn @click="editing=false" flat color="red">
+                    Cancel
+                  </v-btn>
+                </v-layout>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs>
       <v-list two-line subheader>
         <v-subheader>UI Settings</v-subheader>
         <v-list-tile avatar>
@@ -81,20 +118,60 @@ export default {
       })
       this.$socket.emit('getConfig')
       return {
+        active: '0',
         config: {
           openTunnelURL: true,
           showNotifications: true,
-          listenShortcuts: true
+          listenShortcuts: true,
+          shortcuts: {},
+          keys: {}
         },
         ui: {
           darkMode: true
-        }
+        },
+        editing: false
       }
     },
     methods: {
       saveSettings() {
         const config = this.config
         this.$socket.emit('setAllConfig', config)
+      },
+      saveEdit(shortcut) {
+        const newShortcut = this.editing
+        this.config.shortcuts[shortcut] = newShortcut
+        this.editing = false
+      },
+      toShortcutCodes(key) {
+        const map = this.config.keys,
+          codeToName = this.codeToName
+        return this.config.shortcuts[key].map(num => {
+          return codeToName[num]
+        })
+      }
+    },
+    computed: {
+      shortcutNames() {
+        return Object.keys(this.config.shortcuts)
+      },
+      codeToName() {
+        const keysObj = this.config.keys
+        console.log(keysObj)
+        return Object.keys(keysObj).reduce((obj, key) => {
+          obj[keysObj[key]] = key
+          return obj
+        }, {})
+      },
+      keyNames() {
+        return Object.keys(this.config.keys)
+      }
+    },
+    filters: {
+      splitWord(word) {
+        return word.split(/(?=[A-Z])/).join(" ")
+      },
+      capitalize(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1)
       }
     }
 }
