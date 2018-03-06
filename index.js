@@ -76,25 +76,29 @@ ipc.serve(() => {
     })
 })
 ipc.server.start()
+try {
+    localtunnel(port, { subdomain }, function(err, tunnel) {
+        if (err) {
+            console.error(err)
+            process.exit(2)
+        }
+        const message = `Your local tunnel URL: ${tunnel.url}`
 
-localtunnel(port, { subdomain }, function(err, tunnel) {
-    if (err) {
-        console.error(err)
-        //process.exit(2)
-    }
-    const message = `Your local tunnel URL: ${tunnel.url}`
 
+        console.log(message)
 
-    console.log(message)
+        pianobarLog.store.unshift(message)
+        pianobarLog.onpush((state, length) => {
+            if (length === pianobarLog.size) {
+                pianobarLog.store.unshift(message)
+            }
+        })
 
-    pianobarLog.store.unshift(message)
-    pianobarLog.onpush((state, length) => {
-        if (length === pianobarLog.size) {
-            pianobarLog.store.unshift(message)
+        if (config.config.get('openTunnelURL')) {
+            opn(tunnel.url)
         }
     })
-
-    if (config.config.get('openTunnelURL')) {
-        opn(tunnel.url)
-    }
-})
+} catch (err) {
+    console.log(err)
+    console.log('localtunnel failed')
+}
