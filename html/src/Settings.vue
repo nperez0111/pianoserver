@@ -112,15 +112,14 @@
 export default {
   data() {
       this.$emit('hideToolbar')
-      this.$socket.on('getConfig', config => {
+      this.$config.onchangeConfig(config => {
         console.log(config)
         this.config = config
       })
-      this.$socket.emit('getConfig')
       window.setting = this
       return {
         active: '0',
-        config: {
+        config: this.$config.config || {
           openTunnelURL: true,
           showNotifications: true,
           listenShortcuts: true,
