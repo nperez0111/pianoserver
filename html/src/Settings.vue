@@ -64,12 +64,12 @@
         <v-tab-item v-for="shortcut in shortcutNames" :key="shortcut">
           <v-card flat>
             <v-card-title v-if="!editing">Current Shortcut:
-              <code v-for="code in toShortcutCodes(shortcut)" v-text="code" class="mx-1" v-if="config.shortcuts[shortcut]"></code>
-              <span v-else>None Specified</span>
+              <code v-for="code in toShortcutCodes(shortcut)" v-text="code" class="mx-1" v-show="config.shortcuts[shortcut]&&config.shortcuts[shortcut].length!==0"></code>
+              <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
             </v-card-title>
             <v-card-title v-else>
               Current Shortcut:
-              <v-chip v-for="(code,i) in editing" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
+              <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
               <span v-if="editing.length==0">&nbsp;Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}}</span>
             </v-card-title>
             <v-card-text>
@@ -78,7 +78,7 @@
                 Edit Shortcut
               </v-btn>
               <div v-else>
-                <code v-for="code in keyNames" class="mx-1" @click="editing.push(code)" v-text="code" :key="code" v-show="!editing.includes(code)"></code>
+                <code v-for="code in keyNames" class="mx-1" @click="editing.push(code)" :key="code" v-show="!editing.includes(code)">{{code | splitByUnderscore}}</code>
                 <v-layout justify-space-between>
                   <v-btn @click="saveEdit(shortcut)" flat color="green">
                     <v-icon left>save</v-icon>
@@ -94,13 +94,13 @@
         </v-tab-item>
       </v-tabs>
       <v-list two-line subheader>
-        <v-subheader>UI Settings</v-subheader>
+        <v-subheader>UI Settings (In Progress)</v-subheader>
         <v-list-tile avatar>
           <v-list-tile-action>
             <v-checkbox v-model="ui.darkMode"></v-checkbox>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>Dark Mode</v-list-tile-title>
+            <v-list-tile-title>Dark Mode (Not working)</v-list-tile-title>
             <v-list-tile-sub-title>Change UI colors</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
@@ -117,6 +117,7 @@ export default {
         this.config = config
       })
       this.$socket.emit('getConfig')
+      window.setting = this
       return {
         active: '0',
         config: {
@@ -174,6 +175,9 @@ export default {
     filters: {
       splitWord(word) {
         return word.split(/(?=[A-Z])/).join(" ")
+      },
+      splitByUnderscore(word) {
+        return word.split("_").join(" ")
       },
       capitalize(string) {
         return string.charAt(0).toUpperCase() + string.slice(1)
