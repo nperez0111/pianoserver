@@ -6,6 +6,7 @@ const dev = true,
   CURRENT = 'station',
   Station = {
     current: null,
+    socket: null,
     allStations: [],
     pubSub: new EventAggregator(),
     install(Vue, options) {
@@ -16,6 +17,17 @@ const dev = true,
         this.current = ls.get('lastStation')
       }
     },
+    init(socket) {
+      this.socket = socket
+    },
+    addVariety(stationNumber, str) {
+      this.socket.emit('addVariety', stationNumber, str)
+    },
+    renameStation(stationNumber, newName) {
+      this.socket.emit('renameStation', stationNumber, newName)
+      this.allStations[stationNumber] = newName
+      this.setStations(this.allStations)
+    },
     getStation() {
       return this.current
     },
@@ -24,12 +36,13 @@ const dev = true,
       this.save(newStation)
       this.pubSub.publish(CURRENT, newStation)
     },
-    getStations: function (filter = a => a) {
+    getStations: function(filter = a => a) {
       return this.allStations.filter(filter)
     },
-    setStations: function (stations) {
+    setStations: function(stations) {
       this.allStations = stations
       this.pubSub.publish(STATIONS, stations)
+      ls.set('stations', stations)
     },
     on(event, callback) {
       return this.pubSub.subscribe(event, callback)
@@ -41,10 +54,7 @@ const dev = true,
       return this.on(STATIONS, callback)
     },
     save(station) {
-      return
-      /*ls.set('lastStation', this.current)
-      ls.set('stations')*/
-
+      ls.set('lastStation', station)
     },
     clear() {
       ls.clear()

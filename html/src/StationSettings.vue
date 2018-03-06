@@ -1,38 +1,53 @@
 <template>
-	<div>
-		<v-toolbar color="primary">
-	      <v-btn to='/' flat>
-	      	<v-icon left>arrow_backward</v-icon> Now Playing
-	      </v-btn>
-	      <v-toolbar-title class="white--text">{{stationName}} Station Settings</v-toolbar-title>
-	      <v-spacer></v-spacer>
-	    </v-toolbar>
-		<v-card>
-			<v-card-text>
-				<ul>
-					<li>rename station</li>	
-					<li>add variety</li>
-
-				</ul>
-			</v-card-text>
-		</v-card>
-	</div>
+  <div>
+    <v-toolbar color="primary">
+      <v-btn to='/' flat>
+        <v-icon left>arrow_backward</v-icon> Now Playing
+      </v-btn>
+      <v-toolbar-title class="white--text">{{stationName}} Station Settings</v-toolbar-title>
+      <v-spacer></v-spacer>
+    </v-toolbar>
+    <v-card class="my-1">
+      <v-card-title class="title">Rename Station</v-card-title>
+      <v-card-text>
+        <v-layout>
+          <v-text-field v-model="stationName" label="Change Station Name To:" class="mr-2"></v-text-field>
+          <v-btn color="primary" @click="$station.renameStation(id,stationName)">
+            <v-icon left>save</v-icon>Save
+          </v-btn>
+        </v-layout>
+      </v-card-text>
+    </v-card>
+    <v-card class="my-1">
+      <v-card-title class="title">Add Variety To This Station</v-card-title>
+      <v-card-text>
+        <v-layout>
+          <v-text-field v-model="variety" label="Add To This Station, Music By:" class="mr-2"></v-text-field>
+          <v-btn color="primary" @click="$station.addVariety(id,variety),variety=''">
+            <v-icon left>save</v-icon>Save
+          </v-btn>
+        </v-layout>
+      </v-card-text>
+    </v-card>
+  </div>
 </template>
 <script>
-	export default {
-		data(){
-			this.$station.onchangeStations(stations=>{
-				this.stationName=stations.find((s,i)=>i===Number(this.id))
-			})
-			this.$emit('hideToolbar')
-			return {
-				stationName:this.$station.getStations((s,i)=>i===Number(this.id))[0]||''
-			}
-		},
-		props:{
-			id:String
-		},
-		computed:{
-		}
-	}
+export default {
+  data() {
+      const stationNum = Number(this.id)
+
+      this.$station.onchangeStations(stations => {
+        this.stationName = stations[stationNum]
+      })
+      this.$emit('hideToolbar')
+      return {
+        variety: "",
+        stationName: this.$station.getStations()[stationNum] || ''
+      }
+    },
+    props: {
+      id: String
+    },
+    computed: {}
+}
 </script>

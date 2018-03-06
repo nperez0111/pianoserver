@@ -23,15 +23,15 @@ const dev = true,
     install(Vue, options) {
 
       Vue.prototype.$player = this
+      this.station = Vue.prototype.$station
       /*
       if (!dev && ls.get('lastStation')) {
         this.allStations = ls.get('stations')
         this.current = ls.get('lastStation')
       }*/
     },
-    init(socket, station) {
+    init(socket) {
       this.socket = socket
-      this.station = station
 
       this.socket.on("status", this.onStatus.bind(this))
       this.socket.on("currentTime", this.onCurrentTime.bind(this))

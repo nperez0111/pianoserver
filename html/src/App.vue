@@ -185,10 +185,12 @@ export default {
     },
     tryReconnect(url) {
       this.loading = true
-      const socket = this.$socket.init(typeof url === 'string' ? url : this.url)
+      const socket = this.$socket.init(typeof url === 'string' ? url : this.url),
+        socketUsers = [this.$player, this.$config, this.$station]
       window.socket = socket
-      this.$player.init(socket, this.$station)
-      this.$config.init(socket)
+      socketUsers.forEach(socketUser => {
+        socketUser.init(socket)
+      })
       setTimeout(() => {
         if (socket.connected === true) {
           this.prompt = false
