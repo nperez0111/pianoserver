@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-toolbar color="primary">
-      <v-btn to='/' flat>
-        <v-icon>arrow_backward</v-icon>
+      <v-btn flat icon to="/">
+        <v-icon>arrow_back</v-icon>
       </v-btn>
       <v-toolbar-title class="white--text">Settings</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -57,7 +57,7 @@
         </v-list-tile>
         <v-subheader v-show="config.listenShortcuts">Shortcut Settings</v-subheader>
       </v-list>
-      <v-tabs v-model="active" color="primary" dark slider-color="white" v-show="config.listenShortcuts">
+      <v-tabs v-model="active" color="primary" dark slider-color="white" v-show="config.listenShortcuts" grow show-arrows>
         <v-tab v-for="shortcut in shortcutNames" :key="shortcut" ripple>
           {{ shortcut | splitWord }}
         </v-tab>

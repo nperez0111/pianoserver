@@ -2,7 +2,7 @@
   <div>
     <v-toolbar color="primary">
       <v-btn to='/' flat>
-        <v-icon left>arrow_backward</v-icon> Now Playing
+        <v-icon left>arrow_back</v-icon> Now Playing
       </v-btn>
       <v-toolbar-title class="white--text">{{stationName}} Station Settings</v-toolbar-title>
       <v-spacer></v-spacer>
