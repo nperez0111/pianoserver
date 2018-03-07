@@ -6,9 +6,9 @@
           <v-list-tile-action>
             <v-icon color="grey lighten-2">settings</v-icon>
           </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--lighten-2">Manage Settings</v-list-tile-title>
+          <v-list-tile-title class="grey--text text--lighten-2">Settings</v-list-tile-title>
         </v-list-tile>
-        <v-subheader class="grey--text"><span class="mx-auto">STATIONS ({{stations.length}})</span></v-subheader>
+        <v-subheader class="grey--text">STATIONS ({{stations.length}})</v-subheader>
         <v-list-tile class="my-1" @click="shuffle">
           <v-list-tile-action>
             <v-icon large>shuffle</v-icon>
@@ -148,6 +148,7 @@ export default {
       this.$socket.emit('shuffle')
     },
     stationSettings(index) {
+      this.drawer = false
       this.$router.push(`/station-settings/${index}`)
         /*
         +    love song

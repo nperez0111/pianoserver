@@ -8,11 +8,11 @@ const Response = {
             })
 
             obj.isPlayingHandler = isPlaying.onpush((state) => {
-                console.log(state ? 'now playing\n' : 'paused\n')
+                console.log(state ? 'Playing' : 'Paused')
                 client.emit('isPlaying', state)
             })
 
-            obj.timeInterval = setInterval(function() {
+            obj.timeInterval = setInterval(function () {
                 client.volatile.emit('currentTime', currentTime.getNewest(), isPlaying.getNewest());
             }, 1000)
         }
@@ -75,9 +75,10 @@ const Response = {
                 spawnInstance.writeCommand("likeSong")
                 curStatus.rating = "1"
                 current.push(curStatus)
+            } else {
+                //client is out of sync send them an update
+                client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
             }
-            //client is out of sync send them an update
-            //client.emit('getCurrentStatus', [curStatus, isPlaying.getNewest()])
         }
     },
     dislikeSong: (client, { spawnInstance, current, isPlaying, log }) => {
@@ -89,9 +90,10 @@ const Response = {
                 spawnInstance.writeCommand("dislikeSong")
                 curStatus.rating = "-1"
                 current.push(curStatus)
+            } else {
+                //client is out of sync send them an update
+                client.emit('getCurrentStatus', [current.getNewest(), isPlaying.getNewest()])
             }
-            //client is out of sync send them an update
-            //client.emit('getCurrentStatus', [curStatus, isPlaying.getNewest()])
         }
     },
     nextSong: (client, { spawnInstance, current, isPlaying, log }) => {

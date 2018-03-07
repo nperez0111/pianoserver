@@ -66,23 +66,62 @@
             <v-card-title v-if="!editing">Current Shortcut:
               <code v-for="code in toShortcutCodes(shortcut)" v-text="code" class="mx-1" v-show="config.shortcuts[shortcut]&&config.shortcuts[shortcut].length!==0"></code>
               <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
+              <v-btn @click="editing=[]" fab small color="primary">
+                <v-icon>edit</v-icon>
+              </v-btn>
             </v-card-title>
             <v-card-title v-else>
-              Current Shortcut:
+              <span v-if="editing.length>0">Current Shortcut:</span>
               <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
-              <span v-if="editing.length==0">&nbsp;Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}}</span>
+              <span v-if="editing.length==0">&nbsp;Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
             </v-card-title>
             <v-card-text>
-              <v-btn @click="editing=[]" v-if="!editing">
-                <v-icon left>edit</v-icon>
-                Edit Shortcut
-              </v-btn>
-              <div v-else>
-                <code v-for="code in keyNames" class="mx-1" @click="editing.push(code)" :key="code" v-show="!editing.includes(code)">{{code | splitByUnderscore}}</code>
+              <div v-if="editing">
+                <v-layout justify-center>
+                  <v-flex v-for="code in ['BACK_TICK','0','1','2','3','4','5','6','7','8','9','0','MINUS']" :key="code">
+                    <v-card light class="mx-1">
+                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
+                    </v-card>
+                  </v-flex>
+                </v-layout>
+                <v-layout justify-center>
+                  <v-flex v-for="code in ['TAB','Q','W','E','R','T','Y','U','I','O','P','LEFT_BRACKET','RIGHT_BRACKET']" :key="code">
+                    <v-card light class="mx-1">
+                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
+                    </v-card>
+                  </v-flex>
+                </v-layout>
+                <v-layout justify-center>
+                  <v-flex v-for="code in ['A','S','D','F','G','H','J','K','L','COLON','SINGLE_QUOTE','PIPE']" :key="code">
+                    <v-card light class="mx-1">
+                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
+                    </v-card>
+                  </v-flex>
+                </v-layout>
+                <v-layout justify-center>
+                  <v-flex v-for="code in ['BACK_TICK','0','1','2','3','4','5','6','7','8','9','0','MINUS']" :key="code">
+                    <v-card light class="mx-1">
+                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
+                    </v-card>
+                  </v-flex>
+                </v-layout>
+                <v-layout justify-center>
+                  <v-flex v-for="code in ['SHIFT','Z','X','C','V','B','N','M','COMMA','PERIOD','QUESTION_MARK','RIGHT_SHIFT']" :key="code">
+                    <v-card light class="mx-1">
+                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
+                    </v-card>
+                  </v-flex>
+                </v-layout>
+                <v-layout justify-space-between wrap>
+
+                  <v-flex v-for="code in keyNames" :key="code" sm1 v-show="!editing.includes(code)">
+                    <code class="mx-1" @click="editing.push(code)">{{code | splitByUnderscore}}</code>
+                  </v-flex>
+                </v-layout>
                 <v-layout justify-space-between>
                   <v-btn @click="saveEdit(shortcut)" flat color="green">
                     <v-icon left>save</v-icon>
-                    Save
+                    Save Shortcut
                   </v-btn>
                   <v-btn @click="editing=false" flat color="red">
                     Cancel

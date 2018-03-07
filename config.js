@@ -48,7 +48,7 @@ const CTRL = 29,
         },
         keys: {
             CTRL,
-            SHIFT,
+            LEFT_SHIFT: SHIFT,
             ALT,
             ESC,
             MINUS,
@@ -93,7 +93,6 @@ const CTRL = 29,
             P,
             LEFT_BRACKET: P + 1,
             RIGHT_BRACKET: P + 2,
-            BACK_SLASH: 43,
             A,
             S: A + 1,
             D: A + 2,
@@ -105,6 +104,7 @@ const CTRL = 29,
             L,
             COLON: L + 1,
             SINGLE_QUOTE: L + 2,
+            BACK_SLASH: 43,
             Z,
             X: Z + 1,
             C: Z + 2,
@@ -114,7 +114,15 @@ const CTRL = 29,
             M,
             COMMA: M + 1,
             PERIOD: M + 2,
-            FORWARD_SLASH: M + 3
+            FORWARD_SLASH: M + 3,
+            SPACE: 28,
+            RIGHT_SHIFT: 54,
+            BACK_SPACE: 14,
+            RIGHT_CTRL: 3613,
+            LEFT_COMMAND: 3675,
+            RIGHT_COMMAND: 3676,
+            RIGHT_OPTION: OPTION,
+            LEFT_OPTION: 56,
 
         }
     })
@@ -183,12 +191,12 @@ module.exports = {
                     message: 'What station would you like to play?',
                     reply: true,
                     timeout: 30,
-                    replied: function(a) {
+                    replied: function (a) {
                         const getVal = obj => obj.activationValue
                         const val = getVal(a)
                         console.log(val)
                     },
-                    activate: function(action) {
+                    activate: function (action) {
                         if (action.activationType == 'actionClicked') {
                             const val = action.activationValue
                             console.log(val)
