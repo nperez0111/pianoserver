@@ -25,7 +25,7 @@
         </ul>
       </v-card-text>
     </v-card>-->
-    <v-container>
+    <v-container class="pa-0">
       <v-list two-line subheader>
         <v-subheader>Pianobar Settings</v-subheader>
         <v-list-tile avatar>
@@ -75,49 +75,21 @@
               <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
               <span v-if="editing.length==0">&nbsp;Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
             </v-card-title>
-            <v-card-text>
+            <v-card-text :class="{'px-0':$vuetify.breakpoint.mdAndDown}">
               <div v-if="editing">
-                <v-layout justify-center>
-                  <v-flex v-for="code in ['BACK_TICK','0','1','2','3','4','5','6','7','8','9','0','MINUS']" :key="code">
-                    <v-card light class="mx-1">
-                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
+                <v-layout justify-center v-for="row in keyboard" :key="row.toString()">
+                  <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}">
+                    <v-card light :class="{'ma-1':$vuetify.breakpoint.mdAndUp}">
+                      <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
                     </v-card>
                   </v-flex>
                 </v-layout>
-                <v-layout justify-center>
-                  <v-flex v-for="code in ['TAB','Q','W','E','R','T','Y','U','I','O','P','LEFT_BRACKET','RIGHT_BRACKET']" :key="code">
-                    <v-card light class="mx-1">
-                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
-                    </v-card>
-                  </v-flex>
-                </v-layout>
-                <v-layout justify-center>
-                  <v-flex v-for="code in ['A','S','D','F','G','H','J','K','L','COLON','SINGLE_QUOTE','PIPE']" :key="code">
-                    <v-card light class="mx-1">
-                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
-                    </v-card>
-                  </v-flex>
-                </v-layout>
-                <v-layout justify-center>
-                  <v-flex v-for="code in ['BACK_TICK','0','1','2','3','4','5','6','7','8','9','0','MINUS']" :key="code">
-                    <v-card light class="mx-1">
-                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
-                    </v-card>
-                  </v-flex>
-                </v-layout>
-                <v-layout justify-center>
-                  <v-flex v-for="code in ['SHIFT','Z','X','C','V','B','N','M','COMMA','PERIOD','QUESTION_MARK','RIGHT_SHIFT']" :key="code">
-                    <v-card light class="mx-1">
-                      <v-card-text class="px-0 text-xs-center">{{code | splitByUnderscore}}</v-card-text>
-                    </v-card>
-                  </v-flex>
-                </v-layout>
-                <v-layout justify-space-between wrap>
+                <!--<v-layout justify-space-between wrap>
 
                   <v-flex v-for="code in keyNames" :key="code" sm1 v-show="!editing.includes(code)">
                     <code class="mx-1" @click="editing.push(code)">{{code | splitByUnderscore}}</code>
                   </v-flex>
-                </v-layout>
+                </v-layout>-->
                 <v-layout justify-space-between>
                   <v-btn @click="saveEdit(shortcut)" flat color="green">
                     <v-icon left>save</v-icon>
@@ -168,10 +140,27 @@ export default {
         ui: {
           darkMode: true
         },
-        editing: false
+        editing: false,
+        keyboard:[
+        ['ESC','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12'],
+        [{name:'BACK_TICK',symbol:'`'},'0','1','2','3','4','5','6','7','8','9',{name:'MINUS',symbol:'-'}],
+        ['TAB','Q','W','E','R','T','Y','U','I','O','P',{name:'LEFT_BRACKET',symbol:'['},{name:'RIGHT_BRACKET',symbol:']'}],
+        ['A','S','D','F','G','H','J','K','L',{name:'COLON',symbol:':'},{name:'SINGLE_QUOTE',symbol:"'"},{name:'BACK_SLASH',symbol:"\\"}],
+        [{name:'LEFT_SHIFT',symbol:"&#x21E7;",grow:2},'Z','X','C','V','B','N','M',{name:'COMMA',symbol:","},{name:'PERIOD',symbol:'.'},{name:'FORWARD_SLASH',symbol:"/"},{name:'RIGHT_SHIFT',symbol:"&#x21E7;",grow:2}],
+        [{name:'LEFT_CTRL',symbol:"CTRL"},{name:'LEFT_COMMAND',symbol:"&#x2318;"},'ALT',{name:'SPACE',symbol:'SPACE',grow:6},{name:'RIGHT_ALT',symbol:"ALT"},{name:'RIGHT_COMMAND',symbol:"&#x2318;"},{name:'RIGHT_CTRL',symbol:"CTRL"}]
+        ]
       }
     },
     methods: {
+      valOf(obj,symbol){
+        if(typeof obj ==='string'){
+          return obj
+        }
+        if(symbol){
+          return obj.symbol
+        }
+        return obj.name
+      },
       saveSettings() {
         const config = this.config
         this.$socket.emit('setAllConfig', config)

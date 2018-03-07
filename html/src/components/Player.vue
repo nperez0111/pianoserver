@@ -29,7 +29,7 @@
                 </span>
               </v-layout>
               <v-layout row class="px-3 not-flex" justify-space-around>
-                <v-btn icon fab large flat slot="activator" @click="dislikeSong" color="red lighten-2">
+                <v-btn icon fab large flat slot="activator" @click="dislikeSong">
                   <v-icon>thumb_down</v-icon>
                 </v-btn>
                 <v-btn icon fab large flat slot="activator" @click="likeSong" :color="liked?'blue lighten-2':''">
