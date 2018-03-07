@@ -71,15 +71,26 @@
               </v-btn>
             </v-card-title>
             <v-card-title v-else>
-              <span v-if="editing.length>0">Current Shortcut:</span>
-              <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
-              <span v-if="editing.length==0">&nbsp;Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
+              <v-layout column>
+                <v-flex>
+                  <span>Old Shortcut:</span>
+                  <v-chip v-for="(code,i) in toShortcutCodes(shortcut)" :key="code" class="mx-1">{{code}}</v-chip>
+                  <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
+                </v-flex>
+              <v-flex>
+                <span v-if="editing.length>0">Current Shortcut:</span>
+                <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
+              </v-flex>
+              <v-flex>
+                <span v-if="editing.length==0">Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
+              </v-flex>
+            </v-layout>
             </v-card-title>
             <v-card-text :class="{'px-0':$vuetify.breakpoint.mdAndDown}">
               <div v-if="editing">
                 <v-layout justify-center v-for="row in keyboard" :key="row.toString()">
-                  <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}">
-                    <v-card light :class="{'ma-1':$vuetify.breakpoint.mdAndUp}">
+                  <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
+                    <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp}">
                       <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
                     </v-card>
                   </v-flex>
