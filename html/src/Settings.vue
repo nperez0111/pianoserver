@@ -90,9 +90,28 @@
               <div v-if="editing">
                 <v-layout justify-center v-for="row in keyboard" :key="row.toString()">
                   <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
-                    <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp}">
+                    <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
                       <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
                     </v-card>
+                  </v-flex>
+                </v-layout>
+                <v-layout>
+                  <v-spacer></v-spacer>
+                  <v-flex xs12 sm6 md4 lg3 xl2 class="mt-2">
+                    <v-layout justify-center>
+                      <v-flex v-for="code in arrowKeys.slice(0,1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
+                      <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
+                        <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
+                      </v-card>
+                      </v-flex>
+                    </v-layout>
+                    <v-layout>
+                      <v-flex v-for="code in arrowKeys.slice(1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
+                      <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
+                        <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
+                      </v-card>
+                      </v-flex>
+                    </v-layout>
                   </v-flex>
                 </v-layout>
                 <!--<v-layout justify-space-between wrap>
@@ -101,13 +120,14 @@
                     <code class="mx-1" @click="editing.push(code)">{{code | splitByUnderscore}}</code>
                   </v-flex>
                 </v-layout>-->
-                <v-layout justify-space-between>
-                  <v-btn @click="saveEdit(shortcut)" flat color="green">
+                <v-layout class="mt-3">
+                  <v-btn @click="editing=false" color="red">
+                    Cancel
+                  </v-btn>
+                  <v-spacer></v-spacer>
+                  <v-btn @click="saveEdit(shortcut)" color="green">
                     <v-icon left>save</v-icon>
                     Save Shortcut
-                  </v-btn>
-                  <v-btn @click="editing=false" flat color="red">
-                    Cancel
                   </v-btn>
                 </v-layout>
               </div>
@@ -159,7 +179,8 @@ export default {
         ['A','S','D','F','G','H','J','K','L',{name:'COLON',symbol:':'},{name:'SINGLE_QUOTE',symbol:"'"},{name:'BACK_SLASH',symbol:"\\"}],
         [{name:'LEFT_SHIFT',symbol:"&#x21E7;",grow:2},'Z','X','C','V','B','N','M',{name:'COMMA',symbol:","},{name:'PERIOD',symbol:'.'},{name:'FORWARD_SLASH',symbol:"/"},{name:'RIGHT_SHIFT',symbol:"&#x21E7;",grow:2}],
         [{name:'LEFT_CTRL',symbol:"CTRL"},{name:'LEFT_COMMAND',symbol:"&#x2318;"},'ALT',{name:'SPACE',symbol:'SPACE',grow:6},{name:'RIGHT_ALT',symbol:"ALT"},{name:'RIGHT_COMMAND',symbol:"&#x2318;"},{name:'RIGHT_CTRL',symbol:"CTRL"}]
-        ]
+        ],
+        arrowKeys:[{name:'UP',symbol:"↑",grow:4},{name:'LEFT',symbol:"←",grow:4},{name:'DOWN',symbol:"↓",grow:4},{name:'RIGHT',symbol:"→",grow:4}]
       }
     },
     methods: {
@@ -223,3 +244,9 @@ export default {
     }
 }
 </script>
+<style>
+  .no-radius{
+    border-radius:unset!important;
+    border:1px solid #DDD;
+  }
+</style>
