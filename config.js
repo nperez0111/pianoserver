@@ -32,6 +32,7 @@ const CTRL = 29,
     homedir = require('homedir')(),
     imageLoc = homedir + '/.config/pianobar/notificationImage.jpg',
     Configstore = require('configstore'),
+    dotProp = require('dot-prop'),
     pkg = require('./package.json'),
     conf = new Configstore(pkg.name, {
         showNotifications: true,
@@ -44,7 +45,8 @@ const CTRL = 29,
             dislikeSong: [CTRL, SHIFT, DOWN],
             play: [],
             pause: [],
-            shuffle: []
+            shuffle: [],
+            nowPlaying: [],
         },
         keys: {
             CTRL,
@@ -128,8 +130,26 @@ const CTRL = 29,
         }
     })
 
+
 module.exports = {
     config: conf,
+    copy() {
+        return JSON.parse(JSON.stringify(conf.all))
+    },
+    get(key) {
+        dotProp(conf.all, key)
+    },
+    set(key, value) {
+        const before = this.copy()
+        conf.set(key, value)
+        const after = this.copy()
+
+        dotProp(this.handlers, key)(before, after, value)
+    },
+    setAll(newConfig) {
+        conf.all = newConfig
+    },
+    handlers: require('./configHandlers'),
     notifications: {
         login: {
             notification: {
