@@ -105,7 +105,7 @@ export default {
     this.$station.onchangeStation(stationName => {
       this.currentStation = stationName
     })
-    const url = 'wss://pandora.localtunnel.me',
+    const url = window.location.hostname === 'localtunnel'?`wss://${window.location.href.slice(5,-3)}`:'wss://pandora.localtunnel.me',
       port = 8081,
       choice = ls.get('socket') || (window.location.hostname === 'localhost' ? 'ws://localhost:' + port : url)
 

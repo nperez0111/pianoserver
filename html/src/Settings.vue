@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-toolbar color="primary">
-      <v-btn flat icon to="/">
-        <v-icon>arrow_back</v-icon>
+      <v-btn flat to="/">
+        <v-icon left>arrow_back</v-icon> Now Playing
       </v-btn>
       <v-toolbar-title class="white--text">Settings</v-toolbar-title>
       <v-spacer></v-spacer>
