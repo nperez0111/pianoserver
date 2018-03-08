@@ -26,6 +26,14 @@ const STATE = 'STATE',
     },
     onchangeConfig(callback) {
       return this.on(STATE, callback)
+    },
+    set(key, value) {
+      console.info(`Setting ${key} to`, value)
+      this.socket.emit('setConfig', key, value)
+    },
+    save(newConfig) {
+      console.info('Setting config to', newConfig)
+      this.socket.emit('setAllConfig', newConfig)
     }
   }
 export default Config

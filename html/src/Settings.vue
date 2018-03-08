@@ -77,14 +77,14 @@
                   <v-chip v-for="(code,i) in toShortcutCodes(shortcut)" :key="code" class="mx-1">{{code}}</v-chip>
                   <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
                 </v-flex>
-              <v-flex>
-                <span v-if="editing.length>0">Current Shortcut:</span>
-                <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
-              </v-flex>
-              <v-flex>
-                <span v-if="editing.length==0">Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
-              </v-flex>
-            </v-layout>
+                <v-flex>
+                  <span v-if="editing.length>0">Current Shortcut:</span>
+                  <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
+                </v-flex>
+                <v-flex>
+                  <span v-if="editing.length==0">Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
+                </v-flex>
+              </v-layout>
             </v-card-title>
             <v-card-text :class="{'px-0':$vuetify.breakpoint.mdAndDown}">
               <div v-if="editing">
@@ -100,16 +100,16 @@
                   <v-flex xs12 sm6 md4 lg3 xl2 class="mt-2">
                     <v-layout justify-center>
                       <v-flex v-for="code in arrowKeys.slice(0,1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
-                      <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
-                        <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
-                      </v-card>
+                        <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
+                          <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
+                        </v-card>
                       </v-flex>
                     </v-layout>
                     <v-layout>
                       <v-flex v-for="code in arrowKeys.slice(1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
-                      <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
-                        <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
-                      </v-card>
+                        <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
+                          <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
+                        </v-card>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -172,35 +172,109 @@ export default {
           darkMode: true
         },
         editing: false,
-        keyboard:[
-        ['ESC','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12'],
-        [{name:'BACK_TICK',symbol:'`'},'0','1','2','3','4','5','6','7','8','9',{name:'MINUS',symbol:'-'}],
-        ['TAB','Q','W','E','R','T','Y','U','I','O','P',{name:'LEFT_BRACKET',symbol:'['},{name:'RIGHT_BRACKET',symbol:']'}],
-        ['A','S','D','F','G','H','J','K','L',{name:'COLON',symbol:':'},{name:'SINGLE_QUOTE',symbol:"'"},{name:'BACK_SLASH',symbol:"\\"}],
-        [{name:'LEFT_SHIFT',symbol:"&#x21E7;",grow:2},'Z','X','C','V','B','N','M',{name:'COMMA',symbol:","},{name:'PERIOD',symbol:'.'},{name:'FORWARD_SLASH',symbol:"/"},{name:'RIGHT_SHIFT',symbol:"&#x21E7;",grow:2}],
-        [{name:'LEFT_CTRL',symbol:"CTRL"},{name:'LEFT_COMMAND',symbol:"&#x2318;"},'ALT',{name:'SPACE',symbol:'SPACE',grow:6},{name:'RIGHT_ALT',symbol:"ALT"},{name:'RIGHT_COMMAND',symbol:"&#x2318;"},{name:'RIGHT_CTRL',symbol:"CTRL"}]
+        keyboard: [
+          ['ESC', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'],
+          [{
+            name: 'BACK_TICK',
+            symbol: '`'
+          }, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', {
+            name: 'MINUS',
+            symbol: '-'
+          }],
+          ['TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', {
+            name: 'LEFT_BRACKET',
+            symbol: '['
+          }, {
+            name: 'RIGHT_BRACKET',
+            symbol: ']'
+          }],
+          ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', {
+            name: 'COLON',
+            symbol: ':'
+          }, {
+            name: 'SINGLE_QUOTE',
+            symbol: "'"
+          }, {
+            name: 'BACK_SLASH',
+            symbol: "\\"
+          }],
+          [{
+            name: 'LEFT_SHIFT',
+            symbol: "&#x21E7;",
+            grow: 2
+          }, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', {
+            name: 'COMMA',
+            symbol: ","
+          }, {
+            name: 'PERIOD',
+            symbol: '.'
+          }, {
+            name: 'FORWARD_SLASH',
+            symbol: "/"
+          }, {
+            name: 'RIGHT_SHIFT',
+            symbol: "&#x21E7;",
+            grow: 2
+          }],
+          [{
+            name: 'LEFT_CTRL',
+            symbol: "CTRL"
+          }, {
+            name: 'LEFT_COMMAND',
+            symbol: "&#x2318;"
+          }, 'ALT', {
+            name: 'SPACE',
+            symbol: 'SPACE',
+            grow: 6
+          }, {
+            name: 'RIGHT_ALT',
+            symbol: "ALT"
+          }, {
+            name: 'RIGHT_COMMAND',
+            symbol: "&#x2318;"
+          }, {
+            name: 'RIGHT_CTRL',
+            symbol: "CTRL"
+          }]
         ],
-        arrowKeys:[{name:'UP',symbol:"↑",grow:4},{name:'LEFT',symbol:"←",grow:4},{name:'DOWN',symbol:"↓",grow:4},{name:'RIGHT',symbol:"→",grow:4}]
+        arrowKeys: [{
+          name: 'UP',
+          symbol: "↑",
+          grow: 4
+        }, {
+          name: 'LEFT',
+          symbol: "←",
+          grow: 4
+        }, {
+          name: 'DOWN',
+          symbol: "↓",
+          grow: 4
+        }, {
+          name: 'RIGHT',
+          symbol: "→",
+          grow: 4
+        }]
       }
     },
     methods: {
-      valOf(obj,symbol){
-        if(typeof obj ==='string'){
+      valOf(obj, symbol) {
+        if (typeof obj === 'string') {
           return obj
         }
-        if(symbol){
+        if (symbol) {
           return obj.symbol
         }
         return obj.name
       },
       saveSettings() {
         const config = this.config
-        this.$socket.emit('setAllConfig', config)
+        this.$config.save(config)
       },
       saveEdit(shortcut) {
         const newShortcut = this.editing
         this.config.shortcuts[shortcut] = newShortcut.map(key => this.config.keys[key])
         this.editing = false
+        this.$config.set(`shortcuts.${shortcut}`, this.conf.shortcuts[shortcut])
       },
       toShortcutCodes(key) {
         const map = this.config.keys,
@@ -245,8 +319,8 @@ export default {
 }
 </script>
 <style>
-  .no-radius{
-    border-radius:unset!important;
-    border:1px solid #DDD;
-  }
+ .no-radius {
+  border-radius: unset!important;
+  border: 1px solid #DDD;
+ }
 </style>
