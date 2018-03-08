@@ -89,7 +89,7 @@
             <v-card-text :class="{'px-0':$vuetify.breakpoint.mdAndDown}">
               <div v-if="editing">
                 <v-layout justify-center v-for="row in keyboard" :key="row.toString()">
-                  <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
+                  <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
                     <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
                       <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
                     </v-card>
@@ -99,14 +99,14 @@
                   <v-spacer></v-spacer>
                   <v-flex xs12 sm6 md4 lg3 xl2 class="mt-2">
                     <v-layout justify-center>
-                      <v-flex v-for="code in arrowKeys.slice(0,1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
+                      <v-flex v-for="code in arrowKeys.slice(0,1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
                         <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
                           <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
                         </v-card>
                       </v-flex>
                     </v-layout>
                     <v-layout>
-                      <v-flex v-for="code in arrowKeys.slice(1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="!editing.includes(valOf(code)) && editing.push(valOf(code))">
+                      <v-flex v-for="code in arrowKeys.slice(1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
                         <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
                           <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
                         </v-card>
@@ -274,7 +274,7 @@ export default {
         const newShortcut = this.editing
         this.config.shortcuts[shortcut] = newShortcut.map(key => this.config.keys[key])
         this.editing = false
-        this.$config.set(`shortcuts.${shortcut}`, this.conf.shortcuts[shortcut])
+        this.$config.set(`shortcuts.${shortcut}`, this.config.shortcuts[shortcut])
       },
       toShortcutCodes(key) {
         const map = this.config.keys,
@@ -282,6 +282,11 @@ export default {
         return this.config.shortcuts[key].map(num => {
           return codeToName[num]
         })
+      },
+      keyHandler(code){
+        const editing=this.editing,
+        val=this.valOf(code)
+        return editing.includes(val) ? editing.splice(editing.indexOf(val),1) : editing.push(val)
       }
     },
     watch: {

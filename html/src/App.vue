@@ -57,11 +57,11 @@
         <v-card-text>
           <v-container>
             <h1 class="text-xs-center">We need to know what you are trying to play from</h1>
-            <v-layout row justify-center class="mt-5" v-show="!chosen">
-              <v-btn @click="enterPort=true">
+            <v-layout row justify-center class="mt-5">
+              <v-btn @click="enterPort=true,chosen=false">
                 This Computer
               </v-btn>
-              <v-btn @click="chosen=true">
+              <v-btn @click="chosen=true,enterPort=false">
                 Another Computer
                 <v-icon right>arrow_forward</v-icon>
               </v-btn>
@@ -70,7 +70,7 @@
               <v-text-field v-model="url" :error="error"></v-text-field>
               <v-btn @click="tryReconnect">Try reconnect</v-btn>
             </v-layout>
-            <v-layout row class="mt-5" v-show="enterPort&&!chosen">
+            <v-layout row class="mt-5" v-show="enterPort">
               <v-text-field v-model="port" type="number" :error="error"></v-text-field>
               <v-btn @click="tryReconnect('ws://localhost:'+port)">Try reconnect</v-btn>
             </v-layout>
@@ -110,10 +110,11 @@ export default {
       choice = ls.get('socket') || (window.location.hostname === 'localhost' ? 'ws://localhost:' + port : url)
 
     //try to reconnect to past connect or defaults
-    this.tryReconnect(choice)
+    this.tryReconnect(choice,this.infiniteHandler)
 
     window.App = this
     return {
+      retryAmount:10,
       loading: false,
       enterPort: false,
       error: false,
@@ -184,15 +185,18 @@ export default {
     refresh() {
       this.$socket.emit('getCurrentStatus')
     },
-    tryReconnect(url) {
+    infiniteHandler(socket){
+      if(socket.disconnected){
+        this.$socket.count++
+        socket.disconnect()
+        setTimeout(this.tryReconnect.bind(this,choice,(this.$socket.count<this.retryAmount)?this.infiniteHandler:false),500)
+      }
+    },
+    tryReconnect(url,handler=false) {
       this.loading = true
       const socket = this.$socket.init(typeof url === 'string' ? url : this.url),
-        socketUsers = [this.$player, this.$config, this.$station]
-      window.socket = socket
-      socketUsers.forEach(socketUser => {
-        socketUser.init(socket)
-      })
-      setTimeout(() => {
+        socketUsers = [this.$player, this.$config, this.$station],
+        socketHandler = ( handler || ( socket => {
         if (socket.connected === true) {
           this.prompt = false
           this.error = false
@@ -203,7 +207,12 @@ export default {
           this.prompt = true
         }
         this.loading = false
-      }, 1000)
+      }))
+      window.socket = socket
+      socketUsers.forEach(socketUser => {
+        socketUser.init(socket)
+      })
+      return setTimeout(socketHandler.bind(this,socket), 1000)
     }
   }
 }

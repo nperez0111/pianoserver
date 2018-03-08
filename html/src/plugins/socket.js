@@ -1,6 +1,7 @@
 import io from 'socket.io-client'
 window.io = io
 const socket = {
+  count: 0,
   socket: null,
   init(url) {
     this.socket = io(url)
