@@ -142,9 +142,11 @@ module.exports = {
     set(key, value) {
         const before = this.copy()
         conf.set(key, value)
-        const after = this.copy()
-
-        dotProp(this.handlers, key)(before, after, value)
+        const after = this.copy(),
+            handler = dotProp(this.handlers, key)
+        if (handler) {
+            handler(before, after, value)
+        }
     },
     setAll(newConfig) {
         conf.all = newConfig
