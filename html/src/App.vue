@@ -41,12 +41,12 @@
         </router-link>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon @click="refresh">
+      <v-btn icon @click="$socket.emit('getCurrentStatus')" v-if="showRefresh">
         <v-icon>refresh</v-icon>
       </v-btn>
     </v-toolbar>
     <v-content>
-      <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:hideToolbar="hideToolbar" v-on:showToolbar="showToolbar" />
+      <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:hideToolbar="hideToolbar" v-on:showToolbar="showToolbar" v-on:edit="edit" />
     </v-content>
     <v-dialog v-model="prompt" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
       <v-card tile>
@@ -129,18 +129,16 @@ export default {
       port,
       url: choice,
       popularStations: ls.get('pastStations') || {},
-      toolbar: true
+      toolbar: true,
+      showRefresh:ls.get('showRefresh')||false
     }
   },
   props: {
     source: String
   },
   methods: {
-    hideToolbar() {
-      this.toolbar = false
-    },
-    showToolbar() {
-      this.toolbar = true
+    edit(key,value){
+      this[key]=value
     },
     setStations(stations) {
       this.stations = stations
@@ -181,9 +179,6 @@ export default {
     },
     showOverflow() {
       document.getElementsByTagName('html')[0].style.overflow = 'auto'
-    },
-    refresh() {
-      this.$socket.emit('getCurrentStatus')
     },
     infiniteHandler(socket){
       if(socket.disconnected){

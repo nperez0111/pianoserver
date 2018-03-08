@@ -39,7 +39,7 @@ export default {
       this.$station.onchangeStations(stations => {
         this.stationName = stations[stationNum]
       })
-      this.$emit('hideToolbar')
+      this.$emit('edit','toolbar',false)
       this.$emit('showoverflow')
       return {
         variety: "",

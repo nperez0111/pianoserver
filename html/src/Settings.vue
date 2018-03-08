@@ -146,14 +146,24 @@
             <v-list-tile-sub-title>Change UI colors</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile avatar>
+          <v-list-tile-action>
+            <v-checkbox v-model="ui.showRefresh"></v-checkbox>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Show Refresh Button</v-list-tile-title>
+            <v-list-tile-sub-title>Shows a refresh button to update the Web UI from the player view</v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
       </v-list>
     </v-container>
   </div>
 </template>
 <script>
+import * as ls from 'local-storage'
 export default {
   data() {
-      this.$emit('hideToolbar')
+      this.$emit('edit','toolbar',false)
       this.$emit('showoverflow')
       this.$config.onchangeConfig(config => {
         console.log(config)
@@ -170,7 +180,8 @@ export default {
           keys: {}
         },
         ui: {
-          darkMode: true
+          darkMode: ls.get('darkMode')||false,
+          showRefresh:ls.get('showRefresh')||false
         },
         editing: false,
         keyboard: [
@@ -288,11 +299,35 @@ export default {
         const editing=this.editing,
         val=this.valOf(code)
         return editing.includes(val) ? editing.splice(editing.indexOf(val),1) : editing.push(val)
+      },
+      handler(key,value){
+        ls.set(key,value)
+        const handlers={
+          showRefresh(key,value){
+            this.$emit('edit','showRefresh',value)
+          }
+        }
+
+        if(key in handlers){
+          return handlers[key].call(this,key,value)
+        }
+
       }
     },
     watch: {
       active() {
         this.editing = false
+      },
+      ui:{
+        handler(newUI){
+          const excluded=[]
+          Object.keys(newUI).forEach(key=>{
+            if(!excluded.includes(key)){
+              this.handler(key,newUI[key])
+            }
+          })
+        },
+        deep:true
       }
     },
     computed: {

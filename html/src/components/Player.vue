@@ -91,7 +91,7 @@ export default {
       window.player = this
 
       this.$emit('hideoverflow')
-      this.$emit('showToolbar')
+      this.$emit('edit','toolbar',true)
       setTimeout(() => {
         this.onResize()
       }, 400)
