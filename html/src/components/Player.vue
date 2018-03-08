@@ -3,7 +3,7 @@
     <div v-resize="onResize">
       <Full-Height class="blue darken-4" v-show="!vertical">
         <v-layout wrap justify-center>
-          <v-flex xs5 md5 lg5>
+          <v-flex xs5 v-touch="{up:likeSong,left:nextSong}">
             <v-layout column justify-center fill-height class="px-2">
               <transition name="dialog-transition" mode="out-in">
                 <img :src="status.coverArt" :key="status.coverArt" class="fullwidth elevation-2">
@@ -50,7 +50,7 @@
       </Full-Height>
       <Full-Height class="blue darken-4" v-show="vertical">
         <v-layout column align-center fill-height>
-          <v-layout class="my-3 spacer fullwidth" ref="container" justify-center column>
+          <v-layout class="my-3 spacer fullwidth" ref="container" justify-center column v-touch="{up:likeSong,left:nextSong}">
             <transition name="dialog-transition" mode="out-in">
               <img :src="status.coverArt" :key="status.coverArt" class="contain elevation-2 mx-auto" ref="vertImage">
             </transition>
