@@ -174,18 +174,13 @@ const Response = {
     setAllConfig: (client, { config, shortcuts }) => {
         return (newConfig) => {
             const before = config.config.get('listenShortcuts')
-            config.config.all = newConfig
-            if (before === true && newConfig.listenShortcuts === false && shortcuts.active) {
-                shortcuts.destroy()
-            }
-            if (before === false && newConfig.listenShortcuts === true && shortcuts.active === false) {
-                shortcuts.init()
-            }
+            config.setAll(newConfig)
         }
     },
     setConfig: (client, { config }) => {
         return (key, value) => {
-            config.config.set(key, value)
+            console.log("setting:", key, "to:", value)
+            config.set(key, value)
         }
     },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {

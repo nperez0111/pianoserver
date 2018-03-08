@@ -2,19 +2,19 @@ const globals = require('./globals'),
     { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
-        onExit: function(exitCode, signal) {
+        onExit: function (exitCode, signal) {
             if (signal === 'SIGINT')
                 process.kill(process.pid, 'SIGINT');
             ipc.server.stop()
             globals.shortcuts.destroy()
             process.exit()
         },
-        onEnd: function() {
+        onEnd: function () {
             //maybe dont stop the server but restart pianobar?
             ipc.server.stop()
             globals.shortcuts.destroy()
         },
-        onData: function(data) {
+        onData: function (data) {
             const getTime = /(\d\d:\d\d).(\d\d:\d\d)/
             if (getTime.test(data)) {
                 const [now, ofTotal] = Array.from(data.match(getTime)).slice(1)
@@ -51,7 +51,7 @@ app.use(express.static('html/dist'))
 server.listen(port)
 
 // Add a connect listener
-socket.on('connection', function(client) {
+socket.on('connection', function (client) {
     const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, pianobarLog, config, shortcuts: globals.shortcuts }
     //needs to be seperate from globals because attachments work per instance of connection
 
@@ -75,20 +75,28 @@ ipc.serve(() => {
         ipc.server.on(key, responseFunc)
     })
 })
-ipc.server.start()
-try {
-    localtunnel(port, { subdomain }, function(err, tunnel) {
+ipc.server.start();
+
+(function tunnel() {
+
+    localtunnel(port, { subdomain }, function (err, tunnel) {
+        var store;
         if (err) {
-            console.error(err)
-            process.exit(2)
+            pianobarLog.unpush(store)
+            pianobarLog.push('Restarting Local Tunnel...')
+            console.log('Restarting Local Tunnel...', err)
+            setTimeout(tunnel, 500)
+            return
+            //process.exit(2)
         }
         const message = `Your local tunnel URL: ${tunnel.url}`
 
 
         console.log(message)
-
-        pianobarLog.store.unshift(message)
-        pianobarLog.onpush((state, length) => {
+        if (!pianobarLog.getOldest(1).startsWith("Your")) {
+            pianobarLog.store.unshift(message)
+        }
+        store = pianobarLog.onpush((state, length) => {
             if (length === pianobarLog.size) {
                 pianobarLog.store.unshift(message)
             }
@@ -98,7 +106,4 @@ try {
             opn(tunnel.url)
         }
     })
-} catch (err) {
-    console.log(err)
-    console.log('localtunnel failed')
-}
+})()
