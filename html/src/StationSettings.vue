@@ -40,6 +40,7 @@ export default {
         this.stationName = stations[stationNum]
       })
       this.$emit('hideToolbar')
+      this.$emit('showoverflow')
       return {
         variety: "",
         stationName: this.$station.getStations()[stationNum] || ''

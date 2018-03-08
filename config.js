@@ -137,15 +137,17 @@ module.exports = {
         return JSON.parse(JSON.stringify(conf.all))
     },
     get(key) {
-        dotProp(conf.all, key)
+        return dotProp.get(conf.all, key)
     },
     set(key, value) {
         const before = this.copy()
         conf.set(key, value)
-        const after = this.copy(),
-            handler = dotProp(this.handlers, key)
-        if (handler) {
-            handler(before, after, value)
+        const after = this.copy()
+
+        if (dotProp.has(this.handlers, key)) {
+
+            dotProp.get(this.handlers, key)(before, after, value)
+
         }
     },
     setAll(newConfig) {

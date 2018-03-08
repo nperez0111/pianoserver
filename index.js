@@ -1,5 +1,5 @@
 const globals = require('./globals'),
-    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config } = globals,
+    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config, notifier } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
         onExit: function (exitCode, signal) {
@@ -40,8 +40,9 @@ const globals = require('./globals'),
     port = process.argv[2] || globals.port
 
 
-globals.shortcuts = shortcuts({ spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, response, config })
+
 globals.spawnInstance = spawnInstance
+globals.shortcuts = shortcuts({ ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, config })
 
 if (config.config.get('listenShortcuts')) {
     globals.shortcuts.init()

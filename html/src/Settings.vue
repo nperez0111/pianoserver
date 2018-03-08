@@ -154,6 +154,7 @@
 export default {
   data() {
       this.$emit('hideToolbar')
+      this.$emit('showoverflow')
       this.$config.onchangeConfig(config => {
         console.log(config)
         this.config = config
