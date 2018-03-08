@@ -105,11 +105,7 @@ const dev = true,
     onStatus(status) {
 
 
-      if (typeof status == 'string') {
-        this.state.status = JSON.parse(status)
-      } else {
-        this.state.status = status
-      }
+      this.state.status = typeof status == 'string' ? JSON.parse(status) : status
 
       const {
         stationName = false, songStationName

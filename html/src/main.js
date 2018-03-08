@@ -1,3 +1,5 @@
+import values from 'object.values'
+values.shim()
 import Vue from 'vue'
 import App from './App'
 import router from './router'

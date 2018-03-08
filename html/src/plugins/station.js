@@ -1,7 +1,7 @@
 import * as ls from 'local-storage'
 import { EventAggregator } from 'aurelia-event-aggregator'
 
-const dev = true,
+const dev = false,
   STATIONS = 'stations',
   CURRENT = 'station',
   Station = {
@@ -36,10 +36,10 @@ const dev = true,
       this.save(newStation)
       this.pubSub.publish(CURRENT, newStation)
     },
-    getStations: function(filter = a => a) {
+    getStations: function (filter = a => a) {
       return this.allStations.filter(filter)
     },
-    setStations: function(stations) {
+    setStations: function (stations) {
       this.allStations = stations
       this.pubSub.publish(STATIONS, stations)
       ls.set('stations', stations)

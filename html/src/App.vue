@@ -184,13 +184,13 @@ export default {
       if(socket.disconnected){
         this.$socket.count++
         socket.disconnect()
-        setTimeout(this.tryReconnect.bind(this,choice,(this.$socket.count<this.retryAmount)?this.infiniteHandler:false),500)
+        setTimeout(this.tryReconnect.bind(this,this.url,(this.$socket.count<this.retryAmount)?this.infiniteHandler:false),500)
       }
     },
     tryReconnect(url,handler=false) {
       this.loading = true
       const socket = this.$socket.init(typeof url === 'string' ? url : this.url),
-        socketUsers = [this.$player, this.$config, this.$station],
+        socketUsers = [this.$config, this.$station, this.$player],
         socketHandler = ( handler || ( socket => {
         if (socket.connected === true) {
           this.prompt = false
