@@ -13,3 +13,4 @@ yarn-error.log*
 *.sln
 html/dist/
 debug.log
+iohook-crash.log
