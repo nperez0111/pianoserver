@@ -21,6 +21,7 @@ const pm2 = require('pm2'),
     localtunnel = require('localtunnel'),
     Connector = require('./lib/Connector'),
     program = require('commander'),
+    chalk = require('chalk'),
     serverName = 'pianoserver',
     defaultPort = 8081,
     defaultSubdomain = 'pianoserver',
@@ -52,6 +53,7 @@ function restartServer() {
             process.exit(2)
         }
         pm2.gracefulReload(serverName)
+        pm2.disconnect()
     })
 }
 
@@ -63,7 +65,6 @@ function checkIfRunning(cb) {
         }
         pm2.describe(serverName, (err, descriptions) => {
             pm2.disconnect()
-            console.log(descriptions)
             const stoppedWhen = ['stopped', 'errored', 'stopping']
             if (err || descriptions.length === 0 || descriptions && descriptions[0] && stoppedWhen.includes(descriptions[0].pm2_env.status)) {
                 cb.notRunning()
@@ -75,7 +76,7 @@ function checkIfRunning(cb) {
 }
 
 function connectToConsole() {
-    console.log(`PRESSING "q" quits the process and server, ctrl-c quits viewer while still playing in background\n`)
+    console.log(chalk.green(`PRESSING "q" quits the server and restarts it, CTRL-C or ESC quits viewer while still playing in background\n`))
     const ipc = require('node-ipc'),
         serverName = 'pianobar-server',
         stdin = process.stdin
@@ -100,7 +101,7 @@ function connectToConsole() {
 
         })
         ipc.of[serverName].on('killProcess', () => {
-            process.exit(0)
+            process.exit()
         })
         ipc.of[serverName].on('getLine', line => {
             console.log(line)
@@ -126,16 +127,14 @@ function connectToConsole() {
         // on any data into stdin
         stdin.on('data', key => {
 
-            if (key === '\u0003') {
+            if (key === '\u0003' || key === '\u001B') {
                 // ctrl-c ( end of text )
+                // ESC
                 process.exit()
             }
 
             //send single char and flush stdin
             ipc.of[serverName].emit('sendLine', key)
-            if (key.trim() === 'q') {
-                process.exit()
-            }
             // write the key to stdout all normal like
             process.stdout.write(key)
         })
