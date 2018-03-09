@@ -46,7 +46,7 @@
       </v-btn>
     </v-toolbar>
     <v-content>
-      <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:hideToolbar="hideToolbar" v-on:showToolbar="showToolbar" v-on:edit="edit" />
+      <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:edit="edit" />
     </v-content>
     <v-dialog v-model="prompt" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
       <v-card tile>
@@ -67,12 +67,20 @@
               </v-btn>
             </v-layout>
             <v-layout row class="mt-5" v-show="chosen">
-              <v-text-field v-model="url" :error="error"></v-text-field>
-              <v-btn @click="tryReconnect">Try reconnect</v-btn>
+              <v-flex xs12 lg8>
+                <v-text-field v-model="url" :error="error"></v-text-field>
+              </v-flex>
+              <v-flex xs12 lg4>
+                <v-btn @click="tryReconnect">Try reconnect</v-btn>
+              </v-flex>
             </v-layout>
             <v-layout row class="mt-5" v-show="enterPort">
-              <v-text-field v-model="port" type="number" :error="error"></v-text-field>
-              <v-btn @click="tryReconnect('ws://localhost:'+port)">Try reconnect</v-btn>
+              <v-flex xs12 lg8>
+                <v-text-field v-model="port" type="number" :error="error"></v-text-field>
+              </v-flex>
+              <v-flex xs12 lg4>
+                <v-btn @click="tryReconnect('ws://localhost:'+port)">Try reconnect</v-btn>
+              </v-flex>
             </v-layout>
             <v-layout row justify-center>
               <v-progress-circular indeterminate :size="70" :width="7" color="light-blue" v-if="loading"></v-progress-circular>
@@ -91,6 +99,9 @@
 <script>
 import LastFM from '@/lib/LastFM'
 import * as ls from 'local-storage'
+function isLocalIP(str){
+  return /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str)
+}
 export default {
   data: function() {
     this.$station.onchangeStations(stations => {
@@ -107,8 +118,8 @@ export default {
     })
     const url = window.location.hostname === 'localtunnel'?`wss://${window.location.href.slice(5,-3)}`:'wss://pandora.localtunnel.me',
       port = 8081,
-      choice = ls.get('socket') || (window.location.hostname === 'localhost' ? 'ws://localhost:' + port : url)
-
+      choice = ls.get('socket') || (window.location.hostname === 'localhost' ? 'ws://localhost:' + port : isLocalIP(window.location.hostname)? `ws://${window.location.hostname}:${port}` : url)
+console.log(choice)
     //try to reconnect to past connect or defaults
     this.tryReconnect(choice,this.infiniteHandler)
 

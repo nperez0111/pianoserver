@@ -4,7 +4,7 @@ const socket = {
   count: 0,
   socket: null,
   init(url) {
-    this.socket = io(url)
+    this.socket = io(url, { origins: '*' })
 
     this.socket.on('disconnect', () => {
       this.socket.on("connect", () => {

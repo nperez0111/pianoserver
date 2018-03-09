@@ -151,23 +151,22 @@
         <v-subheader class="title">Login Settings</v-subheader>
         <div class="pa-3">
           <v-text-field label="Username" v-model="config.username"></v-text-field>
-          <v-text-field label="E-mail" v-model="email" :rules="emailRules" required ></v-text-field>
         </div>
       </v-form>
       <v-list two-line subheader>
         <v-subheader class="title">UI Settings (In Progress)</v-subheader>
-        <v-list-tile avatar>
+        <v-list-tile avatar @click="ui.darkMode=!ui.darkMode">
           <v-list-tile-action>
-            <v-checkbox v-model="ui.darkMode"></v-checkbox>
+            <v-switch v-model="ui.darkMode"></v-switch>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Dark Mode (Not working)</v-list-tile-title>
             <v-list-tile-sub-title>Change UI colors</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile avatar>
+        <v-list-tile avatar @click="ui.showRefresh=!ui.showRefresh">
           <v-list-tile-action>
-            <v-checkbox v-model="ui.showRefresh"></v-checkbox>
+            <v-switch v-model="ui.showRefresh"></v-switch>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Show Refresh Button</v-list-tile-title>

@@ -14,3 +14,4 @@ yarn-error.log*
 html/dist/
 debug.log
 iohook-crash.log
+client/dist
