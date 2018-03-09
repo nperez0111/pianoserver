@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // pianobar
 // should start server and serve website to localhost and hopefully out on lan
 // starts a local tunnel instance, a pm2 instance that reloads using pm2 api, runs a script to connect to server and see its output as well as send messages back
@@ -19,13 +21,14 @@ const pm2 = require('pm2'),
     localtunnel = require('localtunnel'),
     Connector = require('./lib/Connector'),
     program = require('commander'),
-    serverName = 'Pianobar Server',
+    serverName = 'pianoserver',
     defaultPort = 8081,
+    defaultSubdomain = 'pianoserver',
     ipcCommands = { play: 'Play song', pause: 'Pause song', likeSong: 'Like the current song', dislikeSong: 'Dislike the current song', nextSong: 'Play next song', shuffle: 'Shuffle all songs' }
 
 
 function startServer(subdomain, port) {
-    pm2.connect(function(err) {
+    pm2.connect(function (err) {
         if (err) {
             console.error(err)
             process.exit(2)
@@ -34,8 +37,8 @@ function startServer(subdomain, port) {
         pm2.start({
             name: serverName,
             script: 'index.js', // Script to be run
-            args: [port, subdomain],
-        }, function(err, apps) {
+            args: [port || defaultPort, subdomain || defaultSubdomain],
+        }, function (err, apps) {
             pm2.disconnect(); // Disconnects from PM2
             if (err) throw err
         })
@@ -43,7 +46,7 @@ function startServer(subdomain, port) {
 }
 
 function restartServer() {
-    pm2.connect(function(err) {
+    pm2.connect(function (err) {
         if (err) {
             console.error(err)
             process.exit(2)
@@ -53,13 +56,16 @@ function restartServer() {
 }
 
 function checkIfRunning(cb) {
-    pm2.connect(function(err) {
+    pm2.connect(function (err) {
         if (err) {
             cb.notRunning()
             return
         }
-        pm2.describe(serverName, (err, description) => {
-            if (err) {
+        pm2.describe(serverName, (err, descriptions) => {
+            pm2.disconnect()
+            console.log(descriptions)
+            const stoppedWhen = ['stopped', 'errored', 'stopping']
+            if (err || descriptions.length === 0 || descriptions && descriptions[0] && stoppedWhen.includes(descriptions[0].pm2_env.status)) {
                 cb.notRunning()
                 return
             }
@@ -69,6 +75,7 @@ function checkIfRunning(cb) {
 }
 
 function connectToConsole() {
+    console.log(`PRESSING "q" quits the process and server, ctrl-c quits viewer while still playing in background\n`)
     const ipc = require('node-ipc'),
         serverName = 'pianobar-server',
         stdin = process.stdin
@@ -138,12 +145,13 @@ function connectToConsole() {
 }
 
 function quitServer() {
-    pm2.connect(function(err) {
+    pm2.connect(function (err) {
         if (err) {
             console.error(err)
             process.exit(2)
         }
         pm2.stop(serverName)
+        setTimeout(pm2.disconnect.bind(pm2), 300)
     })
 }
 
@@ -162,12 +170,12 @@ function tryServerCommand(command, args) {
 }
 
 Object.keys(ipcCommands).forEach(command => {
-    program.command(command).description(ipcCommands[command]).action(function() {
+    program.command(command).description(ipcCommands[command]).action(function () {
         tryServerCommand(command)
     })
 })
 
-program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function(station) {
+program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {
@@ -190,7 +198,7 @@ program.description('Starts the server for both pianobar console and the web app
 
 program.version('0.0.1').parse(process.argv)
 
-const NO_COMMAND_SPECIFIED = program.args.length === 0;
+const NO_COMMAND_SPECIFIED = program.args.length === 0
 
 if (NO_COMMAND_SPECIFIED) {
     checkIfRunning({
@@ -199,6 +207,7 @@ if (NO_COMMAND_SPECIFIED) {
         },
         notRunning() {
             startServer()
+            connectToConsole()
         }
     })
 }

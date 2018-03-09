@@ -40,7 +40,6 @@ const globals = require('./globals'),
     port = process.argv[2] || globals.port
 
 
-
 globals.spawnInstance = spawnInstance
 globals.shortcuts = shortcuts({ ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, config })
 

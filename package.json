@@ -1,13 +1,17 @@
 {
-  "name": "pianobar",
-  "version": "2.0.0",
-  "description": "interact with pandora through notifications",
+  "name": "pianoserver",
+  "version": "1.0.0",
+  "description": "Server for Pianobar with Web UI.",
+  "author": "NickTheSick",
+  "repository": "nperez0111/pianoserver",
   "main": "index.js",
   "scripts": {
     "test": "node tests.js",
     "start": "node index.js"
   },
-  "author": "NickTheSick",
+  "bin": {
+    "pianoserver": "./bin.js"
+  },
   "license": "UNLICENSED",
   "dependencies": {
     "commander": "^2.14.1",
@@ -26,5 +30,8 @@
     "pm2": "^2.10.1",
     "simple-node-logger": "^0.93.37",
     "socket.io": "^2.0.4"
+  },
+  "engines": {
+    "node": ">=5"
   }
 }
