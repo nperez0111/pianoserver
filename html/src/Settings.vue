@@ -27,35 +27,45 @@
     </v-card>-->
     <v-container class="pa-0">
       <v-list two-line subheader>
-        <v-subheader>Pianobar Settings</v-subheader>
-        <v-list-tile avatar>
+        <v-subheader class="title">Pianobar Settings</v-subheader>
+        <v-list-tile avatar @click="config.showNotifications=!config.showNotifications">
           <v-list-tile-action>
-            <v-checkbox v-model="config.showNotifications"></v-checkbox>
+            <v-switch v-model="config.showNotifications"></v-switch>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Notifications</v-list-tile-title>
             <v-list-tile-sub-title>Allow notifications</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile avatar>
+        <v-list-tile avatar @click="config.openTunnelURL=!config.openTunnelURL">
           <v-list-tile-action>
-            <v-checkbox v-model="config.openTunnelURL"></v-checkbox>
+            <v-switch v-model="config.openTunnelURL"></v-switch>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Open on Startup</v-list-tile-title>
             <v-list-tile-sub-title>Open Pianobar UI (this web app) on startup</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile avatar>
+        <v-list-tile avatar @click="config.listenShortcuts=!config.listenShortcuts">
           <v-list-tile-action>
-            <v-checkbox v-model="config.listenShortcuts"></v-checkbox>
+            <v-switch v-model="config.listenShortcuts"></v-switch>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Listen for Shortcuts</v-list-tile-title>
             <v-list-tile-sub-title>Use Shortcuts to control pianobar</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-subheader v-show="config.listenShortcuts">Shortcut Settings</v-subheader>
+        <v-list-tile avatar @click="setAutostart=!setAutostart">
+          <v-list-tile-action>
+            <v-switch v-model="setAutostart"></v-switch>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Set Current Station as Startup Station(Not working)</v-list-tile-title>
+            <v-list-tile-sub-title>Sets the currently playing station to always play on startup</v-list-tile-sub-title>
+            <v-list-tile-sub-title>Your current Startup Station is: <v-span v-if="config.autostart" v-text="config.autostart" class="white--text"></v-span><span v-else class="red--text">Not Set</span></v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-subheader v-show="config.listenShortcuts" class="title">Shortcut Settings</v-subheader>
       </v-list>
       <v-tabs v-model="active" color="primary" dark slider-color="white" v-show="config.listenShortcuts" grow show-arrows>
         <v-tab v-for="shortcut in shortcutNames" :key="shortcut" ripple>
@@ -63,7 +73,8 @@
         </v-tab>
         <v-tab-item v-for="shortcut in shortcutNames" :key="shortcut">
           <v-card flat>
-            <v-card-title v-if="!editing">Current Shortcut:
+            <v-card-title v-if="!editing">
+              <span class="subheading">Current Shortcut:</span>
               <code v-for="code in toShortcutCodes(shortcut)" v-text="code" class="mx-1" v-show="config.shortcuts[shortcut]&&config.shortcuts[shortcut].length!==0"></code>
               <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
               <v-btn @click="editing=[]" fab small color="primary">
@@ -73,12 +84,12 @@
             <v-card-title v-else>
               <v-layout column>
                 <v-flex>
-                  <span>Old Shortcut:</span>
+                  <span class="subheading">Old Shortcut:</span>
                   <v-chip v-for="(code,i) in toShortcutCodes(shortcut)" :key="code" class="mx-1">{{code}}</v-chip>
                   <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
                 </v-flex>
                 <v-flex>
-                  <span v-if="editing.length>0">Current Shortcut:</span>
+                  <span v-if="editing.length>0" class="subheading">Current Shortcut:</span>
                   <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
                 </v-flex>
                 <v-flex>
@@ -135,8 +146,16 @@
           </v-card>
         </v-tab-item>
       </v-tabs>
+
+      <v-form>
+        <v-subheader class="title">Login Settings</v-subheader>
+        <div class="pa-3">
+          <v-text-field label="Username" v-model="config.username"></v-text-field>
+          <v-text-field label="E-mail" v-model="email" :rules="emailRules" required ></v-text-field>
+        </div>
+      </v-form>
       <v-list two-line subheader>
-        <v-subheader>UI Settings (In Progress)</v-subheader>
+        <v-subheader class="title">UI Settings (In Progress)</v-subheader>
         <v-list-tile avatar>
           <v-list-tile-action>
             <v-checkbox v-model="ui.darkMode"></v-checkbox>
@@ -172,6 +191,7 @@ export default {
       window.setting = this
       return {
         active: '0',
+        setAutostart:false,
         config: this.$config.config || {
           openTunnelURL: true,
           showNotifications: true,
@@ -287,6 +307,12 @@ export default {
         this.config.shortcuts[shortcut] = newShortcut.map(key => this.config.keys[key])
         this.editing = false
         this.$config.set(`shortcuts.${shortcut}`, this.config.shortcuts[shortcut])
+        if(this.setAutostart){
+          this.saveAutostart()
+        }
+      },
+      saveAutostart(){
+        this.$socket.emit('setAutostart')
       },
       toShortcutCodes(key) {
         const map = this.config.keys,

@@ -1,7 +1,7 @@
 {
-  "name": "new-pandora",
+  "name": "pianobar-ui",
   "version": "1.0.0",
-  "description": "A Vue.js project",
+  "description": "Pianobar UI interface",
   "author": "Nick Perez <nperez0111@gmail.com>",
   "private": true,
   "scripts": {
