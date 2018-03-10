@@ -22,10 +22,12 @@ const pm2 = require('pm2'),
     Connector = require('./lib/Connector'),
     program = require('commander'),
     chalk = require('chalk'),
+    path = require('path'),
+    dotProp = require('dot-prop'),
     serverName = 'pianoserver',
     defaultPort = 8081,
     defaultSubdomain = 'pianoserver',
-    ipcCommands = { play: 'Play song', pause: 'Pause song', likeSong: 'Like the current song', dislikeSong: 'Dislike the current song', nextSong: 'Play next song', shuffle: 'Shuffle all songs' }
+    ipcCommands = { play: 'Play song', pause: 'Pause song', likeSong: 'Like the current song', dislikeSong: 'Dislike the current song', nextSong: 'Play next song', shuffle: 'Shuffle all stations' }
 
 
 function startServer(subdomain, port) {
@@ -37,7 +39,7 @@ function startServer(subdomain, port) {
 
         pm2.start({
             name: serverName,
-            script: 'index.js', // Script to be run
+            script: path.resolve(__dirname, 'index.js'), // Script to be run
             args: [port || defaultPort, subdomain || defaultSubdomain],
         }, function (err, apps) {
             pm2.disconnect(); // Disconnects from PM2
@@ -66,7 +68,7 @@ function checkIfRunning(cb) {
         pm2.describe(serverName, (err, descriptions) => {
             pm2.disconnect()
             const stoppedWhen = ['stopped', 'errored', 'stopping']
-            if (err || descriptions.length === 0 || descriptions && descriptions[0] && stoppedWhen.includes(descriptions[0].pm2_env.status)) {
+            if (err || descriptions.length === 0 || stoppedWhen.includes(dotProp.get(descriptions, '0.pm2_env.status'))) {
                 cb.notRunning()
                 return
             }

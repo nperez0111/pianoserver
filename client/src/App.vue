@@ -121,6 +121,7 @@ export default {
       choice = ls.get('socket') || (window.location.hostname === 'localhost' ? 'ws://localhost:' + port : isLocalIP(window.location.hostname)? `ws://${window.location.hostname}:${port}` : url)
 console.log(choice)
     //try to reconnect to past connect or defaults
+    //figure out issue with localtunnel not updating but localhost does, work on url parsing 
     this.tryReconnect(choice,this.infiniteHandler)
 
     window.App = this
