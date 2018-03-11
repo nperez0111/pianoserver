@@ -48,7 +48,7 @@
     <v-content>
       <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:edit="edit" />
     </v-content>
-    <v-dialog v-model="prompt" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
+    <v-dialog v-show="connectionState==='disconnected'" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
       <v-card tile>
         <v-toolbar card dark color="primary">
           <v-toolbar-title>Welcome to Pianobar</v-toolbar-title>
@@ -58,28 +58,20 @@
           <v-container>
             <h1 class="text-xs-center">We need to know what you are trying to play from</h1>
             <v-layout row justify-center class="mt-5">
-              <v-btn @click="enterPort=true,chosen=false">
+              <v-btn @click="location='local',url='ws://localhost:'+port">
                 This Computer
               </v-btn>
-              <v-btn @click="chosen=true,enterPort=false">
+              <v-btn @click="location='external'">
                 Another Computer
                 <v-icon right>arrow_forward</v-icon>
               </v-btn>
             </v-layout>
-            <v-layout row class="mt-5" v-show="chosen">
+            <v-layout row class="mt-5" v-show="location!==undefined">
               <v-flex xs12 lg8>
-                <v-text-field v-model="url" :error="error"></v-text-field>
+                <v-text-field v-model="url" :error="connectionState==='disconnected'" @keyup.enter="tryReconnect"></v-text-field>
               </v-flex>
               <v-flex xs12 lg4>
                 <v-btn @click="tryReconnect">Try reconnect</v-btn>
-              </v-flex>
-            </v-layout>
-            <v-layout row class="mt-5" v-show="enterPort">
-              <v-flex xs12 lg8>
-                <v-text-field v-model="port" type="number" :error="error"></v-text-field>
-              </v-flex>
-              <v-flex xs12 lg4>
-                <v-btn @click="tryReconnect('ws://localhost:'+port)">Try reconnect</v-btn>
               </v-flex>
             </v-layout>
             <v-layout row justify-center>
@@ -90,9 +82,9 @@
         <div style="flex: 1 1 auto;" />
       </v-card>
     </v-dialog>
-    <v-snackbar color="error" v-model="error" :timeout="10000" vertical>
+    <v-snackbar color="error" v-show="connectionState==='disconnected'" :timeout="10000" vertical>
       Whoops seems like we can't connect to your pandora, check to see that the url is correct and that you have the server running
-      <v-btn dark flat @click.native="error = false">Close</v-btn>
+      <v-btn dark flat @click.native="connectionState='loading'">Close</v-btn>
     </v-snackbar>
   </v-app>
 </template>
@@ -126,15 +118,12 @@ console.log(choice)
 
     window.App = this
     return {
+      connectionState:'loading',
       retryAmount:10,
       loading: false,
-      enterPort: false,
-      error: false,
-      prompt: false,
-      chosen: false,
+      location:undefined,
       loadedAlbumCovers: false,
       drawer: false,
-      showBottomPlayer: false,
       albumCovers: [],
       stations: this.$station.getStations(),
       currentStation: this.$station.getStation(),
@@ -200,18 +189,16 @@ console.log(choice)
       }
     },
     tryReconnect(url,handler=false) {
-      this.loading = true
+      this.connectionState='loading'
       const socket = this.$socket.init(typeof url === 'string' ? url : this.url),
         socketUsers = [this.$config, this.$station, this.$player],
         socketHandler = ( handler || ( socket => {
         if (socket.connected === true) {
-          this.prompt = false
-          this.error = false
+          this.connectionState='connected'
           ls.set('socket', this.url)
         } else {
           socket.disconnect()
-          this.error = true
-          this.prompt = true
+          this.connectionState='disconnected'
         }
         this.loading = false
       }))
