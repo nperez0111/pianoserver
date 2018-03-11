@@ -48,7 +48,7 @@
     <v-content>
       <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:edit="edit" />
     </v-content>
-    <v-dialog v-show="connectionState==='disconnected'" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
+    <v-dialog v-model="disconnected" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
       <v-card tile>
         <v-toolbar card dark color="primary">
           <v-toolbar-title>Welcome to Pianobar</v-toolbar-title>
@@ -75,14 +75,14 @@
               </v-flex>
             </v-layout>
             <v-layout row justify-center>
-              <v-progress-circular indeterminate :size="70" :width="7" color="light-blue" v-if="loading"></v-progress-circular>
+              <v-progress-circular indeterminate :size="70" :width="7" color="light-blue" v-if="connectionState==='loading'"></v-progress-circular>
             </v-layout>
           </v-container>
         </v-card-text>
         <div style="flex: 1 1 auto;" />
       </v-card>
     </v-dialog>
-    <v-snackbar color="error" v-show="connectionState==='disconnected'" :timeout="10000" vertical>
+    <v-snackbar color="error" v-model="disconnected" :timeout="10000" vertical>
       Whoops seems like we can't connect to your pandora, check to see that the url is correct and that you have the server running
       <v-btn dark flat @click.native="connectionState='loading'">Close</v-btn>
     </v-snackbar>
@@ -118,9 +118,8 @@ console.log(choice)
 
     window.App = this
     return {
-      connectionState:'loading',
-      retryAmount:10,
-      loading: false,
+      connectionState:'connected',
+      retryAmount:3,
       location:undefined,
       loadedAlbumCovers: false,
       drawer: false,
@@ -136,6 +135,11 @@ console.log(choice)
   },
   props: {
     source: String
+  },
+  computed:{
+    disconnected:{get(){
+      return this.connectionState==='disconnected'||this.connectionState==='loading'
+    },set(){}}
   },
   methods: {
     edit(key,value){
@@ -186,6 +190,9 @@ console.log(choice)
         this.$socket.count++
         socket.disconnect()
         setTimeout(this.tryReconnect.bind(this,this.url,(this.$socket.count<this.retryAmount)?this.infiniteHandler:false),500)
+      }else{
+        ls.set('socket', this.url)
+        this.connectionState='connected'
       }
     },
     tryReconnect(url,handler=false) {
@@ -200,7 +207,6 @@ console.log(choice)
           socket.disconnect()
           this.connectionState='disconnected'
         }
-        this.loading = false
       }))
       window.socket = socket
       socketUsers.forEach(socketUser => {
