@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-toolbar color="primary">
-      <v-btn flat to="/">
+      <v-btn flat @click="back">
         <v-icon left>arrow_back</v-icon> Now Playing
       </v-btn>
       <v-toolbar-title class="white--text">Settings</v-toolbar-title>
@@ -288,6 +288,10 @@ export default {
       }
     },
     methods: {
+      back(){
+        this.saveSettings()
+        this.$router.push('/')
+      },
       valOf(obj, symbol) {
         if (typeof obj === 'string') {
           return obj
@@ -300,18 +304,15 @@ export default {
       saveSettings() {
         const config = this.config
         this.$config.save(config)
+        if(this.setAutostart){
+          this.$socket.emit('setAutostart')
+        }
       },
       saveEdit(shortcut) {
         const newShortcut = this.editing
         this.config.shortcuts[shortcut] = newShortcut.map(key => this.config.keys[key])
         this.editing = false
         this.$config.set(`shortcuts.${shortcut}`, this.config.shortcuts[shortcut])
-        if(this.setAutostart){
-          this.saveAutostart()
-        }
-      },
-      saveAutostart(){
-        this.$socket.emit('setAutostart')
       },
       toShortcutCodes(key) {
         const map = this.config.keys,
