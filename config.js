@@ -202,6 +202,33 @@ module.exports = {
 
             }
         },
+        selectStation: {
+            notification: {
+                title: 'Select Station',
+                message: 'What station would you like to play?',
+                //reply: true,
+                timeout: 30,
+                /*replied: function(a) {
+                    const getVal = obj => obj.activationValue
+                    const val = getVal(a)
+                    console.log(val)
+                },*/
+                activate: function(action) {
+                    if (action.activationType == 'actionClicked') {
+                        const val = action.activationValue
+                        console.log(val)
+
+                    }
+                    console.log("user clicked", action)
+                },
+                actions: ['something', 'abc', 'bcd', 'bee', 'lee', 'ree'],
+                dropdownLabel: 'Station List'
+            },
+            handler: function(err, resp, meta) {
+                console.log(err)
+                console.log(resp, meta)
+            }
+        },
         selectStations: {
             getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
             cb([resp]) {
@@ -216,12 +243,12 @@ module.exports = {
                     message: 'What station would you like to play?',
                     reply: true,
                     timeout: 30,
-                    replied: function (a) {
+                    replied: function(a) {
                         const getVal = obj => obj.activationValue
                         const val = getVal(a)
                         console.log(val)
                     },
-                    activate: function (action) {
+                    activate: function(action) {
                         if (action.activationType == 'actionClicked') {
                             const val = action.activationValue
                             console.log(val)
