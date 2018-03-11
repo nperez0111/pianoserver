@@ -1,7 +1,10 @@
 const homedir = require('homedir')(),
     path = require('path'),
     fs = require('fs'),
-    configFileLoc = path.resolve(homedir, ".config/pianobar/config")
+    execa = require('execa'),
+    configLoc = path.resolve(homedir, ".config/pianobar"),
+    configFileLoc = path.resolve(configLoc, "config"),
+    passLoc = path.resolve(configLoc, "pass.enc")
 
 class pianobarConfig {
 
@@ -64,6 +67,10 @@ class pianobarConfig {
             this.lines[index] = `#${this.lines[index]}`
             return this.writeLinesToFile()
         }
+    }
+    setPassword(password) {
+        console.log(passLoc, password)
+        return execa('openssl', ['enc', '-aes-256-cbc', '-salt', '-pass', 'pass:pianoserver', '-out', passLoc], { input: password })
     }
 }
 if (!module.parent) {
