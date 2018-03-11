@@ -185,12 +185,20 @@ const Response = {
     },
     setAutostart: (client, { pianobarLog }) => {
         return () => {
-            const regex = />  Now Playing "(.+)" (\([0-9]+\))/g
-
+            const regex = /  Now Playing "(.+)" .+\(([0-9]+)\)/g
+            console.log(pianobarLog)
             const found = pianobarLog.getNewest(pianobarLog.size).find(line => {
                 return regex.test(line)
             })
-            console.log(found)
+            regex.exec(found)
+            if (found) {
+                console.log(found)
+                const [line, stationName, stationID] = regex.exec(found)
+                console.log(line, stationName, stationID)
+            } else {
+                console.log('no matches found')
+
+            }
         }
     },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {
