@@ -23,6 +23,8 @@ const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
         shortcuts: require('./lib/Shortcuts'),
         localtunnel: require('localtunnel'),
         opn: require('opn'),
-        config: require('./config')
+        config: require('./config'),
+        nodeCleanup: require('node-cleanup'),
+        express: require('express')
     }
 module.exports = globals
