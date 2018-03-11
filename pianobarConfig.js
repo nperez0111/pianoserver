@@ -24,7 +24,7 @@ class pianobarConfig {
         return new Promise((resolve, reject) => {
             fs.writeFile(configFileLoc, this.lines.join('\n'), 'utf8', (err) => {
                 if (err) reject(err)
-                resolve()
+                resolve(true)
             })
         })
 
@@ -46,8 +46,24 @@ class pianobarConfig {
     }
     set(key, value) {
         const index = this.get(key, true)
+        if (index === null) {
+            return Promise.reject(`Unable to find:${key} in config file`)
+        }
         this.lines[index] = `${key} = ${value}`
         return this.writeLinesToFile()
+    }
+    disable(key) {
+        const index = this.get(key, true)
+        if (index === null) {
+            return Promise.reject(`Unable to find:${key} in config file`)
+        }
+        const isCommented = this.lines[index].startsWith('#')
+        if (isCommented) {
+            return Promise.resolve(true)
+        } else {
+            this.lines[index] = `#${this.lines[index]}`
+            return this.writeLinesToFile()
+        }
     }
 }
 if (!module.parent) {
