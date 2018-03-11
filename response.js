@@ -183,6 +183,16 @@ const Response = {
             config.set(key, value)
         }
     },
+    setAutostart: (client, { pianobarLog }) => {
+        return () => {
+            const regex = />  Now Playing "(.+)" (\([0-9]+\))/g
+
+            const found = pianobarLog.getNewest(pianobarLog.size).find(line => {
+                return regex.test(line)
+            })
+            console.log(found)
+        }
+    },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {
         return () => {
             clearInterval(timeInterval)

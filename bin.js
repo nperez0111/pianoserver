@@ -33,7 +33,7 @@ const pm2 = require('pm2'),
 function startServer(subdomain, port) {
     pm2.connect(function (err) {
         if (err) {
-            console.error(err)
+            console.error('An error occured attempting to start the server, please try again...')
             process.exit(2)
         }
 
@@ -51,7 +51,7 @@ function startServer(subdomain, port) {
 function restartServer() {
     pm2.connect(function (err) {
         if (err) {
-            console.error(err)
+            console.error("An error occured attempting to restart the server, please try again...")
             process.exit(2)
         }
         pm2.gracefulReload(serverName)
@@ -148,7 +148,7 @@ function connectToConsole() {
 function quitServer() {
     pm2.connect(function (err) {
         if (err) {
-            console.error(err)
+            console.error("An error occured attempting to quit the server, please try again...")
             process.exit(2)
         }
         pm2.stop(serverName)
