@@ -1,5 +1,6 @@
 const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
     History = require('./lib/History'),
+    PianobarConfig = require('./pianobarConfig'),
     globals = {
         ipc: require('node-ipc'),
         Spawner: require('./spawnPianobar'),
@@ -25,6 +26,7 @@ const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
         opn: require('opn'),
         config: require('./config'),
         nodeCleanup: require('node-cleanup'),
-        express: require('express')
+        express: require('express'),
+        pianobarConfig: new PianobarConfig()
     }
 module.exports = globals

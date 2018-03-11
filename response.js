@@ -183,7 +183,7 @@ const Response = {
             config.set(key, value)
         }
     },
-    setAutostart: (client, { pianobarLog }) => {
+    getStationIDNumber: (client, { pianobarLog }) => {
         return () => {
             const regex = /  Now Playing "(.+)" .+\(([0-9]+)\)/g
             console.log(pianobarLog)
@@ -193,12 +193,34 @@ const Response = {
             regex.exec(found)
             if (found) {
                 console.log(found)
-                const [line, stationName, stationID] = regex.exec(found)
-                console.log(line, stationName, stationID)
+                const [line, stationName, stationIDNumber] = regex.exec(found)
+                client.emit('getStationIDNumber', stationIDNumber)
             } else {
                 console.log('no matches found')
-
+                //maybe try reading it for the file
+                client.emit('getStationIDNumber', null)
             }
+        }
+    },
+    setAutostart: (client, globals) => {
+        const { pianobarLog, pianobarConfig } = globals
+
+        return () => {
+            (new Promise((resolve, reject) => {
+                Response.getStationIDNumber({
+                    emit: (label, stationIDNumber) => {
+                        if (id === null) {
+                            reject('No station ID found.')
+                        } else {
+                            resolve(stationIDNumber)
+                        }
+                    }
+                }, globals)
+            })).then(stationIDNumber => {
+                pianobarConfig.set('autostart_station', stationIDNumber)
+            }).catch(() => {
+                console.log("attempted to set autostart but couldn't find station ID")
+            })
         }
     },
     disconnect: (client, { current, timeInterval, status, isPlayingHandler, isPlaying, log }) => {
