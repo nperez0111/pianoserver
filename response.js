@@ -166,14 +166,14 @@ const Response = {
             spawnInstance.writeCommand(command)
         }
     },
-    getConfig: (client, { config }) => {
+    getConfig: (client, { config, pianobarConfig }) => {
         return () => {
-            client.emit('getConfig', config.config.all)
+            client.emit('getConfig', config.copy(), pianobarConfig.getAll())
         }
     },
     setAllConfig: (client, { config, shortcuts }) => {
         return (newConfig) => {
-            const before = config.config.get('listenShortcuts')
+            const before = config.get('listenShortcuts')
             config.setAll(newConfig)
         }
     },

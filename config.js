@@ -138,7 +138,7 @@ module.exports = {
         return JSON.parse(JSON.stringify(conf.all))
     },
     get(key) {
-        return dotProp.get(conf.all, key)
+        return conf.get(key)
     },
     set(key, value) {
         const before = this.copy()

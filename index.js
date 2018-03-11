@@ -42,7 +42,7 @@ const globals = require('./globals'),
 globals.spawnInstance = spawnInstance
 globals.shortcuts = shortcuts({ ipc, current, pastSongs, log, currentTime, isPlaying, spawnInstance, logger, response, notifier, config })
 
-if (config.config.get('listenShortcuts')) {
+if (config.get('listenShortcuts')) {
     globals.shortcuts.init()
 }
 
@@ -101,7 +101,7 @@ ipc.server.start();
             }
         })
 
-        if (config.config.get('openTunnelURL')) {
+        if (config.get('openTunnelURL')) {
             opn(tunnel.url)
         }
     })
