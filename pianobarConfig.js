@@ -31,8 +31,10 @@ class pianobarConfig {
     }
     getAll() {
         return this.lines.filter(line => line.length > 0).reduce((obj, line) => {
-            const [key, value] = line.split(" = ")
-            obj[key] = value
+            if (key !== 'password') {
+                const [key, value] = line.split(" = ")
+                obj[key] = value
+            }
             return obj
         }, {})
     }
