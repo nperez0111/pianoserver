@@ -224,7 +224,7 @@ module.exports = {
                     if (type in handlers) {
                         handlers[type](meta.activationValue)
                     } else {
-                        console.log(type, meta)
+                        //console.log(type, meta)
                     }
                 },
                 cb(resp, allGlobals) {

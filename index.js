@@ -1,5 +1,5 @@
 const globals = require('./globals'),
-    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config, notifier, express, nodeCleanup, pianobarConfig } = globals,
+    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config, notifier, express, nodeCleanup, pianobarConfig, chalk } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
         onExit: function (exitCode, signal) {
@@ -88,10 +88,11 @@ ipc.server.start();
             return
             //process.exit(2)
         }
-        const message = `Your local tunnel URL: ${tunnel.url}`
+        const message = chalk.green(`Your local tunnel URL: ${chalk.blue(tunnel.url)}\nYour local URL: ${chalk.blue(`http://localhost:${port}/`)}`)
 
 
         console.log(message)
+
         if (!pianobarLog.getOldest(1).startsWith("Your")) {
             pianobarLog.store.unshift(message)
         }

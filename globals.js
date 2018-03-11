@@ -27,6 +27,7 @@ const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
         config: require('./config'),
         nodeCleanup: require('node-cleanup'),
         express: require('express'),
-        pianobarConfig: new PianobarConfig()
+        pianobarConfig: new PianobarConfig(),
+        chalk: require('chalk'),
     }
 module.exports = globals
