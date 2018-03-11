@@ -47,6 +47,7 @@ const CTRL = 29,
             pause: [],
             shuffle: [],
             nowPlaying: [],
+            selectStation: [CTRL, SHIFT, A + 1], //A+1 = S
         },
         keys: {
             CTRL,
@@ -240,38 +241,6 @@ module.exports = {
 
                 }
             }
-        })(),
-        selectStations: {
-            getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
-            cb([resp]) {
-                if (resp.length == 1) {
-                    return 'response was empty' + JSON.stringify(resp)
-                }
-                const [label, status, isPlaying] = resp, { stationCount } = status
-                const stations = (new Array(parseInt(stationCount))).fill(false).map((c, i) => status[`station${i}`])
-                console.log(stations)
-                return {
-                    title: 'Select Station',
-                    message: 'What station would you like to play?',
-                    reply: true,
-                    timeout: 30,
-                    replied: function (a) {
-                        const getVal = obj => obj.activationValue
-                        const val = getVal(a)
-                        console.log(val)
-                    },
-                    activate: function (action) {
-                        if (action.activationType == 'actionClicked') {
-                            const val = action.activationValue
-                            console.log(val)
-
-                        }
-                        console.log("user clicked", action)
-                    },
-                    actions: ['a', 'b'],
-                    dropDownLabel: 'Station List'
-                }
-            }
-        }
+        })()
     }
 }
