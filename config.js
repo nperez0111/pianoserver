@@ -202,33 +202,45 @@ module.exports = {
 
             }
         },
-        selectStation: {
-            notification: {
-                title: 'Select Station',
-                message: 'What station would you like to play?',
-                //reply: true,
-                timeout: 30,
-                /*replied: function(a) {
-                    const getVal = obj => obj.activationValue
-                    const val = getVal(a)
-                    console.log(val)
-                },*/
-                activate: function(action) {
-                    if (action.activationType == 'actionClicked') {
-                        const val = action.activationValue
-                        console.log(val)
+        selectStation: (function () {
+            var globals
 
+            return {
+                handler: function (err, type, meta) {
+                    const { response } = globals, handlers = {
+                        replied: station => {
+                            if (response) {
+                                response.selectStation(null, globals)(station)
+                            } else {
+                                console.log("Would've switched the station to:", station)
+                            }
+                        }
                     }
-                    console.log("user clicked", action)
+                    if (err) {
+                        return 'Welp we failed somehow'
+                    }
+
+                    if (type in handlers) {
+                        handlers[type](meta.activationValue)
+                    } else {
+                        console.log(type, meta)
+                    }
                 },
-                actions: ['something', 'abc', 'bcd', 'bee', 'lee', 'ree'],
-                dropdownLabel: 'Station List'
-            },
-            handler: function(err, resp, meta) {
-                console.log(err)
-                console.log(resp, meta)
+                cb(resp, allGlobals) {
+                    globals = allGlobals
+
+                    return {
+                        message: 'Type in the name of the station which you would like to play',
+                        title: 'What station would you like to play?',
+                        reply: true,
+                        timeout: 300,
+                        icon: imageLoc,
+                        contentImage: imageLoc
+                    }
+
+                }
             }
-        },
+        })(),
         selectStations: {
             getFromServer: [{ name: 'getCurrentStatus', args: [1] }],
             cb([resp]) {
@@ -243,12 +255,12 @@ module.exports = {
                     message: 'What station would you like to play?',
                     reply: true,
                     timeout: 30,
-                    replied: function(a) {
+                    replied: function (a) {
                         const getVal = obj => obj.activationValue
                         const val = getVal(a)
                         console.log(val)
                     },
-                    activate: function(action) {
+                    activate: function (action) {
                         if (action.activationType == 'actionClicked') {
                             const val = action.activationValue
                             console.log(val)
