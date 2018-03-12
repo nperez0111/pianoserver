@@ -24,19 +24,19 @@ class Spawner {
         this.options = Object.assign({
             onExitCloseChild: true,
             takeInput: true,
-            onExit: function(exitCode, signal) {
+            onExit: function (exitCode, signal) {
 
             },
-            onEnd: function() {
+            onEnd: function () {
 
             },
-            onData: function(data) {
+            onData: function (data) {
 
             }
         }, options)
 
         if (start === true && once) {
-            this.pianobar = execa('pianobar')
+            this.pianobar = execa('pianobar', { preferLocal: true, localDir: __dirname })
             this.setUpPianobar()
             once = false
         } else {
