@@ -136,6 +136,8 @@ function connectToConsole() {
             }
             if (key === '\u001B') {
                 quitServer()
+                console.log('Server has been stopped.')
+                process.exit()
             }
 
             //send single char and flush stdin
