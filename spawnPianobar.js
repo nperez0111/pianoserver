@@ -1,4 +1,4 @@
-const spawn = require('child_process').spawn,
+const execa = require('execa'),
     logger = require('simple-node-logger').createSimpleLogger('debug.log'),
     log = logger.info,
     stdin = process.stdin,
@@ -36,7 +36,7 @@ class Spawner {
         }, options)
 
         if (start === true && once) {
-            this.pianobar = spawn('pianobar')
+            this.pianobar = execa('pianobar')
             this.setUpPianobar()
             once = false
         } else {
