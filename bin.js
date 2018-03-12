@@ -31,7 +31,7 @@ const pm2 = require('pm2'),
 
 
 function startServer(subdomain, port) {
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             console.error('An error occured attempting to start the server, please try again...')
             process.exit(2)
@@ -41,7 +41,7 @@ function startServer(subdomain, port) {
             name: serverName,
             script: path.resolve(__dirname, 'index.js'), // Script to be run
             args: [port || defaultPort, subdomain || defaultSubdomain],
-        }, function (err, apps) {
+        }, function(err, apps) {
             pm2.disconnect(); // Disconnects from PM2
             if (err) throw err
         })
@@ -49,7 +49,7 @@ function startServer(subdomain, port) {
 }
 
 function restartServer() {
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             console.error("An error occured attempting to restart the server, please try again...")
             process.exit(2)
@@ -60,7 +60,7 @@ function restartServer() {
 }
 
 function checkIfRunning(cb) {
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             cb.notRunning()
             return
@@ -78,7 +78,7 @@ function checkIfRunning(cb) {
 }
 
 function connectToConsole() {
-    console.log(chalk.green(`PRESSING "q" quits the server and restarts it, CTRL-C or ESC quits viewer while still playing in background\n`))
+    console.log(chalk.green(`PRESSING "q" quits the server and restarts it, CTRL-C quits viewer while still playing in background, ESC quits the server\n`))
     const ipc = require('node-ipc'),
         serverName = 'pianobar-server',
         stdin = process.stdin
@@ -129,10 +129,13 @@ function connectToConsole() {
         // on any data into stdin
         stdin.on('data', key => {
 
-            if (key === '\u0003' || key === '\u001B') {
+            if (key === '\u0003') {
                 // ctrl-c ( end of text )
                 // ESC
                 process.exit()
+            }
+            if (key === '\u001B') {
+                quitServer()
             }
 
             //send single char and flush stdin
@@ -146,7 +149,7 @@ function connectToConsole() {
 }
 
 function quitServer() {
-    pm2.connect(function (err) {
+    pm2.connect(function(err) {
         if (err) {
             console.error("An error occured attempting to quit the server, please try again...")
             process.exit(2)
@@ -171,12 +174,12 @@ function tryServerCommand(command, args) {
 }
 
 Object.keys(ipcCommands).forEach(command => {
-    program.command(command).description(ipcCommands[command]).action(function () {
+    program.command(command).description(ipcCommands[command]).action(function() {
         tryServerCommand(command)
     })
 })
 
-program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
+program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function(station) {
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {
