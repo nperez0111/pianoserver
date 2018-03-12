@@ -1,5 +1,6 @@
 const execa = require('execa'),
     logger = require('simple-node-logger').createSimpleLogger('debug.log'),
+    path = require('path'),
     log = logger.info,
     stdin = process.stdin,
     mappings = {
@@ -36,7 +37,7 @@ class Spawner {
         }, options)
 
         if (start === true && once) {
-            this.pianobar = execa('pianobar', { preferLocal: true, localDir: __dirname })
+            this.pianobar = execa('./pianobar', { cwd: path.resolve(__dirname, 'pianobar') })
             this.setUpPianobar()
             once = false
         } else {
