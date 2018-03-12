@@ -3,63 +3,92 @@ const commandExists = require('command-exists'),
     log = console.log.bind(console),
     brew = execa.bind(execa, 'brew'),
     mkfifo = execa.bind(execa, 'mkfifo'),
+    os = require('os'),
+    make = execa.bind(execa, 'make', ['-j', os.cpus().length - 1]),
     installBrew = () => execa('/usr/bin/ruby', ['-e', '"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"']),
     homedir = require('homedir')(),
     path = require('path'),
     fs = require('fs'),
     del = require('del'),
+    ghdownload = require('github-download'),
     inquirer = require('inquirer'),
     logToFile = (file) => {
         const log_file = fs.createWriteStream(file, { flags: 'w' })
         return {
-            log: function(line) {
+            log: function (line) {
                 log_file.write(util.format(line));
             },
-            logLine: function(line) {
+            logLine: function (line) {
                 log_file.write(util.format(line) + '\n');
             },
-            newLine: function() {
+            newLine: function () {
                 log_file.write('\n')
             },
-            makeExecutable: function(cb) {
+            makeExecutable: function (cb) {
                 fs.chmod(file, 0755, cb)
             }
         }
     },
     err = console.error.bind(console),
     PianobarConfig = require('./pianobarConfig'),
-    pianobarConfigPath = path.resolve(homedir, '.config/pianobar'),
+    configLoc = path.resolve(homedir, '.config'),
+    pianobarConfigPath = path.resolve(configLoc, 'pianobar'),
     configPath = path.resolve(pianobarConfigPath, 'config'),
     ctlPath = path.resolve(pianobarConfigPath, 'ctl'),
-    //config = require('./config'),
+    pianobarLocalLoc = path.resolve(__dirname, 'pianobar'),
+    downloadPianobar = () => new Promise((resolve, reject) => ghdownload('https://github.com/PromyLOPh/pianobar.git', pianobarLocalLoc).on("error", reject).on("end", resolve)),
+    makePianobar = () => make({
+        stdio: 'inherit',
+        env: process.env,
+        cwd: pianobarLocalLoc
+    }),
+    fileExists = path => fs.existsSync(path) ? Promise.resolve(true) : Promise.reject(false),
     makedirIfNotExists = path => execa('mkdir', ['-p', path]),
     run = () => {
+        console.log(configLoc, pianobarConfigPath, configPath, ctlPath, pianobarLocalLoc)
         log("Checking to see if Pianobar is installed...")
-        commandExists('pianobar').catch(() => {
+        fileExists(pianobarLocalLoc).catch(() => {
 
             log(`Pianobar is not installed, So let's install it...`)
-            log("Checking to see if Brew is installed...")
-            commandExists('brew').catch(() => {
 
-                log(`Brew is not installed, So lets install it...`)
+            log('Checking to see if pkg-config is installed...')
+            return commandExists('pkg-config').catch(() => {
+                log("pkg-config is not installed, So let's install it...")
 
-                return installBrew().catch(err('Error installing brew...'))
+                log("Checking to see if Brew is installed...")
+                return commandExists('brew').catch(() => {
+
+                    log(`Brew is not installed, So lets install it...`)
+
+                    return installBrew().catch(err('Error installing brew...'))
+                }).then(() => {
+
+                    log(`Success!\n So, let's update Brew it and install Pianobar...`)
+
+                    return brew(['update'])
+                        .catch(() => err('brew update failed'))
+                        .then(() => log("Attempting to install pkg-config"))
+                        .then(brew(['install', 'pkg-config']))
+                        .then(() => { log("Success!") })
+                        .catch(() => err('pkg-config failed to install'))
+                })
             }).then(() => {
+                log("pkg-config is installed...")
 
-                log(`Success!\n So, let's update Brew it and install Pianobar...`)
+                log("Downloading Pianobar...")
+                return downloadPianobar().catch(() => err("Failed to download Pianobar, check internet connection?")).then(() => {
+                    log("Compiling Pianobar...")
+                    return makePianobar().catch(() => { err("Failed to compile Pianobar...") }).then(() => {
+                        log("Pianobar installed successfully!")
+                    })
+                })
 
-                return brew(['update'])
-                    .catch(err('brew update failed'))
-                    .then(() => log("Attempting to install Pianobar"))
-                    .then(brew(['install', 'pianobar']))
-                    .then(() => { log("Success!") })
-                    .catch(err('Pianobar failed to install'))
             })
         }).then(() => {
             //pianobar exists
             log(`Ensuring directory structure...`)
 
-            return makedirIfNotExists(path).then(() => log("Success!")).catch(err("Failed..."))
+            return makedirIfNotExists(pianobarConfigPath).then(() => log("Success!")).catch(() => err("Failed..."))
         }).then(() => {
             log(`Attempting to create FIFO...`)
             return mkfifo(ctlPath)
@@ -98,7 +127,7 @@ OR
 Input an autostart station for Pandora to automatically play on startup.`,
                     when: ans => ans.actuallyAutostart
                 }],
-                text = ({ username, autostart }) => `
+                text = ({ username, autostart, password }) => `
 user = ${username}
 #password = ${password}
 autostart_station = ${autostart||'814524665525141882'}
@@ -124,7 +153,7 @@ event_command = ~/.config/pianobar/pianobarNotify.rb`,
                 }).then(() => {
                     log("Success!")
                     log("Encrypting Password...")
-                    return handlePassword(answers.password).then(() => log("Success!")).catch(err('Failed To Encrypt password, try installing openssl?'))
+                    return handlePassword(answers.password).then(() => log("Success!")).catch(() => err('Failed To Encrypt password, try installing openssl?'))
 
                 })
             })
