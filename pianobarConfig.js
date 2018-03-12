@@ -8,12 +8,14 @@ const homedir = require('homedir')(),
 
 class pianobarConfig {
 
-    constructor() {
+    constructor({ readLines = true }) {
         this.lines = []
-        const instance = this
-        this.getLinesFromFile().then(file => {
-            this.lines = file.split('\n')
-        })
+        if (readLines) {
+            const instance = this
+            this.getLinesFromFile().then(file => {
+                this.lines = file.split('\n')
+            })
+        }
     }
     getLinesFromFile() {
         return new Promise((resolve, reject) => {
