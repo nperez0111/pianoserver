@@ -24,6 +24,8 @@ const pm2 = require('pm2'),
     chalk = require('chalk'),
     path = require('path'),
     dotProp = require('dot-prop'),
+    getStdin = require('get-stdin'),
+    logger = require("simple-node-logger"),
     serverName = 'pianoserver',
     defaultPort = 8081,
     defaultSubdomain = 'pianoserver',
@@ -151,6 +153,29 @@ function connectToConsole() {
 
 }
 
+function sendStdin(currentCommand) {
+    const ipc = require('node-ipc'),
+        serverName = 'pianobar-server'
+    ipc.config.id = 'pianobar-stdin'
+    ipc.config.retry = 100
+    ipc.config.maxRetries = 2
+    ipc.config.silent = true
+
+    getStdin().then(stdin => {
+
+        ipc.connectTo(serverName, () => {
+            //console.log('yet to connect')
+            ipc.of[serverName].on('connect', () => {
+
+                ipc.of[serverName].emit('cli', [currentCommand, stdin]);
+
+                ipc.disconnect(serverName)
+            });
+        })
+
+    })
+}
+
 function quitServer() {
     return new Promise((resolve, reject) => {
         pm2.connect(function (err) {
@@ -188,6 +213,9 @@ Object.keys(ipcCommands).forEach(command => {
     })
 })
 
+/*program.command('stdin <currentCommand>').description('Internal command used only to send output of pianobar into the server').action(function (currentCommand) {
+    sendStdin(currentCommand)
+})*/
 program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
     tryServerCommand('selectStation', station)
 })
@@ -205,9 +233,11 @@ program.command('start [port] [subdomain]').description('Starts the server for b
     //console.log(subdomain, Number(port))
     startServer(subdomain, port)
 })
-program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.').action(() => {
-    startServer()
-})
+program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.')
+program.arguments('[cmd]')
+    .action(function (cmd) {
+        sendStdin(cmd)
+    })
 
 program.version('0.0.1').parse(process.argv)
 
