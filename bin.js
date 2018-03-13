@@ -31,7 +31,7 @@ const pm2 = require('pm2'),
 
 
 function startServer(subdomain, port) {
-    pm2.connect(function(err) {
+    pm2.connect(function (err) {
         if (err) {
             console.error('An error occured attempting to start the server, please try again...')
             process.exit(2)
@@ -41,7 +41,7 @@ function startServer(subdomain, port) {
             name: serverName,
             script: path.resolve(__dirname, 'index.js'), // Script to be run
             args: [port || defaultPort, subdomain || defaultSubdomain],
-        }, function(err, apps) {
+        }, function (err, apps) {
             pm2.disconnect(); // Disconnects from PM2
             if (err) throw err
         })
@@ -49,7 +49,7 @@ function startServer(subdomain, port) {
 }
 
 function restartServer() {
-    pm2.connect(function(err) {
+    pm2.connect(function (err) {
         if (err) {
             console.error("An error occured attempting to restart the server, please try again...")
             process.exit(2)
@@ -60,7 +60,7 @@ function restartServer() {
 }
 
 function checkIfRunning(cb) {
-    pm2.connect(function(err) {
+    pm2.connect(function (err) {
         if (err) {
             cb.notRunning()
             return
@@ -135,9 +135,10 @@ function connectToConsole() {
                 process.exit()
             }
             if (key === '\u001B') {
-                quitServer()
-                console.log('Server has been stopped.')
-                process.exit()
+                quitServer().then(() => {
+                    console.log('Server has been stopped.')
+                    process.exit()
+                })
             }
 
             //send single char and flush stdin
@@ -151,14 +152,20 @@ function connectToConsole() {
 }
 
 function quitServer() {
-    pm2.connect(function(err) {
-        if (err) {
-            console.error("An error occured attempting to quit the server, please try again...")
-            process.exit(2)
-        }
-        pm2.stop(serverName)
-        setTimeout(pm2.disconnect.bind(pm2), 300)
+    return new Promise((resolve, reject) => {
+        pm2.connect(function (err) {
+            if (err) {
+                reject("An error occured attempting to quit the server, please try again...")
+                process.exit(2)
+            }
+            pm2.stop(serverName)
+            setTimeout(() => {
+                pm2.disconnect.bind(pm2)
+                resolve()
+            }, 300)
+        })
     })
+
 }
 
 function tryServerCommand(command, args) {
@@ -176,16 +183,16 @@ function tryServerCommand(command, args) {
 }
 
 Object.keys(ipcCommands).forEach(command => {
-    program.command(command).description(ipcCommands[command]).action(function() {
+    program.command(command).description(ipcCommands[command]).action(function () {
         tryServerCommand(command)
     })
 })
 
-program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function(station) {
+program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {
-    quitServer()
+    quitServer().then(() => { process.exit() })
 })
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
     restartServer()
