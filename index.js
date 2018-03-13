@@ -64,7 +64,7 @@ currentTime.push({ now: '00:01', ofTotal: '99:99' })
 isPlaying.push(true)
 
 ipc.config.id = 'pianobar-server';
-ipc.config.retry = 1500;
+ipc.config.retry = 200;
 ipc.config.silent = true;
 
 ipc.serve(() => {
