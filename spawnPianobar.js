@@ -1,7 +1,6 @@
 const execa = require('execa'),
-    logger = require('simple-node-logger').createSimpleLogger('debug.log'),
     path = require('path'),
-    log = logger.info,
+    homedir = require('homedir')(),
     stdin = process.stdin,
     mappings = {
         nextSong: 'n',
