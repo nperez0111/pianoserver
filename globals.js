@@ -1,14 +1,13 @@
-const logger = require('simple-node-logger').createSimpleLogger('debug.log'),
-    History = require('./lib/History'),
+const History = require('./lib/History'),
     PianobarConfig = require('./pianobarConfig'),
     globals = {
         ipc: require('node-ipc'),
         Spawner: require('./spawnPianobar'),
-        logger,
+        logger: { log: console.log.bind(console), error: console.error.bind(console) },
+        log: globals.logger,
         History,
         io: require('socket.io'),
         response: require('./response'),
-        log: logger.trace,
         currentTime: new History(20, { key: 'now' }), //apply something so it only updates when time.now is different
         current: new History(120, { key: 'coverArt' }),
         pastSongs: new History(50, { key: 'coverArt' }),
