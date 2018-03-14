@@ -15,16 +15,16 @@ const commandExists = require('command-exists'),
     logToFile = (file) => {
         const log_file = fs.createWriteStream(file, { flags: 'w' })
         return {
-            log: function(line) {
+            log: function (line) {
                 log_file.write(util.format(line));
             },
-            logLine: function(line) {
+            logLine: function (line) {
                 log_file.write(util.format(line) + '\n');
             },
-            newLine: function() {
+            newLine: function () {
                 log_file.write('\n')
             },
-            makeExecutable: function(cb) {
+            makeExecutable: function (cb) {
                 fs.chmod(file, 0755, cb)
             }
         }
@@ -104,18 +104,15 @@ const commandExists = require('command-exists'),
 
             })
         }).then(() => {
-            //pianobar exists
+            log("Pianobar is installed!")
             log(`Ensuring directory structure...`)
 
             return makedirIfNotExists(pianobarConfigPath).then(() => log("Success!")).catch(() => err("Failed..."))
         }).then(() => {
             log(`Attempting to create FIFO...`)
-            return mkfifo(ctlPath)
-                .catch(a => {
-                    log("Success!")
-                }).then(() => {
-                    log('Success!')
-                })
+            return mkfifo(ctlPath).catch(() => {}).then(() => {
+                log('Success!')
+            })
         }).then(() => {
             fileExists(configPath).then(() => inquirer.prompt({ type: 'confirm', default: false, name: 'regenConfig', message: 'You already have a config file... Do you want to regenerate it?' }).then(answer => { if (answer.regenConfig) { throw "Regenerate config file" } })).catch(() => {
                 log("Generating Pianobar config file based off of the following questions...")
