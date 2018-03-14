@@ -5,6 +5,7 @@ const commandExists = require('command-exists'),
     mkfifo = execa.bind(execa, 'mkfifo'),
     os = require('os'),
     make = execa.bind(execa, 'make', ['-j', os.cpus().length - 1]),
+    npm = execa.bind(execa, 'npm'),
     installBrew = () => execa('/usr/bin/ruby', ['-e', '"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"']),
     homedir = require('homedir')(),
     path = require('path'),
@@ -15,16 +16,16 @@ const commandExists = require('command-exists'),
     logToFile = (file) => {
         const log_file = fs.createWriteStream(file, { flags: 'w' })
         return {
-            log: function (line) {
+            log: function(line) {
                 log_file.write(util.format(line));
             },
-            logLine: function (line) {
+            logLine: function(line) {
                 log_file.write(util.format(line) + '\n');
             },
-            newLine: function () {
+            newLine: function() {
                 log_file.write('\n')
             },
-            makeExecutable: function (cb) {
+            makeExecutable: function(cb) {
                 fs.chmod(file, 0755, cb)
             }
         }
@@ -44,6 +45,7 @@ const commandExists = require('command-exists'),
         env: process.env,
         cwd: pianobarLocalLoc
     }),
+    buildUI = () => npm(['run', 'build'], { cwd: path.resolve(__dirname, 'client') }),
     fileExists = path => fs.existsSync(path) ? Promise.resolve(true) : Promise.reject(false),
     makedirIfNotExists = path => execa('mkdir', ['-p', path]),
     copyFile = (source, target) => {
@@ -114,7 +116,10 @@ const commandExists = require('command-exists'),
                 log('Success!')
             })
         }).then(() => {
-            fileExists(configPath).then(() => inquirer.prompt({ type: 'confirm', default: false, name: 'regenConfig', message: 'You already have a config file... Do you want to regenerate it?' }).then(answer => { if (answer.regenConfig) { throw "Regenerate config file" } })).catch(() => {
+            log("Generating Web UI...")
+            return buildUI().then(() => log("Success...")).catch(() => err("Unable to Generate Web UI code"))
+        }).then(() => {
+            return fileExists(configPath).then(() => inquirer.prompt({ type: 'confirm', default: false, name: 'regenConfig', message: 'You already have a config file... Do you want to regenerate it?' }).then(answer => { if (answer.regenConfig) { throw "Regenerate config file" } })).catch(() => {
                 log("Generating Pianobar config file based off of the following questions...")
 
                 const questions = [{
