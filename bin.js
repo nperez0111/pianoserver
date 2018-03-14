@@ -213,9 +213,6 @@ Object.keys(ipcCommands).forEach(command => {
     })
 })
 
-/*program.command('stdin <currentCommand>').description('Internal command used only to send output of pianobar into the server').action(function (currentCommand) {
-    sendStdin(currentCommand)
-})*/
 program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function(station) {
     tryServerCommand('selectStation', station)
 })
@@ -238,9 +235,9 @@ program.command('start [port] [subdomain]').description('Starts the server for b
     startServer(subdomain, port)
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.')
-program.arguments('[cmd]')
-    .action(function(cmd) {
-        sendStdin(cmd)
+program.arguments('[pianobarCommand]')
+    .action(function(pianobarCommand) {
+        sendStdin(pianobarCommand)
     })
 
 program.version('0.0.1').parse(process.argv)
