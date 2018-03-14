@@ -15,7 +15,9 @@ const execa = require('execa'),
         shuffle: 'x',
         createStation: 'c',
         createGenreStation: 'g',
-        deleteStation: 'd'
+        deleteStation: 'd',
+        renameStation: 'r',
+        history: 'h'
     }
 let once = true
 class Spawner {
@@ -24,13 +26,13 @@ class Spawner {
         this.options = Object.assign({
             onExitCloseChild: true,
             takeInput: true,
-            onExit: function (exitCode, signal) {
+            onExit: function(exitCode, signal) {
 
             },
-            onEnd: function () {
+            onEnd: function() {
 
             },
-            onData: function (data) {
+            onData: function(data) {
 
             }
         }, options)

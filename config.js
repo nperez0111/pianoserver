@@ -203,11 +203,11 @@ module.exports = {
 
             }
         },
-        selectStation: (function () {
+        selectStation: (function() {
             var globals
 
             return {
-                handler: function (err, type, meta) {
+                handler: function(err, handler, meta) {
                     const { response } = globals, handlers = {
                         replied: station => {
                             if (response) {
@@ -221,8 +221,8 @@ module.exports = {
                         return 'Welp we failed somehow'
                     }
 
-                    if (type in handlers) {
-                        handlers[type](meta.activationValue)
+                    if (handler in handlers) {
+                        handlers[handler](meta.activationValue)
                     } else {
                         //console.log(type, meta)
                     }

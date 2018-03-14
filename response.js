@@ -12,7 +12,7 @@ const Response = {
                 client.emit('isPlaying', state)
             })
 
-            obj.timeInterval = setInterval(function () {
+            obj.timeInterval = setInterval(function() {
                 client.volatile.emit('currentTime', currentTime.getNewest(), isPlaying.getNewest());
             }, 1000)
         }
@@ -152,6 +152,55 @@ const Response = {
             isPlaying.push(true)
         }
     },
+    renameCurrentStation: (client, globals) => {
+        const { spawnInstance, isPlaying } = globals
+        return (stationName) => {
+            //logger.info('got a request to add station ' + stationName)
+
+            spawnInstance.writeCommand("renameStation")
+            spawnInstance.writeCommand(stationName)
+
+        }
+    },
+    renameStation: (client, globals) => {
+        const { spawnInstance, isPlaying, current } = globals
+        return (stationName, newName) => {
+            //logger.info('got a request to add station ' + stationName)
+            if (current.getNewest().stationName !== stationName) {
+                let songsAgo = 0
+                const isInHistory = (cb) => {
+                    Response.getStationIDNumber({
+                        emit: (code, idNum) => cb(idNum !== null)
+                    }, Object.assign({
+                        filter: (line, possibleStation, index) => {
+                            const isCurrentStation = possibleStation == stationName
+                            if (isCurrentStation) {
+                                songsAgo = index
+                            }
+                            return isCurrentStation
+                        }
+                    }, globals))()
+                }
+
+                isInHistory((inHistory) => {
+                    if (inHistory) {
+                        Response.goBackToSong(null, globals)(songAgo)
+                    } else {
+                        Response.selectStation(client, globals)(stationName)
+                    }
+                })
+            }
+            Response.renameCurrentStation(client, globals)(newName)
+        }
+    },
+    goBackToSong: (client, { spawnInstance, logger }) => {
+        return (songAgo) => {
+            //logger.info('got a request to add station ' + artistOrSongName)
+
+            spawnInstance.writeCommand("history")
+            spawnInstance.writeCommand(songsAgo)
+        }
+    },
     addMusicToStation: (client, { spawnInstance, logger }) => {
         return (artistOrSongName) => {
             //logger.info('got a request to add station ' + artistOrSongName)
@@ -183,17 +232,23 @@ const Response = {
             config.set(key, value)
         }
     },
-    getStationIDNumber: (client, { pianobarLog }) => {
+    getStationIDNumber: (client, { pianobarLog, songsAgo, filter }) => {
         return () => {
             const regex = /  Now Playing "(.+)" .+\(([0-9]+)\)/g
             console.log(pianobarLog)
-            const found = pianobarLog.getNewest(pianobarLog.size).find(line => {
-                return regex.test(line)
-            })
+            const found = pianobarLog.getNewest(pianobarLog.size).filter(line => {
+                return (filter || ((a, b) => b))(line, regex.test(line))
+            }).filter((line, i) => {
+                if (filter) {
+                    let [line, stationName, stationIDNumber] = /  Now Playing "(.+)" .+\(([0-9]+)\)/g.exec(line)
+                    return filter(line, stationName, i)
+                }
+                return true
+            })[songsAgo || 0]
             regex.exec(found)
             if (found) {
                 console.log(found)
-                const [line, stationName, stationIDNumber] = regex.exec(found)
+                let [line, stationName, stationIDNumber] = regex.exec(found)
                 client.emit('getStationIDNumber', stationIDNumber)
             } else {
                 console.log('no matches found')

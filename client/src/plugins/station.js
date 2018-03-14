@@ -23,6 +23,11 @@ const dev = false,
     addVariety(stationNumber, str) {
       this.socket.emit('addVariety', stationNumber, str)
     },
+    renameCurrentStation(newName) {
+      this.socket.emit('renameCurrentStation', newName)
+      this.allStations[this.allStations.indexOf(this.current)] = newName
+      this.setStations(this.allStations)
+    },
     renameStation(stationNumber, newName) {
       this.socket.emit('renameStation', stationNumber, newName)
       this.allStations[stationNumber] = newName
@@ -36,10 +41,10 @@ const dev = false,
       this.save(newStation)
       this.pubSub.publish(CURRENT, newStation)
     },
-    getStations: function (filter = a => a) {
+    getStations: function(filter = a => a) {
       return this.allStations.filter(filter)
     },
-    setStations: function (stations) {
+    setStations: function(stations) {
       this.allStations = stations
       this.pubSub.publish(STATIONS, stations)
       ls.set('stations', stations)

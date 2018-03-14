@@ -15,16 +15,16 @@ const commandExists = require('command-exists'),
     logToFile = (file) => {
         const log_file = fs.createWriteStream(file, { flags: 'w' })
         return {
-            log: function (line) {
+            log: function(line) {
                 log_file.write(util.format(line));
             },
-            logLine: function (line) {
+            logLine: function(line) {
                 log_file.write(util.format(line) + '\n');
             },
-            newLine: function () {
+            newLine: function() {
                 log_file.write('\n')
             },
-            makeExecutable: function (cb) {
+            makeExecutable: function(cb) {
                 fs.chmod(file, 0755, cb)
             }
         }
