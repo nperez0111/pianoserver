@@ -8,7 +8,7 @@
       <v-spacer></v-spacer>
     </v-toolbar>
     <v-card class="my-1">
-      <v-card-title class="title">Rename Station (Not Working)</v-card-title>
+      <v-card-title class="title">Rename Station</v-card-title>
       <v-card-text>
         <v-layout>
           <v-text-field v-model="stationName" label="Change Station Name To:" class="mr-2"></v-text-field>
@@ -19,7 +19,7 @@
       </v-card-text>
     </v-card>
     <v-card class="my-1">
-      <v-card-title class="title">Add Variety To This Station (Not Working)</v-card-title>
+      <v-card-title class="title">Add Variety To This Station</v-card-title>
       <v-card-text>
         <v-layout>
           <v-text-field v-model="variety" label="Add To This Station, Music By:" class="mr-2"></v-text-field>
@@ -39,7 +39,7 @@ export default {
       this.$station.onchangeStations(stations => {
         this.stationName = stations[stationNum]
       })
-      this.$emit('edit','toolbar',false)
+      this.$emit('edit', 'toolbar', false)
       this.$emit('showoverflow')
       return {
         variety: "",

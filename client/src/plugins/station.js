@@ -20,18 +20,34 @@ const dev = false,
     init(socket) {
       this.socket = socket
     },
+    updateStatus(cb) {
+      this.socket.emit("getCurrentStatus")
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          cb.bind(this)
+          resolve()
+        }, 700)
+      })
+    }
     addVariety(stationNumber, str) {
-      this.socket.emit('addVariety', stationNumber, str)
-    },
-    renameCurrentStation(newName) {
-      this.socket.emit('renameCurrentStation', newName)
-      this.allStations[this.allStations.indexOf(this.current)] = newName
-      this.setStations(this.allStations)
+      this.updateStatus().then(() => {
+        if (this.isCurrentStation(stationNumber)) {
+          this.socket.emit('addVarietyToCurrentStation', str)
+        } else {
+          this.socket.emit('addVariety', this.allStations[stationNumber], str)
+        }
+      })
     },
     renameStation(stationNumber, newName) {
-      this.socket.emit('renameStation', stationNumber, newName)
-      this.allStations[stationNumber] = newName
-      this.setStations(this.allStations)
+      this.updateStatus().then(() => {
+        if (this.isCurrentStation(stationNumber)) {
+          this.socket.emit('renameCurrentStation', newName)
+        } else {
+          this.socket.emit('renameStation', stationNumber, newName)
+        }
+        this.allStations[stationNumber] = newName
+        this.setStations(this.allStations)
+      })
     },
     getStation() {
       return this.current
@@ -65,6 +81,9 @@ const dev = false,
       ls.clear()
       this.current = null
 
+    },
+    isCurrentStation(stationNumber) {
+      return this.allStations[stationNumber] === this.current
     },
     get length() {
       return this.allStations.length
