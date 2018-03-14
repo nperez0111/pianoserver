@@ -65,122 +65,129 @@
             <v-list-tile-sub-title>Your current Startup Station is: <v-span v-if="config.autostart" v-text="config.autostart" class="white--text"></v-span><span v-else class="red--text">Not Set</span></v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-subheader v-show="config.listenShortcuts" class="title">Shortcut Settings</v-subheader>
       </v-list>
-      <v-tabs v-model="active" color="primary" dark slider-color="white" v-show="config.listenShortcuts" grow show-arrows>
-        <v-tab v-for="shortcut in shortcutNames" :key="shortcut" ripple>
-          {{ shortcut | splitWord }}
-        </v-tab>
-        <v-tab-item v-for="shortcut in shortcutNames" :key="shortcut">
-          <v-card flat>
-            <v-card-title v-if="!editing">
-              <span class="subheading">Current Shortcut:</span>
-              <code v-for="code in toShortcutCodes(shortcut)" v-text="code" class="mx-1" v-show="config.shortcuts[shortcut]&&config.shortcuts[shortcut].length!==0"></code>
-              <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
-              <v-btn @click="editing=[]" fab small color="primary">
-                <v-icon>edit</v-icon>
-              </v-btn>
-            </v-card-title>
-            <v-card-title v-else>
-              <v-layout column>
-                <v-flex>
-                  <span class="subheading">Old Shortcut:</span>
-                  <v-chip v-for="(code,i) in toShortcutCodes(shortcut)" :key="code" class="mx-1">{{code}}</v-chip>
+      <v-card class="my-1">
+        <v-card-title class="pa-0">
+          <v-subheader v-show="config.listenShortcuts" class="title mb-0">Shortcut Settings</v-subheader>
+        </v-card-title>
+        <v-card-text class="pa-0">
+          <v-tabs v-model="active" color="primary" dark slider-color="white" v-show="config.listenShortcuts" grow show-arrows>
+            <v-tab v-for="shortcut in shortcutNames" :key="shortcut" ripple>
+              {{ shortcut | splitWord }}
+            </v-tab>
+            <v-tab-item v-for="shortcut in shortcutNames" :key="shortcut">
+              <v-card flat>
+                <v-card-title v-if="!editing">
+                  <span class="subheading">Current Shortcut:</span>
+                  <code v-for="code in toShortcutCodes(shortcut)" v-text="code" class="mx-1" v-show="config.shortcuts[shortcut]&&config.shortcuts[shortcut].length!==0"></code>
                   <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
-                </v-flex>
-                <v-flex>
-                  <span v-if="editing.length>0" class="subheading">Current Shortcut:</span>
-                  <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
-                </v-flex>
-                <v-flex>
-                  <span v-if="editing.length==0">Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
-                </v-flex>
-              </v-layout>
-            </v-card-title>
-            <v-card-text :class="{'px-0':$vuetify.breakpoint.mdAndDown}">
-              <div v-if="editing">
-                <v-layout justify-center v-for="row in keyboard" :key="row.toString()">
-                  <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
-                    <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
-                      <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
-                    </v-card>
-                  </v-flex>
-                </v-layout>
-                <v-layout>
-                  <v-spacer></v-spacer>
-                  <v-flex xs12 sm6 md4 lg3 xl2 class="mt-2">
-                    <v-layout justify-center>
-                      <v-flex v-for="code in arrowKeys.slice(0,1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
+                  <v-btn @click="editing=[]" fab small color="primary">
+                    <v-icon>edit</v-icon>
+                  </v-btn>
+                </v-card-title>
+                <v-card-title v-else>
+                  <v-layout column>
+                    <v-flex>
+                      <span class="subheading">Old Shortcut:</span>
+                      <v-chip v-for="(code,i) in toShortcutCodes(shortcut)" :key="code" class="mx-1">{{code}}</v-chip>
+                      <span v-show="!config.shortcuts[shortcut]||config.shortcuts[shortcut].length===0">&nbsp;None Specified</span>
+                    </v-flex>
+                    <v-flex>
+                      <span v-if="editing.length>0" class="subheading">Current Shortcut:</span>
+                      <v-chip v-for="(code,i) in editing" :key="code" class="mx-1" close @input="editing.splice(i,1)">{{code}}</v-chip>
+                    </v-flex>
+                    <v-flex>
+                      <span v-if="editing.length==0">Choose from below the shortcut keys to activate {{shortcut | splitWord | capitalize}} Shortcut</span>
+                    </v-flex>
+                  </v-layout>
+                </v-card-title>
+                <v-card-text :class="{'px-0':$vuetify.breakpoint.mdAndDown}">
+                  <div v-if="editing">
+                    <v-layout justify-center v-for="row in keyboard" :key="row.toString()">
+                      <v-flex v-for="code in row" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
                         <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
                           <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
                         </v-card>
                       </v-flex>
                     </v-layout>
                     <v-layout>
-                      <v-flex v-for="code in arrowKeys.slice(1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
-                        <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
-                          <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
-                        </v-card>
+                      <v-spacer></v-spacer>
+                      <v-flex xs12 sm6 md4 lg3 xl2 class="mt-2">
+                        <v-layout justify-center>
+                          <v-flex v-for="code in arrowKeys.slice(0,1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
+                            <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
+                              <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
+                            </v-card>
+                          </v-flex>
+                        </v-layout>
+                        <v-layout>
+                          <v-flex v-for="code in arrowKeys.slice(1)" :key="valOf(code)" :class="{['xs'+code.grow]:true}" @click="keyHandler(code)">
+                            <v-card :light="!editing.includes(valOf(code))" :raised="!editing.includes(valOf(code))" :color="editing.includes(valOf(code))?'green':'light'" :class="{'ma-1':$vuetify.breakpoint.mdAndUp,'no-radius':$vuetify.breakpoint.mdAndDown}" :flat="$vuetify.breakpoint.mdAndDown">
+                              <v-card-text :class="{'pa-2':$vuetify.breakpoint.mdAndUp, 'py-1':$vuetify.breakpoint.smAndDown,'px-0':$vuetify.breakpoint.smAndDown ,'text-xs-center':true}" v-html="valOf(code,true)"></v-card-text>
+                            </v-card>
+                          </v-flex>
+                        </v-layout>
                       </v-flex>
                     </v-layout>
-                  </v-flex>
-                </v-layout>
-                <!--<v-layout justify-space-between wrap>
+                    <!--<v-layout justify-space-between wrap>
 
-                  <v-flex v-for="code in keyNames" :key="code" sm1 v-show="!editing.includes(code)">
-                    <code class="mx-1" @click="editing.push(code)">{{code | splitByUnderscore}}</code>
-                  </v-flex>
-                </v-layout>-->
-                <v-layout class="mt-3">
-                  <v-btn @click="editing=false" color="red">
-                    Cancel
-                  </v-btn>
-                  <v-spacer></v-spacer>
-                  <v-btn @click="saveEdit(shortcut)" color="green">
-                    <v-icon left>save</v-icon>
-                    Save Shortcut
-                  </v-btn>
-                </v-layout>
-              </div>
-            </v-card-text>
-          </v-card>
-        </v-tab-item>
-      </v-tabs>
-
-      <v-form>
-        <v-subheader class="title">Login Settings</v-subheader>
-        <v-layout class="pa-3">
-          <v-text-field label="Username" v-model="pianobarConfig.user"></v-text-field>
-          <v-tooltip top>
-            <v-btn @click="$config.set('user',pianobarConfig.user)" color="primary" slot="activator">
-              <v-icon left>save</v-icon>
+                      <v-flex v-for="code in keyNames" :key="code" sm1 v-show="!editing.includes(code)">
+                        <code class="mx-1" @click="editing.push(code)">{{code | splitByUnderscore}}</code>
+                      </v-flex>
+                    </v-layout>-->
+                    <v-layout class="mt-3">
+                      <v-btn @click="editing=false" color="red">
+                        Cancel
+                      </v-btn>
+                      <v-spacer></v-spacer>
+                      <v-btn @click="saveEdit(shortcut)" color="green">
+                        <v-icon left>save</v-icon>
+                        Save Shortcut
+                      </v-btn>
+                    </v-layout>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+          </v-tabs>
+      </v-card-text>
+    </v-card>
+      <v-card class="my-1">
+        <v-form>
+          <v-subheader class="title">Login Settings</v-subheader>
+          <v-layout class="pa-3">
+            <v-text-field label="Username" v-model="pianobarConfig.user"></v-text-field>
+            <v-tooltip top>
+              <v-btn @click="$config.set('user',pianobarConfig.user)" color="primary" slot="activator">
+                <v-icon left>save</v-icon>
+                  Save
+              </v-btn>
+              <span>Changes will be saved now but won't take effect until you restart the server.</span>
+            </v-tooltip>
+          </v-layout>
+          <v-layout class="pa-3">
+            <v-text-field label="Password" v-model="pianobarConfig['#password']" :type="showPassword"></v-text-field>
+            <v-tooltip top>
+              <v-btn @click="showPassword=showPassword==='password'?'text':'password'" color="primary" icon slot="activator">
+                <v-icon v-text="showPassword==='password'?'lock_open':'lock'"></v-icon>
+              </v-btn>
+              <span v-if="showPassword==='password'">
+                Shows Password instead of hiding it
+              </span>
+              <span v-else>
+                Hides Password instead of showing it
+              </span>
+            </v-tooltip>
+            <v-tooltip top>
+              <v-btn @click="$config.setPassword(pianobarConfig['#password'])" color="primary" slot="activator">
+                <v-icon left>save</v-icon>
                 Save
-            </v-btn>
-            <span>Changes will be saved now but won't take effect until you restart the server.</span>
-          </v-tooltip>
-        </v-layout>
-        <v-layout class="pa-3">
-          <v-text-field label="Password" v-model="pianobarConfig['#password']" :type="showPassword"></v-text-field>
-          <v-tooltip top>
-            <v-btn @click="showPassword=showPassword==='password'?'text':'password'" color="primary" icon slot="activator">
-              <v-icon v-text="showPassword==='password'?'lock_open':'lock'"></v-icon>
-            </v-btn>
-            <span v-if="showPassword==='password'">
-              Shows Password instead of hiding it
-            </span>
-            <span v-else>
-              Hides Password instead of showing it
-            </span>
-          </v-tooltip>
-          <v-tooltip top>
-            <v-btn @click="$config.setPassword(pianobarConfig['#password'])" color="primary" slot="activator">
-              <v-icon left>save</v-icon>
-              Save
-            </v-btn>
-            <span>Changes will be saved now but won't take effect until you restart the server.</span>
-          </v-tooltip>
-        </v-layout>
-      </v-form>
+              </v-btn>
+              <span>Changes will be saved now but won't take effect until you restart the server.</span>
+            </v-tooltip>
+          </v-layout>
+        </v-form>
+      </v-card>
       <v-list two-line subheader>
         <v-subheader class="title">UI Settings (In Progress)</v-subheader>
         <v-list-tile avatar @click="ui.darkMode=!ui.darkMode">
