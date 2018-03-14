@@ -7,6 +7,7 @@
       <v-toolbar-title class="white--text">{{stationName}} Station Settings</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
+    <v-alert v-if="!isCurrentlyPlaying"></v-alert>
     <v-card class="my-1">
       <v-card-title class="title">Rename Station</v-card-title>
       <v-card-text>
@@ -49,6 +50,10 @@ export default {
     props: {
       id: String
     },
-    computed: {}
+    computed: {
+      isCurrentlyPlaying() {
+        return this.$station.current === this.stationName
+      }
+    }
 }
 </script>
