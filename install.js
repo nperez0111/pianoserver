@@ -149,9 +149,9 @@ OR
 Input an autostart station for Pandora to automatically play on startup.`,
                         when: ans => ans.actuallyAutostart
                     }],
-                    text = ({ username, autostart, password }) => `
+                    text = ({ username, autostart }) => `
 user = ${username}
-#password = ${password}
+#password = password
 autostart_station = ${autostart||'814524665525141882'}
 format_nowplaying_song = [93m%t[0m, by: [93m%a[0m on the album: [96m%l[0m [91m%r[0m%@%s
 format_nowplaying_station = Now Playing "[95m%n[0m" [90m(%i)[0m
@@ -162,7 +162,7 @@ format_msg_time = [90m#   [97m%s[0m
 format_msg_err = [90m/!\[0m %s
 format_msg_question = [97m[?][0m %s
 format_msg_debug = [90m%s[0m
-event_command = ~/.config/pianobar/pianobarNotify.rb`,
+event_command = ${path.resolve(__dirname,'bin.js')}`,
                     handlePassword = password => {
                         const pianobarConfig = new PianobarConfig({ readLines: false })
                         return pianobarConfig.setPassword(password)
