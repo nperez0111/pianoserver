@@ -28,7 +28,7 @@ const dev = false,
           resolve()
         }, 700)
       })
-    }
+    },
     addVariety(stationNumber, str) {
       this.updateStatus().then(() => {
         if (this.isCurrentStation(stationNumber)) {
@@ -57,10 +57,10 @@ const dev = false,
       this.save(newStation)
       this.pubSub.publish(CURRENT, newStation)
     },
-    getStations: function(filter = a => a) {
+    getStations: function (filter = a => a) {
       return this.allStations.filter(filter)
     },
-    setStations: function(stations) {
+    setStations: function (stations) {
       this.allStations = stations
       this.pubSub.publish(STATIONS, stations)
       ls.set('stations', stations)

@@ -43,7 +43,7 @@
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Open on Startup</v-list-tile-title>
-            <v-list-tile-sub-title>Open Pianobar UI (this web app) on startup</v-list-tile-sub-title>
+            <v-list-tile-sub-title>Open Pianobar UI (this web app) on startup of server</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile avatar @click="config.listenShortcuts=!config.listenShortcuts">
@@ -149,9 +149,37 @@
 
       <v-form>
         <v-subheader class="title">Login Settings</v-subheader>
-        <div class="pa-3">
-          <v-text-field label="Username" v-model="config.username"></v-text-field>
-        </div>
+        <v-layout class="pa-3">
+          <v-text-field label="Username" v-model="pianobarConfig.user"></v-text-field>
+          <v-tooltip top>
+            <v-btn @click="$config.set('user',pianobarConfig.user)" color="primary" slot="activator">
+              <v-icon left>save</v-icon>
+                Save
+            </v-btn>
+            <span>Changes will be saved now but won't take effect until you restart the server.</span>
+          </v-tooltip>
+        </v-layout>
+        <v-layout class="pa-3">
+          <v-text-field label="Password" v-model="pianobarConfig['#password']" :type="showPassword"></v-text-field>
+          <v-tooltip top>
+            <v-btn @click="showPassword=showPassword==='password'?'text':'password'" color="primary" icon slot="activator">
+              <v-icon v-text="showPassword==='password'?'lock_open':'lock'"></v-icon>
+            </v-btn>
+            <span v-if="showPassword==='password'">
+              Shows Password instead of hiding it
+            </span>
+            <span v-else>
+              Hides Password instead of showing it
+            </span>
+          </v-tooltip>
+          <v-tooltip top>
+            <v-btn @click="$config.setPassword(pianobarConfig['#password'])" color="primary" slot="activator">
+              <v-icon left>save</v-icon>
+              Save
+            </v-btn>
+            <span>Changes will be saved now but won't take effect until you restart the server.</span>
+          </v-tooltip>
+        </v-layout>
       </v-form>
       <v-list two-line subheader>
         <v-subheader class="title">UI Settings (In Progress)</v-subheader>
@@ -183,20 +211,24 @@ export default {
   data() {
       this.$emit('edit','toolbar',false)
       this.$emit('showoverflow')
-      this.$config.onchangeConfig(config => {
-        console.log(config)
+      this.$config.onchangeConfig(({config,pianobarConfig}) => {
         this.config = config
+        this.pianobarConfig=pianobarConfig
       })
       window.setting = this
       return {
         active: '0',
         setAutostart:false,
+        showPassword:'password',
         config: this.$config.config || {
           openTunnelURL: true,
           showNotifications: true,
           listenShortcuts: true,
           shortcuts: {},
           keys: {}
+        },
+        pianobarConfig:{
+          user:"user"
         },
         ui: {
           darkMode: ls.get('darkMode')||false,

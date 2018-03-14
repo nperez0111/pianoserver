@@ -13,7 +13,7 @@ const wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amou
                     client.emit('isPlaying', state)
                 })
 
-                obj.timeInterval = setInterval(function() {
+                obj.timeInterval = setInterval(function () {
                     client.volatile.emit('currentTime', currentTime.getNewest(), isPlaying.getNewest());
                 }, 1000)
             }
@@ -218,6 +218,11 @@ const wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amou
             return (key, value) => {
                 console.log("setting:", key, "to:", value)
                 config.set(key, value)
+            }
+        },
+        setPassword: (client, { pianobarConfig }) => {
+            return (password) => {
+                pianobarConfig.setPassword(password)
             }
         },
         getStationIDNumber: (client, { pianobarLog }) => {

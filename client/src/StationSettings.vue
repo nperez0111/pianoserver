@@ -7,7 +7,7 @@
       <v-toolbar-title class="white--text">{{stationName}} Station Settings</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
-    <v-alert v-if="!isCurrentlyPlaying"></v-alert>
+    <v-alert type="error" :value="!isCurrentlyPlaying">The current station is not currently playing, in order to change the settings below we will switch this to be the now playing station. </v-alert>
     <v-card class="my-1">
       <v-card-title class="title">Rename Station</v-card-title>
       <v-card-text>
@@ -35,6 +35,7 @@
 <script>
 export default {
   data() {
+    window.stationSet=this
       const stationNum = Number(this.id)
 
       this.$station.onchangeStations(stations => {

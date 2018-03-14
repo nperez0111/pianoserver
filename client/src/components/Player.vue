@@ -3,14 +3,14 @@
     <div v-resize="onResize">
       <Full-Height class="blue darken-4" v-show="!vertical">
         <v-layout wrap justify-center>
-          <v-flex xs5 v-touch="{up:likeSong,left:nextSong}">
+          <v-flex sm5 lg6  v-touch="{up:likeSong,left:nextSong}">
             <v-layout column justify-center fill-height class="px-2">
               <transition name="dialog-transition" mode="out-in">
                 <img :src="status.coverArt" :key="status.coverArt" class="fullwidth elevation-2">
               </transition>
             </v-layout>
           </v-flex>
-          <v-flex xs7 md12 lg7>
+          <v-flex sm7 lg6>
             <v-layout column justify-center fill-height class="px-3">
               <v-spacer></v-spacer>
               <h1 class="headline">{{status.title}}</h1>

@@ -4,7 +4,7 @@ import { EventAggregator } from 'aurelia-event-aggregator'
 const STATE = 'STATE',
   Config = {
     socket: {},
-    config: null,
+    state: null,
     pub: new EventAggregator(),
     install(Vue, options) {
 
@@ -13,10 +13,10 @@ const STATE = 'STATE',
     init(socket) {
       this.socket = socket
 
-      this.socket.on('getConfig', config => {
-        //console.log(config)
-        this.config = config
-        this.pub.publish(STATE, config)
+      this.socket.on('getConfig', (config, pianobarConfig) => {
+        console.log(config, pianobarConfig)
+        this.state = { config, pianobarConfig }
+        this.pub.publish(STATE, this.state)
       })
       this.socket.emit('getConfig')
 
@@ -26,6 +26,9 @@ const STATE = 'STATE',
     },
     onchangeConfig(callback) {
       return this.on(STATE, callback)
+    },
+    setPassword(password) {
+      this.socket.emit('setPassword', password)
     },
     set(key, value) {
       console.info(`Setting ${key} to`, value)
