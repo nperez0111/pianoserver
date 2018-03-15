@@ -2,19 +2,19 @@ const globals = require('./globals'),
     { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config, notifier, express, nodeCleanup, pianobarConfig, chalk } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
-        onExit: function(exitCode, signal) {
+        onExit: function (exitCode, signal) {
             if (signal === 'SIGINT')
                 process.kill(process.pid, 'SIGINT');
             ipc.server.stop()
             globals.shortcuts.destroy()
             process.exit()
         },
-        onEnd: function() {
+        onEnd: function () {
             //maybe dont stop the server but restart pianobar?
             ipc.server.stop()
             globals.shortcuts.destroy()
         },
-        onData: function(data) {
+        onData: function (data) {
             const getTime = /(\d\d:\d\d).(\d\d:\d\d)/
             if (getTime.test(data)) {
                 const [now, ofTotal] = Array.from(data.match(getTime)).slice(1)
@@ -30,7 +30,8 @@ const globals = require('./globals'),
                 console.log(data.trim())
                 pianobarLog.push(data.trim())
             }
-        }
+        },
+        stdin: process.stdin
     }),
     app = express(),
     server = http.Server(app),
@@ -50,7 +51,7 @@ app.use(express.static(path.resolve(__dirname, 'client/dist')))
 server.listen(port)
 
 // Add a connect listener
-socket.on('connection', function(client) {
+socket.on('connection', function (client) {
     const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, pianobarLog, pianobarConfig, config, shortcuts: globals.shortcuts }
     //needs to be seperate from globals because attachments work per instance of connection
 
@@ -78,7 +79,7 @@ ipc.server.start();
 
 (function tunnel() {
 
-    localtunnel(port, { subdomain }, function(err, tunnel) {
+    localtunnel(port, { subdomain }, function (err, tunnel) {
         var store;
         if (err) {
             pianobarLog.unpush(store)
@@ -108,7 +109,7 @@ ipc.server.start();
     })
 })()
 
-nodeCleanup(function(exitCode, signal) {
+nodeCleanup(function (exitCode, signal) {
     spawnInstance.pianobar.kill()
     spawnInstance.options.onEnd(exitCode, signal)
 })
