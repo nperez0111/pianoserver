@@ -1,7 +1,6 @@
 const execa = require('execa'),
     path = require('path'),
     homedir = require('homedir')(),
-    stdin = process.stdin,
     mappings = {
         nextSong: 'n',
         dislikeSong: '-',
@@ -22,17 +21,17 @@ const execa = require('execa'),
 let once = true
 class Spawner {
     constructor(start, options) {
-
+        this.stdin = options.stdin || process.stdin
         this.options = Object.assign({
             onExitCloseChild: true,
             takeInput: true,
-            onExit: function(exitCode, signal) {
+            onExit: function (exitCode, signal) {
 
             },
-            onEnd: function() {
+            onEnd: function () {
 
             },
-            onData: function(data) {
+            onData: function (data) {
 
             }
         }, options)
@@ -49,19 +48,19 @@ class Spawner {
     setUpPianobar() {
         if (this.options.takeInput) {
             // without this, we would only get streams once enter is pressed
-            if (stdin.setRawMode) {
-                stdin.setRawMode(true);
+            if (this.stdin.setRawMode) {
+                this.stdin.setRawMode(true);
             }
 
-            // resume stdin in the parent process (node app won't quit all by itself
+            // resume this.stdin in the parent process (node app won't quit all by itself
             // unless an error or process.exit() happens)
-            stdin.resume();
+            this.stdin.resume();
 
             // i don't want binary, do you?
-            stdin.setEncoding('utf8');
+            this.stdin.setEncoding('utf8');
 
-            // on any data into stdin
-            stdin.on('data', key => {
+            // on any data into this.stdin
+            this.stdin.on('data', key => {
                 // ctrl-c ( end of text )
                 if (key === '\u0003') {
                     this.options.onExit()
@@ -71,7 +70,7 @@ class Spawner {
                     process.exit();
                 }
 
-                //send single char and flush stdin
+                //send single char and flush this.stdin
                 this.pianobar.stdin.write(key + "\n")
 
                 // write the key to stdout all normal like
@@ -114,3 +113,16 @@ class Spawner {
 }
 
 module.exports = Spawner
+if (!module.parent) {
+    var proccess = new Spawner(true, {
+        onExit: function (exitCode, signal) {
+            process.exit()
+        },
+        onEnd: function () {
+            process.exit()
+        },
+        onData: function (data) {
+            console.log(data)
+        }
+    })
+}
