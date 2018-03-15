@@ -46,7 +46,7 @@ if (config.get('listenShortcuts')) {
     globals.shortcuts.init()
 }
 
-app.use(express.static('client/dist'))
+app.use(express.static(path.resolve(__dirname, 'client/dist')))
 server.listen(port)
 
 // Add a connect listener

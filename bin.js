@@ -33,48 +33,66 @@ const pm2 = require('pm2'),
 
 
 function startServer(subdomain, port) {
-    pm2.connect(function (err) {
-        if (err) {
-            console.error('An error occured attempting to start the server, please try again...')
-            process.exit(2)
-        }
+    return new Promise((resolve, reject) => {
+        pm2.connect(function(err) {
+            if (err) {
+                reject('An error occured attempting to start the server, please try again...')
+                return process.exit(2)
+            }
 
-        pm2.start({
-            name: serverName,
-            script: path.resolve(__dirname, 'index.js'), // Script to be run
-            args: [port || defaultPort, subdomain || defaultSubdomain],
-        }, function (err, apps) {
-            pm2.disconnect(); // Disconnects from PM2
-            if (err) throw err
+            pm2.start({
+                name: serverName,
+                script: path.resolve(__dirname, 'index.js'), // Script to be run
+                args: [port || defaultPort, subdomain || defaultSubdomain],
+            }, function(err, apps) {
+                pm2.disconnect(); // Disconnects from PM2
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(true)
+                }
+            })
         })
     })
+
 }
 
 function restartServer() {
-    pm2.connect(function (err) {
-        if (err) {
-            console.error("An error occured attempting to restart the server, please try again...")
-            process.exit(2)
-        }
-        pm2.gracefulReload(serverName)
-        pm2.disconnect()
+    return new Promise((resolve, reject) => {
+        pm2.connect(function(err) {
+            if (err) {
+                reject("An error occured attempting to restart the server, please try again...")
+                return process.exit(2)
+            }
+            pm2.gracefulReload(serverName)
+            pm2.disconnect()
+            resolve(true)
+        })
     })
+
 }
 
 function checkIfRunning(cb) {
-    pm2.connect(function (err) {
-        if (err) {
-            cb.notRunning()
-            return
-        }
-        pm2.describe(serverName, (err, descriptions) => {
-            pm2.disconnect()
-            const stoppedWhen = ['stopped', 'errored', 'stopping']
-            if (err || descriptions.length === 0 || stoppedWhen.includes(dotProp.get(descriptions, '0.pm2_env.status'))) {
-                cb.notRunning()
+    const { notRunning = () => false, running = () => true } = cb
+
+    return new Promise((resolve, reject) => {
+        pm2.connect(function(err) {
+            if (err) {
+                notRunning()
+                reject(err)
                 return
             }
-            cb.running()
+            pm2.describe(serverName, (err, descriptions) => {
+                pm2.disconnect()
+                const stoppedWhen = ['stopped', 'errored', 'stopping']
+                if (err || descriptions.length === 0 || stoppedWhen.includes(dotProp.get(descriptions, '0.pm2_env.status'))) {
+                    notRunning()
+                    reject(false)
+                    return
+                }
+                running()
+                resolve(true)
+            })
         })
     })
 }
@@ -178,7 +196,7 @@ function sendStdin(currentCommand) {
 
 function quitServer() {
     return new Promise((resolve, reject) => {
-        pm2.connect(function (err) {
+        pm2.connect(function(err) {
             if (err) {
                 reject("An error occured attempting to quit the server, please try again...")
                 process.exit(2)
@@ -197,7 +215,7 @@ function tryServerCommand(command, args) {
 
     if (command in ipcCommands) {
         const connection = new Connector()
-        connection.on(command, args).then(() => {
+        return connection.on(command, args).then(() => {
             //console.log(`Ran: ${command}`)
             process.exit(0)
         }).catch(err => {
@@ -208,22 +226,23 @@ function tryServerCommand(command, args) {
 }
 
 Object.keys(ipcCommands).forEach(command => {
-    program.command(command).description(ipcCommands[command]).action(function () {
+    program.command(command).description(ipcCommands[command]).action(function() {
         tryServerCommand(command)
     })
 })
 
-/*program.command('stdin <currentCommand>').description('Internal command used only to send output of pianobar into the server').action(function (currentCommand) {
-    sendStdin(currentCommand)
-})*/
-program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
+program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function(station) {
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {
     quitServer().then(() => { process.exit() })
 })
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
-    restartServer()
+    restartServer().then(() => { process.exit() })
+})
+program.command('install').description('Installs pianobar, Regenerates the Web UI').action(() => {
+    const install = require('./install')
+    install().catch(() => console.error("Something must've gone wrong")).then(() => process.exit())
 })
 program.command('start [port] [subdomain]').description('Starts the server for both pianobar console and the web app. Allows you to specify the subdomain you would like to use. Otherwise will try to use pandora or if unavailable will try to use a random one.').action((port, subdomain) => {
     if (port !== Number(port).toString()) {
@@ -234,9 +253,9 @@ program.command('start [port] [subdomain]').description('Starts the server for b
     startServer(subdomain, port)
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.')
-program.arguments('[cmd]')
-    .action(function (cmd) {
-        sendStdin(cmd)
+program.arguments('[pianobarCommand]')
+    .action(function(pianobarCommand) {
+        sendStdin(pianobarCommand)
     })
 
 program.version('0.0.1').parse(process.argv)
@@ -244,13 +263,5 @@ program.version('0.0.1').parse(process.argv)
 const NO_COMMAND_SPECIFIED = program.args.length === 0
 
 if (NO_COMMAND_SPECIFIED) {
-    checkIfRunning({
-        running() {
-            connectToConsole()
-        },
-        notRunning() {
-            startServer()
-            connectToConsole()
-        }
-    })
+    checkIfRunning({}).catch(startServer).then(connectToConsole)
 }
