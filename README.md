@@ -10,9 +10,25 @@ This project gives a Web UI for [pianobar](https://github.com/PromyLOPh/pianobar
 ![Vertical Player Interface](screenshots/vertical.png)
 ### Manages Settings
 ![Settings Interface](screenshots/settings.png)
-#### What settings could there be?
- * Notifications 
-   - Every time a song changes you can see what song is playing
-   - Every time a song is liked it will notify you
- * Shortcuts 
-   - You can Play, Pause, Like, Dislike and even Select a station to play through shortcuts and confirmed through notification bubbles.
+You can configure Pianobar settings as well as edit your shortcuts or disable features if you don't want them.
+### Notifications
+Every time a song changes, or is liked you will get a native notification in MacOS
+### Shortcuts 
+You can Play, Pause, Like, Dislike and even Select a station to play through shortcuts and confirmed through notification bubbles.
+
+## Install
+```npm install nperez0111/pianoserver```
+## Usage
+```pianoserver```
+Starts a server instance if not already running.
+### Commands
+#### Start [port] [subdomain]
+Starts the server if an instance is not already running on the port and subdomain specified if supplied
+#### Quit
+Stops the server
+#### Restart
+Restarts the server
+#### Play, Pause, LikeSong, DislikeSong
+Does the action to the currently playing music
+#### SelectStation [stationName]
+Changes the station to the station name specified
