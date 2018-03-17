@@ -8,7 +8,7 @@
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
     "build": "node build/build.js",
-    "now": "now --public /dist && now alias && now remove pianobar --safe"
+    "now": "now --public ./dist -n pianobar && now alias && now remove pianobar --safe"
   },
   "dependencies": {
     "aurelia-event-aggregator": "^1.0.1",
