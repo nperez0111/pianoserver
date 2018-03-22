@@ -30,8 +30,7 @@ const globals = require('./globals'),
                 console.log(data.trim())
                 pianobarLog.push(data.trim())
             }
-        },
-        stdin: process.stdin
+        }
     }),
     app = express(),
     server = http.Server(app),
@@ -61,7 +60,7 @@ socket.on('connection', function (client) {
     response.init(client, obj)()
 });
 
-currentTime.push({ now: '00:01', ofTotal: '99:99' })
+currentTime.push({ now: '00:01', ofTotal: '59:59' })
 isPlaying.push(true)
 
 ipc.config.id = 'pianobar-server';
