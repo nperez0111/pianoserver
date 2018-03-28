@@ -19,108 +19,59 @@
 const pm2 = require('pm2'),
     opn = require('opn'),
     localtunnel = require('localtunnel'),
-    Connector = require('./lib/Connector'),
     program = require('commander'),
     chalk = require('chalk'),
     path = require('path'),
-    dotProp = require('dot-prop'),
     getStdin = require('get-stdin'),
-    logger = require("simple-node-logger"),
-    serverName = 'pianoserver',
-    defaultPort = 8081,
-    defaultSubdomain = 'pianoserver',
-    ipcCommands = { play: 'Play song', pause: 'Pause song', likeSong: 'Like the current song', dislikeSong: 'Dislike the current song', nextSong: 'Play next song', shuffle: 'Shuffle all stations' }
-
-
-function startServer(subdomain, port) {
-    return new Promise((resolve, reject) => {
-        pm2.connect(function(err) {
-            if (err) {
-                reject('An error occured attempting to start the server, please try again...')
-                return process.exit(2)
-            }
-
-            pm2.start({
-                name: serverName,
-                script: path.resolve(__dirname, 'index.js'), // Script to be run
-                args: [port || defaultPort, subdomain || defaultSubdomain],
-            }, function(err, apps) {
-                pm2.disconnect(); // Disconnects from PM2
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve(true)
-                }
-            })
-        })
-    })
-
-}
-
-function restartServer() {
-    return new Promise((resolve, reject) => {
-        pm2.connect(function(err) {
-            if (err) {
-                reject("An error occured attempting to restart the server, please try again...")
-                return process.exit(2)
-            }
-            pm2.gracefulReload(serverName)
-            pm2.disconnect()
-            resolve(true)
-        })
-    })
-
-}
-
-function checkIfRunning(cb) {
-    const { notRunning = () => false, running = () => true } = cb
-
-    return new Promise((resolve, reject) => {
-        pm2.connect(function(err) {
-            if (err) {
-                notRunning()
-                reject(err)
-                return
-            }
-            pm2.describe(serverName, (err, descriptions) => {
-                pm2.disconnect()
-                const stoppedWhen = ['stopped', 'errored', 'stopping']
-                if (err || descriptions.length === 0 || stoppedWhen.includes(dotProp.get(descriptions, '0.pm2_env.status'))) {
-                    notRunning()
-                    reject(false)
-                    return
-                }
-                running()
-                resolve(true)
-            })
-        })
-    })
-}
+    serverCommands = require('./serverCommands'),
+    startServer = serverCommands.startServer,
+    quitServer = serverCommands.quitServer,
+    restartServer = serverCommands.restartServer,
+    checkIfRunning = serverCommands.checkIfRunning,
+    ipcCommands = {
+        play: 'Play song',
+        pause: 'Pause song',
+        likeSong: 'Like the current song',
+        dislikeSong: 'Dislike the current song',
+        nextSong: 'Play next song',
+        shuffle: 'Shuffle all stations'
+    }
 
 function connectToConsole() {
     console.log(chalk.green(`PRESSING "q" quits the server and restarts it, CTRL-C quits viewer while still playing in background, ESC quits the server\n`))
     const ipc = require('node-ipc'),
         serverName = 'pianobar-server',
-        stdin = process.stdin
+        stdin = process.stdin,
+        state = {
+            hasNotRun: true,
+            isDisconnected: true
+        }
 
     ipc.config.id = 'pianobar-console'
-    ipc.config.retry = 1500
+    ipc.config.retry = 50
     ipc.config.silent = true
-    let hasRun = false
 
     //console.log(`Welcome to Pianobar!\n`)
 
     ipc.connectTo(serverName, () => {
         ipc.of[serverName].on('connect', () => {
-
-            if (hasRun === false) {
+            if (state.hasNotRun) {
                 ipc.of[serverName].emit('getPastLines', 200)
-                hasRun = true
-                return
+                state.hasNotRun = false
+            } else {
+                console.log(`Reconnected to Server`)
             }
+            state.isDisconnected = false
+        })
+        ipc.of[serverName].on('disconnect', () => {
+            state.isDisconnected = true
+            console.log(`Lost Connection to Server...`)
 
-            console.log(`Reconnected to Server`)
-
+            setTimeout(() => {
+                if (state.isDisconnected) {
+                    process.exit()
+                }
+            }, 2000)
         })
         ipc.of[serverName].on('killProcess', () => {
             process.exit()
@@ -150,11 +101,11 @@ function connectToConsole() {
         stdin.on('data', key => {
 
             if (key === '\u0003') {
-                // ctrl-c ( end of text )
-                // ESC
+                // CTRL-C ( end of text )
                 process.exit()
             }
             if (key === '\u001B') {
+                // ESC
                 quitServer().then(() => {
                     console.log('\nServer has been stopped.')
                     process.exit()
@@ -175,14 +126,13 @@ function sendStdin(currentCommand) {
     const ipc = require('node-ipc'),
         serverName = 'pianobar-server'
     ipc.config.id = 'pianobar-stdin'
-    ipc.config.retry = 100
-    ipc.config.maxRetries = 2
+    ipc.config.retry = 30
+    ipc.config.maxRetries = 200
     ipc.config.silent = true
 
     getStdin().then(stdin => {
 
         ipc.connectTo(serverName, () => {
-            //console.log('yet to connect')
             ipc.of[serverName].on('connect', () => {
 
                 ipc.of[serverName].emit('cli', [currentCommand, stdin]);
@@ -194,25 +144,8 @@ function sendStdin(currentCommand) {
     })
 }
 
-function quitServer() {
-    return new Promise((resolve, reject) => {
-        pm2.connect(function(err) {
-            if (err) {
-                reject("An error occured attempting to quit the server, please try again...")
-                process.exit(2)
-            }
-            pm2.stop(serverName)
-            setTimeout(() => {
-                pm2.disconnect.bind(pm2)
-                resolve()
-            }, 300)
-        })
-    })
-
-}
-
 function tryServerCommand(command, args) {
-
+    const Connector = require('./lib/Connector')
     if (command in ipcCommands) {
         const connection = new Connector()
         return connection.on(command, args).then(() => {
@@ -226,12 +159,12 @@ function tryServerCommand(command, args) {
 }
 
 Object.keys(ipcCommands).forEach(command => {
-    program.command(command).description(ipcCommands[command]).action(function() {
+    program.command(command).description(ipcCommands[command]).action(function () {
         tryServerCommand(command)
     })
 })
 
-program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function(station) {
+program.command('selectStation <station>').description('Select the station to play (Either # of station or station name)').action(function (station) {
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {
@@ -254,7 +187,7 @@ program.command('start [port] [subdomain]').description('Starts the server for b
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.')
 program.arguments('[pianobarCommand]')
-    .action(function(pianobarCommand) {
+    .action(function (pianobarCommand) {
         sendStdin(pianobarCommand)
     })
 
