@@ -1,5 +1,6 @@
 const pm2 = require('pm2'),
     path = require('path'),
+    dotProp = require('dot-prop'),
     serverName = 'pianoserver',
     defaultPort = 8081,
     defaultSubdomain = 'pianoserver'

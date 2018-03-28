@@ -64,9 +64,10 @@ function connectToConsole() {
             state.isDisconnected = false
         })
         ipc.of[serverName].on('disconnect', () => {
+            if (!state.isDisconnected) {
+                console.log(`Lost Connection to Server...`)
+            }
             state.isDisconnected = true
-            console.log(`Lost Connection to Server...`)
-
             setTimeout(() => {
                 if (state.isDisconnected) {
                     process.exit()
@@ -103,6 +104,7 @@ function connectToConsole() {
             if (key === '\u0003') {
                 // CTRL-C ( end of text )
                 process.exit()
+                return
             }
             if (key === '\u001B') {
                 // ESC
@@ -110,6 +112,7 @@ function connectToConsole() {
                     console.log('\nServer has been stopped.')
                     process.exit()
                 })
+                return
             }
 
             //send single char and flush stdin
@@ -196,5 +199,7 @@ program.version('0.0.1').parse(process.argv)
 const NO_COMMAND_SPECIFIED = program.args.length === 0
 
 if (NO_COMMAND_SPECIFIED) {
-    checkIfRunning({}).catch(startServer).then(connectToConsole)
+    checkIfRunning({}).catch(startServer).then(() => {
+        setTimeout(connectToConsole, 1000)
+    })
 }
