@@ -129,8 +129,8 @@ function sendStdin(currentCommand) {
     const ipc = require('node-ipc'),
         serverName = 'pianobar-server'
     ipc.config.id = 'pianobar-stdin'
-    ipc.config.retry = 30
-    ipc.config.maxRetries = 200
+    ipc.config.retry = 20
+    ipc.config.maxRetries = 30
     ipc.config.silent = true
 
     getStdin().then(stdin => {
