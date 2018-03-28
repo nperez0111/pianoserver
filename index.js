@@ -76,7 +76,7 @@ ipc.serve(() => {
 })
 ipc.server.start();
 
-function tunnel() {
+(function tunneller() {
     var store;
     localtunnel(port, { subdomain }, function (err, tunnel) {
 
@@ -84,7 +84,7 @@ function tunnel() {
             pianobarLog.unpush(store)
             pianobarLog.push('Restarting Local Tunnel...')
             console.log('Restarting Local Tunnel...', err)
-            setTimeout(tunnel, 500)
+            setTimeout(tunneller, 500)
             return
             //process.exit(2)
         }
@@ -106,8 +106,7 @@ function tunnel() {
             opn(tunnel.url)
         }
     })
-}
-tunnel()
+})()
 
 nodeCleanup(function (exitCode, signal) {
     spawnInstance.pianobar.kill()
