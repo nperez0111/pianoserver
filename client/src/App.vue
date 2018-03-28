@@ -63,71 +63,110 @@
         <v-dialog v-model="disconnected" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
             <v-card tile>
                 <v-toolbar card dark color="primary">
-                    <v-toolbar-title>Welcome to Pianoserver</v-toolbar-title>
+                    <v-toolbar-title v-if="hasWorkedBefore===false">Welcome to Pianoserver</v-toolbar-title>
+                    <v-toolbar-title v-if="hasWorkedBefore!==false">Reconnect to Pianoserver</v-toolbar-title>
                     <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
-                    <v-container v-if="hasWorkedBefore===false">
-                        First timer
-                    </v-container>
-                    <v-container v-else>
-                        <h1 class="display-1 text-xs-center">We noticed you've connected before, let's try to get you connected once more</h1>
-                        <v-layout wrap class="ma-4" justify-center align-center>
-                            <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
-                                <v-tooltip top>
-                                    <h2 slot="activator">If the Server is running:</h2>
-                                    <span>You can check if the server is running by running the command: <code>$ pianoserver status</code></span>
-                                </v-tooltip>
-                                <v-btn @click="tryReconnect" color="green" :loading="connectionState==='loading'" :disabled="connectionState==='loading'">Try reconnect
-                                    <v-icon right>refresh</v-icon>
-                                    <span slot="loader">Trying to Connect...</span>
+                    <v-slide-y-transition>
+                        <Full-Height v-if="hasWorkedBefore===false">
+                            <h1 class="display-2 text-xs-center">Welcome to the Pianoserver UI</h1>
+                            <h2 class="headline text-xs-center my-2">Here's how to get started</h2>
+                            <v-expansion-panel popout>
+                                <v-expansion-panel-content>
+                                    <div slot="header">Install Pianoserver</div>
+                                    <v-card>
+                                        <v-card-text>
+                                            To install Pianoserver run <code>$ npm install nperez0111/pianoserver</code> in your terminal.
+                                        </v-card-text>
+                                    </v-card>
+                                </v-expansion-panel-content>
+                                <v-expansion-panel-content>
+                                    <div slot="header">Run Pianoserver</div>
+                                    <v-card>
+                                        <v-card-text>
+                                            To run Pianoserver run <code>$ pianoserver</code> in your terminal.
+                                        </v-card-text>
+                                    </v-card>
+                                </v-expansion-panel-content>
+                                <v-expansion-panel-content>
+                                    <div slot="header">Connect the UI to the server</div>
+                                    <v-card>
+                                        <v-card-text>
+                                            In order for you to be able to control the server from this UI we have to let the UI know where the server is, when the server is started it gives you two URLs to use, the first is an external URL that can be used from anywhere and the second can only be used on your local machine where the music is playing out of. The UI below allows you to specify which you would like to connect to.
+                                        </v-card-text>
+                                        <v-card-actions>
+                                            <v-btn @click="hasWorkedBefore=0">
+                                                Connect to Server
+                                            </v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-expansion-panel-content>
+                            </v-expansion-panel>
+                        </Full-Height>
+                    </v-slide-y-transition>
+                    <v-slide-y-transition>
+                        <v-container v-show="hasWorkedBefore!==false">
+                            <h1 class="display-1 text-xs-center">We noticed you've connected before, let's try to get you connected once more</h1>
+                            <v-layout wrap class="ma-4" justify-center align-center>
+                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
+                                    <v-tooltip top>
+                                        <h2 slot="activator">If the Server is running:</h2>
+                                        <span>You can check if the server is running by running the command: <code>$ pianoserver status</code></span>
+                                    </v-tooltip>
+                                    <v-btn @click="tryReconnect" color="green" :loading="connectionState==='loading'" :disabled="connectionState==='loading'">Try reconnect
+                                        <v-icon right>refresh</v-icon>
+                                        <span slot="loader">Trying to Connect...</span>
+                                    </v-btn>
+                                </v-card>
+                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
+                                    <v-tooltip top>
+                                        <h2 slot="activator">If the Server is not running:</h2>
+                                        <span>You can check if the server is running by running the command: <code>$ pianoserver status</code></span>
+                                    </v-tooltip>
+                                    <p>You'll need to start the server by running the command: <code>$ pianoserver</code></p>
+                                </v-card>
+                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
+                                    <h2>If trying to reconnect didn't work:</h2>
+                                    <p>This is most likely because '{{url}}' is not pointing to the server.</p>
+                                    <v-btn @click="hasWorkedBefore=0" color="primary">
+                                        <v-icon left>edit</v-icon>Edit URL
+                                    </v-btn>
+                                </v-card>
+                            </v-layout>
+                        </v-container>
+                    </v-slide-y-transition>
+                    <v-slide-y-transition>
+                        <v-container v-show="disconnected && !hasWorkedBefore" class="mb-5 pb-5">
+                            <h1 class="display-1 text-xs-center">We need to know what you are trying to play from</h1>
+                            <v-layout row justify-center class="mt-5">
+                                <v-btn @click="location='local',url='ws://localhost:'+port" color="primary">
+                                    This Computer
+                                    <v-icon right>computer</v-icon>
                                 </v-btn>
-                            </v-card>
-                            <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
-                                <v-tooltip top>
-                                    <h2 slot="activator">If the Server is not running:</h2>
-                                    <span>You can check if the server is running by running the command: <code>$ pianoserver status</code></span>
-                                </v-tooltip>
-                                <p>You'll need to start the server by running the command: <code>$ pianoserver</code></p>
-                            </v-card>
-                            <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
-                                <h2>If trying to reconnect didn't work:</h2>
-                                <p>This is most likely because '{{url}}' is not pointing to the server.</p>
-                                <v-btn @click="hasWorkedBefore=0" color="primary">
-                                    <v-icon left>edit</v-icon>Edit URL
-                                </v-btn>
-                            </v-card>
-                        </v-layout>
-                    </v-container>
-                    <v-container v-if="disconnected &&!hasWorkedBefore">
-                        <h1 class="display-1 text-xs-center">We need to know what you are trying to play from</h1>
-                        <v-layout row justify-center class="mt-5">
-                            <v-btn @click="location='local',url='ws://localhost:'+port" color="primary">
-                                This Computer
-                                <v-icon right>computer</v-icon>
-                            </v-btn>
-                            <v-btn @click="location='external'" color="primary">
-                                Another Computer
-                                <v-icon right>settings_ethernet</v-icon>
-                            </v-btn>
-                        </v-layout>
-                        <v-layout row class="mt-5" v-show="location!==undefined">
-                            <v-flex xs12 lg8>
-                                <v-text-field v-model="url" :error="connectionState==='disconnected'" @keyup.enter="tryReconnect"></v-text-field>
-                            </v-flex>
-                            <v-layout class="flex xs12 lg4" justify-center align-center>
-                                <v-btn @click="tryReconnect" color="green" :loading="connectionState==='loading'" :disabled="connectionState==='loading'">Try reconnect
-                                    <v-icon right>refresh</v-icon>
-                                    <span slot="loader">Trying to Connect...</span>
+                                <v-btn @click="location='external'" color="primary">
+                                    Another Computer
+                                    <v-icon right>settings_ethernet</v-icon>
                                 </v-btn>
                             </v-layout>
-                        </v-layout>
-                    </v-container>
+                            <v-layout row class="mt-5" v-show="location!==undefined">
+                                <v-flex xs12 lg8>
+                                    <v-text-field v-model="url" :error="connectionState==='disconnected'" @keyup.enter="tryReconnect"></v-text-field>
+                                </v-flex>
+                                <v-layout class="flex xs12 lg4" justify-center align-center>
+                                    <v-btn @click="tryReconnect" color="green" :loading="connectionState==='loading'" :disabled="connectionState==='loading'">Try reconnect
+                                        <v-icon right>refresh</v-icon>
+                                        <span slot="loader">Trying to Connect...</span>
+                                    </v-btn>
+                                </v-layout>
+                            </v-layout>
+                        </v-container>
+                    </v-slide-y-transition>
                 </v-card-text>
-                <div style="flex: 1 1 auto;" />
+                <div style="flex: 1 1 auto;"></div>
             </v-card>
         </v-dialog>
-        <v-snackbar color="error" v-model="disconnected" :timeout="100000" vertical>
+        <v-snackbar color="error" v-model="disconnected" :timeout="hasWorkedBefore?100000:1" vertical>
             Whoops seems like we can't connect to your Pandora, check to see that the url is correct and that you have the server running
             <v-btn dark flat @click.native="connectionState='loading'">Close</v-btn>
         </v-snackbar>
@@ -140,11 +179,15 @@
 <script>
 import LastFM from '@/lib/LastFM'
 import * as ls from 'local-storage'
+import FullHeight from '@/components/Full-Height'
 
 function isLocalIP(str) {
     return /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(str)
 }
 export default {
+    components: {
+        'Full-Height': FullHeight
+    },
     data: function() {
         this.$station.onchangeStations(stations => {
             if (!this.loadedAlbumCovers) {
