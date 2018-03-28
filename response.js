@@ -1,4 +1,5 @@
-const wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amount)),
+const ServerCommands = require('./serverCommands'),
+    wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amount)),
     Response = {
         init: (client, obj) => {
             const { current, isPlaying, currentTime } = obj
@@ -212,6 +213,40 @@ const wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amou
             return (newConfig) => {
                 const before = config.get('listenShortcuts')
                 config.setAll(newConfig)
+            }
+        },
+        killInstance: () => {
+            return () => {
+                Response.writeCommand(null, globals)('q')
+            }
+        },
+        restartPianobar: (client) {
+            const failed = () => {
+                client.emit('restartPianobar', false)
+            }
+            return () => {
+                ServerCommands.checkIfRunning().then(() => {
+                    ServerCommands.restartPianobar().then(() => {
+                        client.emit('restartPianobar', true)
+                    }).catch(failed)
+                }).catch(failed)
+            }
+        },
+        quitPianobar: (client) {
+            const quitter = () => {
+                Response.killInstance()()
+                client.emit('quitPianobar', true)
+            }
+            return () => {
+                ServerCommands.checkIfRunning().catch(a => a).then(isRunning => {
+                    if (isRunning) {
+                        ServerCommands.quitServer().catch(() => 0).then(() => {
+                            quitter()
+                        })
+                    } else {
+                        quitter()
+                    }
+                })
             }
         },
         setConfig: (client, { config }) => {
