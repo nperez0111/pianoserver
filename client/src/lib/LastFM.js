@@ -15,6 +15,32 @@ export default class LastFM {
     const url = `${prefix}${type}.search&${type}=${encodeURIComponent(query)}`
     return fetch(url).then(resp => resp.json()).then(({ results }) => results[`${type}matches`][type])
   }
+  static getAlbumCover(album, artist) {
+    const albumKey = `${album}_${artist}`
+    if (ls.get(albumKey)) {
+      return Promise.resolve(ls.get(albumKey))
+    }
+    return LastFM.getPossibleAlbums(album).then(results => {
+      const COULD_NOT_FIND = false,
+        result = results.reduce((prev, { artist, image }) => {
+          if (prev) {
+            return prev
+          }
+          if (artist.toLowerCase() == artist.toLowerCase()) {
+            const url = image.slice(-1)[0]['#text']
+            if (url) {
+              return url
+            }
+          }
+        }, COULD_NOT_FIND)
+      if (result === COULD_NOT_FIND) {
+        throw new Error('Could not find album cover')
+        return
+      }
+      ls.set(albumKey, result)
+      return result
+    })
+  }
   static getImagesForStations(stations) {
     return Promise.all(stations.map(station => {
       const stored = ls.get(station) || false,
