@@ -176,6 +176,18 @@ program.command('quit').description('Stops the PM2 Process').action(() => {
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
     restartServer().then(() => { process.exit() })
 })
+program.command('status').description('Returns the status of the server, whether it is running or not').action(() => {
+    checkIfRunning({
+        running() {
+            console.log(chalk.green("Server is running!"))
+            process.exit(0)
+        },
+        notRunning() {
+            console.log(chalk.red("Server is not running!"))
+            process.exit(1)
+        }
+    })
+})
 program.command('install').description('Installs pianobar, Regenerates the Web UI').action(() => {
     const install = require('./install')
     install().catch(() => console.error("Something must've gone wrong")).then(() => process.exit())
