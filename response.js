@@ -220,19 +220,21 @@ const ServerCommands = require('./serverCommands'),
                 Response.writeCommand(null, globals)('q')
             }
         },
-        restartPianobar: (client) {
+        restartPianobar: (client, { config }) => {
             const failed = () => {
                 client.emit('restartPianobar', false)
+                config.set('willRestart', false)
             }
             return () => {
                 ServerCommands.checkIfRunning().then(() => {
+                    config.set('willRestart', true)
                     ServerCommands.restartPianobar().then(() => {
                         client.emit('restartPianobar', true)
                     }).catch(failed)
                 }).catch(failed)
             }
         },
-        quitPianobar: (client) {
+        quitPianobar: (client) => {
             const quitter = () => {
                 Response.killInstance()()
                 client.emit('quitPianobar', true)

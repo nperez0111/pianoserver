@@ -35,6 +35,7 @@ const CTRL = 29,
     dotProp = require('dot-prop'),
     pkg = require('./package.json'),
     conf = new Configstore(pkg.name, {
+        willRestart: false,
         showNotifications: true,
         openTunnelURL: true,
         listenShortcuts: true,
@@ -203,11 +204,11 @@ module.exports = {
 
             }
         },
-        selectStation: (function() {
+        selectStation: (function () {
             var globals
 
             return {
-                handler: function(err, handler, meta) {
+                handler: function (err, handler, meta) {
                     const { response } = globals, handlers = {
                         replied: station => {
                             if (response) {

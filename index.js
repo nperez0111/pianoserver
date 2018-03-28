@@ -102,7 +102,7 @@ ipc.server.start();
             }
         })
 
-        if (config.get('openTunnelURL')) {
+        if (config.get('openTunnelURL') && !config.get('willRestart')) {
             opn(tunnel.url)
         }
     })
