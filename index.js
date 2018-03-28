@@ -10,9 +10,9 @@ const globals = require('./globals'),
             process.exit()
         },
         onEnd: function () {
-            //maybe dont stop the server but restart pianobar?
             ipc.server.stop()
             globals.shortcuts.destroy()
+            process.exit()
         },
         onData: function (data) {
             const getTime = /(\d\d:\d\d).(\d\d:\d\d)/
@@ -76,10 +76,10 @@ ipc.serve(() => {
 })
 ipc.server.start();
 
-(function tunnel() {
-
+function tunnel() {
+    var store;
     localtunnel(port, { subdomain }, function (err, tunnel) {
-        var store;
+
         if (err) {
             pianobarLog.unpush(store)
             pianobarLog.push('Restarting Local Tunnel...')
@@ -106,7 +106,8 @@ ipc.server.start();
             opn(tunnel.url)
         }
     })
-})()
+}
+tunnel()
 
 nodeCleanup(function (exitCode, signal) {
     spawnInstance.pianobar.kill()
