@@ -240,7 +240,7 @@ const ServerCommands = require('./serverCommands'),
                 client.emit('quitPianobar', true)
             }
             return () => {
-                ServerCommands.checkIfRunning().catch(a => a).then(isRunning => {
+                ServerCommands.checkIfRunning({}).catch(a => a).then(isRunning => {
                     if (isRunning) {
                         ServerCommands.quitServer().catch(() => 0).then(() => {
                             quitter()
@@ -306,7 +306,6 @@ const ServerCommands = require('./serverCommands'),
                 clearInterval(timeInterval)
                 current.unpush(status)
                 isPlaying.unpush(isPlayingHandler)
-                log('Client has disconnected');
             }
         }
 
