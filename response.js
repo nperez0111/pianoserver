@@ -1,5 +1,4 @@
-const ServerCommands = require('./serverCommands'),
-    wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amount)),
+const wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amount)),
     Response = {
         init: (client, obj) => {
             const { current, isPlaying, currentTime } = obj
@@ -220,7 +219,7 @@ const ServerCommands = require('./serverCommands'),
                 Response.writeCommand(null, globals)('q')
             }
         },
-        restartPianobar: (client, { config }) => {
+        restartPianobar: (client, { config, ServerCommands }) => {
             const failed = () => {
                 client.emit('restartPianobar', false)
                 config.set('willRestart', false)
@@ -234,7 +233,7 @@ const ServerCommands = require('./serverCommands'),
                 }).catch(failed)
             }
         },
-        quitPianobar: (client) => {
+        quitPianobar: (client, { ServerCommands }) => {
             const quitter = () => {
                 Response.killInstance()()
                 client.emit('quitPianobar', true)

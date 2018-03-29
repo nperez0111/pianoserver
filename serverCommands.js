@@ -1,7 +1,8 @@
 const pm2 = require('pm2'),
     path = require('path'),
     dotProp = require('dot-prop'),
-    serverName = 'pianoserver',
+    serverName = 'Pianoserver',
+    launcherName = 'Pianoserver_Launcher',
     defaultPort = 8081,
     defaultSubdomain = 'pianoserver'
 
@@ -62,7 +63,7 @@ function quitServer() {
 
 }
 
-function checkIfRunning(cb) {
+function checkIfRunning(cb, which) {
     const { notRunning = () => false, running = () => true } = (cb || {})
 
     return new Promise((resolve, reject) => {
@@ -72,7 +73,7 @@ function checkIfRunning(cb) {
                 reject(err)
                 return
             }
-            pm2.describe(serverName, (err, descriptions) => {
+            pm2.describe(which || serverName, (err, descriptions) => {
                 pm2.disconnect()
                 const stoppedWhen = ['stopped', 'errored', 'stopping']
                 if (err || descriptions.length === 0 || stoppedWhen.includes(dotProp.get(descriptions, '0.pm2_env.status'))) {
@@ -87,9 +88,35 @@ function checkIfRunning(cb) {
     })
 }
 
+function startLauncher(port) {
+    return new Promise((resolve, reject) => {
+        pm2.connect(function (err) {
+            if (err) {
+                reject('An error occured attempting to start the server, please try again...')
+                return
+            }
+            pm2.start({
+                name: launcherName,
+                script: path.resolve(__dirname, 'launcher.js'),
+                args: [port || 8082],
+            }, function (err, apps) {
+                pm2.disconnect()
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
+    })
+}
+
 module.exports = {
+    serverName: serverName,
     quitServer: quitServer,
     restartServer: restartServer,
     startServer: startServer,
-    checkIfRunning: checkIfRunning
+    checkIfRunning: checkIfRunning,
+    startLauncher: startLauncher,
+    launcherName: launcherName
 }

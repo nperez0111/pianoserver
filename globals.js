@@ -28,5 +28,6 @@ const History = require('./lib/History'),
         express: require('express'),
         pianobarConfig: new PianobarConfig({}),
         chalk: require('chalk'),
+        ServerCommands: require('./serverCommands'),
     }
 module.exports = globals

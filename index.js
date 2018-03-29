@@ -1,5 +1,33 @@
 const globals = require('./globals'),
-    { ipc, Spawner, logger, History, io, response, log, currentTime, current, pastSongs, isPlaying, http, url, fs, path, ipcResponse, shortcuts, pianobarLog, localtunnel, opn, config, notifier, express, nodeCleanup, pianobarConfig, chalk } = globals,
+    {
+        ipc,
+        Spawner,
+        logger,
+        History,
+        io,
+        response,
+        log,
+        currentTime,
+        current,
+        pastSongs,
+        isPlaying,
+        http,
+        url,
+        fs,
+        path,
+        ipcResponse,
+        shortcuts,
+        pianobarLog,
+        localtunnel,
+        opn,
+        config,
+        notifier,
+        express,
+        nodeCleanup,
+        pianobarConfig,
+        chalk,
+        ServerCommands
+    } = globals,
     SpawnImmediately = true,
     spawnInstance = new Spawner(SpawnImmediately, {
         onExit: function (exitCode, signal) {
@@ -51,7 +79,20 @@ server.listen(port)
 
 // Add a connect listener
 socket.on('connection', function (client) {
-    const obj = { spawnInstance, isPlaying, current, currentTime, pastSongs, log, logger, pianobarLog, pianobarConfig, config, shortcuts: globals.shortcuts }
+    const obj = {
+        spawnInstance,
+        isPlaying,
+        current,
+        currentTime,
+        pastSongs,
+        log,
+        logger,
+        pianobarLog,
+        pianobarConfig,
+        config,
+        ServerCommands,
+        shortcuts: globals.shortcuts
+    }
     //needs to be seperate from globals because attachments work per instance of connection
 
     Object.keys(response).forEach(key => {
@@ -76,6 +117,9 @@ ipc.serve(() => {
 })
 ipc.server.start();
 
+ServerCommands.checkIfRunning({}, ServerCommands.launcherName).then(() => { console.log("Launcher already running") }).catch(() => {
+    ServerCommands.startLauncher(port + 1).catch(() => console.log('unable to start launcher'))
+});
 (function tunneller() {
     var store;
     localtunnel(port, { subdomain }, function (err, tunnel) {

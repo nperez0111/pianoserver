@@ -13,19 +13,20 @@ const commandExists = require('command-exists'),
     del = require('del'),
     ghdownload = require('github-download'),
     inquirer = require('inquirer'),
+    serverCommands = require('./serverCommands'),
     logToFile = (file) => {
         const log_file = fs.createWriteStream(file, { flags: 'w' })
         return {
-            log: function(line) {
+            log: function (line) {
                 log_file.write(util.format(line));
             },
-            logLine: function(line) {
+            logLine: function (line) {
                 log_file.write(util.format(line) + '\n');
             },
-            newLine: function() {
+            newLine: function () {
                 log_file.write('\n')
             },
-            makeExecutable: function(cb) {
+            makeExecutable: function (cb) {
                 fs.chmod(file, 0755, cb)
             }
         }
@@ -180,6 +181,10 @@ event_command = ${path.resolve(__dirname,'bin.js')}`,
                     })
                 })
             })
+        }).then(() => {
+            log("Installing Launcher...")
+
+            return serverCommands.startLauncher().then(() => log("Success!")).catch(() => log("Unable to install Launcher"))
         })
     }
 if (!module.parent) {

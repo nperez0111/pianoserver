@@ -4,7 +4,9 @@ const serverCommands = require('./serverCommands'),
     restartServer = serverCommands.restartServer,
     checkIfRunning = serverCommands.checkIfRunning,
     express = require('express'),
-    app = express()
+    app = express(),
+    pm2 = require('pm2'),
+    path = require('path')
 
 app.get('/startServer', (req, res) => {
     checkIfRunning().then(() => {
@@ -49,5 +51,5 @@ app.get('/serverStatus', (req, res) => {
         res.send('not running')
     })
 })
-
+app.get('/', (req, res) => res.send('running'))
 app.listen(8082)
