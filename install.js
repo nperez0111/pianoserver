@@ -206,7 +206,7 @@ event_command = ${path.resolve(__dirname,'bin.js')}`,
                 }
             }).catch(() => {
                 return serverCommands.startServer()
-            }).then(() => log("Server has been launched you can connect to the CLI interface by running 'pianoserver'")))
+            }).then(() => log("Server has been launched you can connect to the CLI interface by running 'pianoserver'")).catch(() => log("Unable to start server maybe something didn't install correctly")))
     }
 if (!module.parent) {
     run()
