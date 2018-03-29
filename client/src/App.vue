@@ -211,7 +211,7 @@ export default {
 
         window.App = this
         return {
-            connectionState: 'disconnected',
+            connectionState: 'connecting',
             retryAmount: 3,
             location: undefined,
             loadedAlbumCovers: false,
@@ -314,8 +314,8 @@ export default {
                         this.connectionState = 'connected'
                         ls.set('socket', this.url)
                     } else {
-                        socket.disconnect()
                         this.connectionState = 'disconnected'
+                        socket.disconnect()
                     }
                 }))
             window.socket = socket
