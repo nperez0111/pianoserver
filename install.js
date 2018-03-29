@@ -120,7 +120,16 @@ const commandExists = require('command-exists'),
             log("Generating Web UI...")
             return buildUI().then(() => log("Success...")).catch(() => err("Unable to Generate Web UI code"))
         }).then(() => {
-            return fileExists(configPath).then(() => inquirer.prompt({ type: 'confirm', default: false, name: 'regenConfig', message: 'You already have a config file... Do you want to regenerate it?' }).then(answer => { if (answer.regenConfig) { throw "Regenerate config file" } })).catch(() => {
+            return fileExists(configPath).then(() => inquirer.prompt({
+                type: 'confirm',
+                default: false,
+                name: 'regenConfig',
+                message: 'You already have a config file... Do you want to regenerate it?'
+            }).then(answer => {
+                if (answer.regenConfig) {
+                    throw "Regenerate config file"
+                }
+            })).catch(() => {
                 log("Generating Pianobar config file based off of the following questions...")
 
                 const questions = [{
@@ -185,7 +194,19 @@ event_command = ${path.resolve(__dirname,'bin.js')}`,
             log("Installing Launcher...")
 
             return serverCommands.startLauncher().then(() => log("Success!")).catch(() => log("Unable to install Launcher"))
-        })
+        }).then(() =>
+            inquirer.prompt({
+                type: 'confirm',
+                name: 'launch',
+                message: 'Would you like to start Pianoserver now?',
+                default: false
+            }).then(answer => {
+                if (answer.launch) {
+                    throw 'launch'
+                }
+            }).catch(() => {
+                return serverCommands.startServer()
+            }).then(() => log("Server has been launched you can connect to the CLI interface by running 'pianoserver'")))
     }
 if (!module.parent) {
     run()
