@@ -240,15 +240,7 @@ const ServerCommands = require('./serverCommands'),
                 client.emit('quitPianobar', true)
             }
             return () => {
-                ServerCommands.checkIfRunning({}).catch(a => a).then(isRunning => {
-                    if (isRunning) {
-                        ServerCommands.quitServer().catch(() => 0).then(() => {
-                            quitter()
-                        })
-                    } else {
-                        quitter()
-                    }
-                })
+                ServerCommands.checkIfRunning().then(ServerCommands.quitServer).catch(quitter).then(quitter)
             }
         },
         setConfig: (client, { config }) => {
