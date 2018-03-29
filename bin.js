@@ -28,6 +28,7 @@ const pm2 = require('pm2'),
     quitServer = serverCommands.quitServer,
     restartServer = serverCommands.restartServer,
     checkIfRunning = serverCommands.checkIfRunning,
+    startLauncher = serverCommands.startLauncher,
     ipcCommands = {
         play: 'Play song',
         pause: 'Pause song',
@@ -170,6 +171,9 @@ program.command('quit').description('Stops the PM2 Process').action(() => {
 })
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
     restartServer().then(exitSuccess).catch(exitFailure)
+})
+program.command('startLauncher').description('Starts the Pianoserver launcher to start Pianoserver from the Web UI').action(() => {
+    startLauncher().then(exitSuccess).catch(exitFailure)
 })
 program.command('status').description('Returns the status of the server, whether it is running or not').action(() => {
     checkIfRunning().then(() => console.log(chalk.green("Server is running!"))).then(exitSuccess).catch(() => {
