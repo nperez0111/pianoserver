@@ -35,7 +35,9 @@ const pm2 = require('pm2'),
         dislikeSong: 'Dislike the current song',
         nextSong: 'Play next song',
         shuffle: 'Shuffle all stations'
-    }
+    },
+    exitSuccess = () => process.exit(0),
+    exitFailure = () => process.exit(1)
 
 function connectToConsole() {
     console.log(chalk.green(`PRESSING "q" quits the server and restarts it, CTRL-C quits viewer while still playing in background, ESC quits the server\n`))
@@ -74,9 +76,7 @@ function connectToConsole() {
                 }
             }, 2000)
         })
-        ipc.of[serverName].on('killProcess', () => {
-            process.exit()
-        })
+        ipc.of[serverName].on('killProcess', exitSuccess)
         ipc.of[serverName].on('getLine', line => {
             console.log(line)
         })
@@ -108,11 +108,10 @@ function connectToConsole() {
             }
             if (key === '\u001B') {
                 // ESC
-                quitServer().then(() => {
+
+                return quitServer().then(() => {
                     console.log('\nServer has been stopped.')
-                    process.exit()
-                })
-                return
+                }).then(exitSuccess).catch(exitFailure)
             }
 
             //send single char and flush stdin
@@ -133,17 +132,18 @@ function sendStdin(currentCommand) {
     ipc.config.maxRetries = 30
     ipc.config.silent = true
 
-    getStdin().then(stdin => {
+    return getStdin().then(stdin => {
+        return new Promise((resolve, reject) => {
+            ipc.connectTo(serverName, () => {
+                ipc.of[serverName].on('connect', () => {
 
-        ipc.connectTo(serverName, () => {
-            ipc.of[serverName].on('connect', () => {
+                    ipc.of[serverName].emit('cli', [currentCommand, stdin]);
 
-                ipc.of[serverName].emit('cli', [currentCommand, stdin]);
-
-                ipc.disconnect(serverName)
-            });
+                    ipc.disconnect(serverName)
+                    resolve()
+                });
+            })
         })
-
     })
 }
 
@@ -151,13 +151,7 @@ function tryServerCommand(command, args) {
     const Connector = require('./lib/Connector')
     if (command in ipcCommands) {
         const connection = new Connector()
-        return connection.on(command, args).then(() => {
-            //console.log(`Ran: ${command}`)
-            process.exit(0)
-        }).catch(err => {
-            console.error(err)
-            process.exit(1)
-        })
+        return connection.on(command, args).then(exitSuccess).catch(exitFailure)
     }
 
 }
@@ -172,26 +166,23 @@ program.command('selectStation <station>').description('Select the station to pl
     tryServerCommand('selectStation', station)
 })
 program.command('quit').description('Stops the PM2 Process').action(() => {
-    quitServer().then(() => { process.exit() })
+    quitServer().then(exitSuccess).catch(exitFailure)
 })
 program.command('restart').description('Reloads the PM2 Instance').action(() => {
-    restartServer().then(() => { process.exit() })
+    restartServer().then(exitSuccess).catch(exitFailure)
 })
 program.command('status').description('Returns the status of the server, whether it is running or not').action(() => {
-    checkIfRunning({
-        running() {
-            console.log(chalk.green("Server is running!"))
-            process.exit(0)
-        },
-        notRunning() {
-            console.log(chalk.red("Server is not running!"))
-            process.exit(1)
-        }
+    checkIfRunning().then(() => console.log(chalk.green("Server is running!"))).then(exitSuccess).catch(() => {
+        console.log(chalk.red("Server is not running!"))
+        exitFailure()
     })
 })
 program.command('install').description('Installs pianobar, Regenerates the Web UI').action(() => {
     const install = require('./install')
-    install().catch(() => console.error("Something must've gone wrong")).then(() => process.exit())
+    install().catch(() => {
+        console.error("Something must've gone wrong")
+        exitFailure()
+    }).then(exitSuccess)
 })
 program.command('start [port] [subdomain]').description('Starts the server for both pianobar console and the web app. Allows you to specify the subdomain you would like to use. Otherwise will try to use pandora or if unavailable will try to use a random one.').action((port, subdomain) => {
     if (port !== Number(port).toString()) {
@@ -199,7 +190,7 @@ program.command('start [port] [subdomain]').description('Starts the server for b
         port = defaultPort
     }
     //console.log(subdomain, Number(port))
-    startServer(subdomain, port)
+    startServer(subdomain, port).then(exitSucces).catch(exitFailure)
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.')
 program.arguments('[pianobarCommand]')

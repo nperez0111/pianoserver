@@ -10,7 +10,7 @@ function startServer(subdomain, port) {
         pm2.connect(function (err) {
             if (err) {
                 reject('An error occured attempting to start the server, please try again...')
-                return process.exit(2)
+                return
             }
 
             pm2.start({
@@ -35,7 +35,7 @@ function restartServer() {
         pm2.connect(function (err) {
             if (err) {
                 reject("An error occured attempting to restart the server, please try again...")
-                return process.exit(2)
+                return
             }
             pm2.gracefulReload(serverName)
             pm2.disconnect()
@@ -50,7 +50,7 @@ function quitServer() {
         pm2.connect(function (err) {
             if (err) {
                 reject("An error occured attempting to quit the server, please try again...")
-                process.exit(2)
+                return
             }
             pm2.stop(serverName)
             setTimeout(() => {
@@ -63,7 +63,7 @@ function quitServer() {
 }
 
 function checkIfRunning(cb) {
-    const { notRunning = () => false, running = () => true } = cb
+    const { notRunning = () => false, running = () => true } = (cb || {})
 
     return new Promise((resolve, reject) => {
         pm2.connect(function (err) {
