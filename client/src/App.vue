@@ -109,7 +109,7 @@
                         <v-container v-show="hasWorkedBefore!==false">
                             <h1 class="display-1 text-xs-center">We noticed you've connected before, let's try to get you connected once more</h1>
                             <v-layout wrap class="ma-4" justify-center align-center>
-                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
+                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="250">
                                     <v-tooltip top>
                                         <h2 slot="activator">If the Server is running:</h2>
                                         <span>You can check if the server is running by running the command: <code>$ pianoserver status</code></span>
@@ -119,14 +119,35 @@
                                         <span slot="loader">Trying to Connect...</span>
                                     </v-btn>
                                 </v-card>
-                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
+                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="250">
                                     <v-tooltip top>
                                         <h2 slot="activator">If the Server is not running:</h2>
                                         <span>You can check if the server is running by running the command: <code>$ pianoserver status</code></span>
                                     </v-tooltip>
-                                    <p>You'll need to start the server by running the command: <code>$ pianoserver</code></p>
+                                    <p>
+                                        You'll need to start the server by running the command: <code>$ pianoserver</code>
+                                    </p>
+                                    <p v-show="launcher">
+                                        You can try to press this button to launch the server since you are locally connected to the server.
+                                    </p>
+                                    <v-slide-y-transition>
+                                        <v-btn @click="launchServer" color="green" :loading="launcher==='loading'" :disabled="launcher==='loading'" v-show="launcher===true">Start Server
+                                            <v-icon right>play_circle_outline</v-icon>
+                                            <span slot="loader">Starting the Server...</span>
+                                        </v-btn>
+                                    </v-slide-y-transition>
+                                    <v-slide-y-transition>
+                                        <v-alert type="success" :value="true" v-show="launcher==='started'">
+                                            Successfully Launched the Server
+                                        </v-alert>
+                                    </v-slide-y-transition>
+                                    <v-slide-y-transition>
+                                        <v-alert type="error" :value="true" v-show="launcher==='failed'">
+                                            Failed to Launch the Server
+                                        </v-alert>
+                                    </v-slide-y-transition>
                                 </v-card>
-                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="150">
+                                <v-card class="flex xs12 md6 xl4 pa-3 layout justify-center align-center column my-3" height="250">
                                     <h2>If trying to reconnect didn't work:</h2>
                                     <p>This is most likely because '{{url}}' is not pointing to the server.</p>
                                     <v-btn @click="hasWorkedBefore=0" color="primary">
@@ -207,7 +228,7 @@ export default {
         console.log(choice)
             //try to reconnect to past connect or defaults
             //figure out issue with localtunnel not updating but localhost does, work on url parsing 
-        this.tryReconnect(choice, this.infiniteHandler)
+
 
         window.App = this
         return {
@@ -226,7 +247,12 @@ export default {
             showRefresh: ls.get('showRefresh') || false,
             restartStatus: false,
             hasWorkedBefore: ls.get('socket') ? true : false,
+            launcher: false,
         }
+    },
+    created() {
+        this.tryReconnect(this.url, this.infiniteHandler)
+        this.checkLauncherStatus()
     },
     props: {
         source: String
@@ -249,9 +275,34 @@ export default {
                 return this.restartStatus === 'restarting'
             },
             set() {}
+        },
+        canBeLauncher() {
+            return isLocalIP(this.url.slice(5).split(":")[0]) || this.url.includes("localhost")
+        },
+        launcherBaseURL() {
+            const port = Number(this.url.split(":")[2]),
+                host = this.url.slice(5).split(":")[0]
+            return `http://${host}:${port+1}/`
         }
     },
     methods: {
+        checkLauncherStatus() {
+            if (this.canBeLauncher) {
+                return fetch(this.launcherBaseURL).then(() => {
+                    this.launcher = true
+                }).catch(() => {
+                    this.launcher = false
+                })
+            }
+        },
+        launchServer() {
+            this.launcher = 'loading'
+            return fetch(this.launcherBaseURL + 'startServer').then(resp => resp.text()).then(response => {
+                this.launcher = response
+            }).catch(() => {
+                this.launcher = 'failed'
+            })
+        },
         edit(key, value) {
             this[key] = value
         },
