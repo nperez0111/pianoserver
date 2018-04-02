@@ -58,7 +58,7 @@ class Spawner {
 
             // i don't want binary, do you?
             this.stdin.setEncoding('utf8');
-
+            let lineByLine = false;
             // on any data into this.stdin
             this.stdin.on('data', key => {
                 // ctrl-c ( end of text )
@@ -68,6 +68,25 @@ class Spawner {
                         this.pianobar.kill()
                     }
                     process.exit();
+                }
+                if (lineByLine || lineByLine === '') {
+                    if (key === '\u000D') {
+                        this.pianobar.stdin.write(lineByLine + '/n')
+                        lineByLine = false
+                        return
+                    } else if (key === '\u0008') {
+                        lineByLine = lineByLine.slice(0, -1)
+                    } else {
+                        lineByLine += key
+                    }
+                    process.stdout.write(key)
+                    return
+                } else {
+                    if (key === 's') {
+                        lineByLine = ''
+                        this.pianobar.stdin.write(key)
+                        return
+                    }
                 }
 
                 //send single char and flush this.stdin
