@@ -4,7 +4,8 @@ const pm2 = require('pm2'),
     serverName = 'Pianoserver',
     launcherName = 'Pianoserver_Launcher',
     defaultPort = 8081,
-    defaultSubdomain = 'pianoserver'
+    defaultSubdomain = 'pianoserver',
+    config = require('./config')
 
 function startServer(subdomain, port) {
     return new Promise((resolve, reject) => {
@@ -38,6 +39,7 @@ function restartServer() {
                 reject("An error occured attempting to restart the server, please try again...")
                 return
             }
+            config.set('willRestart', true)
             pm2.gracefulReload(serverName)
             pm2.disconnect()
             resolve(true)
@@ -53,6 +55,7 @@ function quitServer() {
                 reject("An error occured attempting to quit the server, please try again...")
                 return
             }
+            config.set('willRestart', false)
             pm2.stop(serverName)
             setTimeout(() => {
                 pm2.disconnect.bind(pm2)
