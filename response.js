@@ -227,7 +227,7 @@ const wait = amount => new Promise((resolve, reject) => setTimeout(resolve, amou
             return () => {
                 ServerCommands.checkIfRunning().then(() => {
                     config.set('willRestart', true)
-                    ServerCommands.restartPianobar().then(() => {
+                    ServerCommands.restartServer().then(() => {
                         client.emit('restartPianobar', true)
                     }).catch(failed)
                 }).catch(failed)

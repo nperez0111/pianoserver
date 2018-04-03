@@ -121,5 +121,6 @@ module.exports = {
     startServer: startServer,
     checkIfRunning: checkIfRunning,
     startLauncher: startLauncher,
-    launcherName: launcherName
+    launcherName: launcherName,
+    defaultPort: defaultPort
 }
