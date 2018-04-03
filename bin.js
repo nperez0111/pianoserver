@@ -99,7 +99,7 @@ function connectToConsole() {
 
         // i don't want binary, do you?
         stdin.setEncoding('utf8');
-
+        let lineByLine = false;
         // on any data into stdin
         stdin.on('data', key => {
 
@@ -114,6 +114,28 @@ function connectToConsole() {
                 return quitServer().then(() => {
                     console.log('\nServer has been stopped.')
                 }).then(exitSuccess).catch(exitFailure)
+            }
+            if (lineByLine || lineByLine === '') {
+                if (key === '\u000D') {
+                    //ENTER/RETURN
+                    ipc.of[serverName].emit('sendLine', lineByLine)
+                    lineByLine = false
+                    key = '\r'
+                } else if (key === '\u0008') {
+                    //BACK_SPACE
+                    lineByLine = lineByLine.slice(0, -1)
+                } else {
+                    //ANY OTHER KEY
+                    lineByLine += key
+                }
+                process.stdout.write(key)
+                return
+            } else {
+                if (key === 's') {
+                    lineByLine = ''
+                    ipc.of[serverName].emit('sendLine', 'selectStation')
+                    return
+                }
             }
 
             //send single char and flush stdin
