@@ -29,6 +29,7 @@ const pm2 = require('pm2'),
     restartServer = serverCommands.restartServer,
     checkIfRunning = serverCommands.checkIfRunning,
     startLauncher = serverCommands.startLauncher,
+    defaultPort = serverCommands.defaultPort,
     ipcCommands = {
         play: 'Play song',
         pause: 'Pause song',
@@ -194,7 +195,7 @@ program.command('start [port] [subdomain]').description('Starts the server for b
         port = defaultPort
     }
     //console.log(subdomain, Number(port))
-    startServer(subdomain, port).then(exitSucces).catch(exitFailure)
+    startServer(subdomain, port).then(exitSuccess).catch(exitFailure)
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.')
 program.arguments('[pianobarCommand]')
