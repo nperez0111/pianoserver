@@ -19,10 +19,10 @@ function startServer(subdomain, port) {
                 name: serverName,
                 script: path.resolve(__dirname, 'index.js'), // Script to be run
                 args: [port || defaultPort, subdomain || defaultSubdomain],
-            }, function (err, apps) {
-                pm2.disconnect(); // Disconnects from PM2
+            }, (err, apps) => {
+                pm2.disconnect()
                 if (err) {
-                    reject(err)
+                    reject(false)
                 } else {
                     resolve(true)
                 }
@@ -40,9 +40,15 @@ function restartServer() {
                 return
             }
             config.set('willRestart', true)
-            pm2.gracefulReload(serverName)
-            pm2.disconnect()
-            resolve(true)
+            pm2.gracefulReload(serverName, (err, desc) => {
+                if (err) {
+                    reject(false)
+                }
+                pm2.disconnect()
+                resolve(true)
+            })
+
+
         })
     })
 
@@ -56,11 +62,13 @@ function quitServer() {
                 return
             }
             config.set('willRestart', false)
-            pm2.stop(serverName)
-            setTimeout(() => {
-                pm2.disconnect.bind(pm2)
-                resolve()
-            }, 300)
+            pm2.stop(serverName, (err, desc) => {
+                if (err) {
+                    reject(false)
+                }
+                pm2.disconnect()
+                resolve(true)
+            })
         })
     })
 
