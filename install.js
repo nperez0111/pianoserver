@@ -173,6 +173,7 @@ format_msg_time = [90m#   [97m%s[0m
 format_msg_err = [90m/!\[0m %s
 format_msg_question = [97m[?][0m %s
 format_msg_debug = [90m%s[0m
+password_command = openssl enc -d -aes-256-cbc -in ~/.config/pianobar/pass.enc -pass pass:pianoserver
 event_command = ${path.resolve(__dirname,'bin.js')}`,
                     handlePassword = password => {
                         const pianobarConfig = new PianobarConfig({ readLines: false })
