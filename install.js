@@ -11,6 +11,7 @@ const commandExists = require('command-exists'),
     path = require('path'),
     fs = require('fs'),
     del = require('del'),
+    util = require('util'),
     ghdownload = require('github-download'),
     inquirer = require('inquirer'),
     serverCommands = require('./serverCommands'),
@@ -181,7 +182,7 @@ event_command = ${path.resolve(__dirname,'bin.js')}`,
                 return inquirer.prompt(questions).then(answers => {
                     return del(configPath).catch(a => a).then(() => {
                         log("Generating Pianobar config file...")
-                        return logToFile(path + '/config').log(text(answers))
+                        return logToFile(pianobarConfigPath + '/config').log(text(answers))
                     }).then(() => {
                         log("Success!")
                         log("Encrypting Password...")
