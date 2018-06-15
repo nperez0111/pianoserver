@@ -4,7 +4,8 @@ const pm2 = require('pm2'),
     serverName = 'Pianoserver',
     launcherName = 'Pianoserver_Launcher',
     defaultPort = 8081,
-    defaultSubdomain = 'pianoserver'
+    defaultSubdomain = 'pianoserver',
+    config = require('./config')
 
 function startServer(subdomain, port) {
     return new Promise((resolve, reject) => {
@@ -18,10 +19,10 @@ function startServer(subdomain, port) {
                 name: serverName,
                 script: path.resolve(__dirname, 'index.js'), // Script to be run
                 args: [port || defaultPort, subdomain || defaultSubdomain],
-            }, function (err, apps) {
-                pm2.disconnect(); // Disconnects from PM2
+            }, (err, apps) => {
+                pm2.disconnect()
                 if (err) {
-                    reject(err)
+                    reject(false)
                 } else {
                     resolve(true)
                 }
@@ -38,9 +39,16 @@ function restartServer() {
                 reject("An error occured attempting to restart the server, please try again...")
                 return
             }
-            pm2.gracefulReload(serverName)
-            pm2.disconnect()
-            resolve(true)
+            config.set('willRestart', true)
+            pm2.gracefulReload(serverName, (err, desc) => {
+                if (err) {
+                    reject(false)
+                }
+                pm2.disconnect()
+                resolve(true)
+            })
+
+
         })
     })
 
@@ -53,11 +61,14 @@ function quitServer() {
                 reject("An error occured attempting to quit the server, please try again...")
                 return
             }
-            pm2.stop(serverName)
-            setTimeout(() => {
-                pm2.disconnect.bind(pm2)
-                resolve()
-            }, 300)
+            config.set('willRestart', false)
+            pm2.stop(serverName, (err, desc) => {
+                if (err) {
+                    reject(false)
+                }
+                pm2.disconnect()
+                resolve(true)
+            })
         })
     })
 
@@ -118,5 +129,6 @@ module.exports = {
     startServer: startServer,
     checkIfRunning: checkIfRunning,
     startLauncher: startLauncher,
-    launcherName: launcherName
+    launcherName: launcherName,
+    defaultPort: defaultPort
 }

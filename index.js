@@ -148,6 +148,7 @@ ServerCommands.checkIfRunning({}, ServerCommands.launcherName).then(() => { cons
 
         if (config.get('openTunnelURL') && !config.get('willRestart')) {
             opn(tunnel.url)
+            config.set('willRestart', false)
         }
     })
 })()

@@ -71,12 +71,15 @@ class Spawner {
                 }
                 if (lineByLine || lineByLine === '') {
                     if (key === '\u000D') {
+                        //ENTER/RETURN
                         this.pianobar.stdin.write(lineByLine + '/n')
                         lineByLine = false
                         return
                     } else if (key === '\u0008') {
+                        //BACK_SPACE
                         lineByLine = lineByLine.slice(0, -1)
                     } else {
+                        //ANY OTHER KEY
                         lineByLine += key
                     }
                     process.stdout.write(key)

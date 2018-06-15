@@ -60,6 +60,14 @@
         <v-content>
             <router-view v-on:hideoverflow="hideOverflow" v-on:showoverflow="showOverflow" v-on:edit="edit" />
         </v-content>
+        <v-dialog v-model="isRestarting" transition="dialog-bottom-transition">
+            <v-card>
+                <v-card-title class="display-2 text-xs-center">Please wait while the server restarts</v-card-title>
+                <v-card-text>
+                    <v-progress-circular indeterminate color="green" class="text-xs-center mx-auto my-3"></v-progress-circular>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
         <v-dialog v-model="disconnected" fullscreen transition="dialog-bottom-transition" :overlay="false" scrollable>
             <v-card tile>
                 <v-toolbar card dark color="primary">
@@ -218,8 +226,10 @@ export default {
                 })
             }
             this.stations = stations
+            this.restartStatus = false
         })
         this.$station.onchangeStation(stationName => {
+            this.restartStatus = false
             this.currentStation = stationName
         })
         const url = window.location.hostname === 'localtunnel' ? `wss://${window.location.href.slice(5,-3)}` : 'wss://pandora.localtunnel.me',
@@ -256,6 +266,13 @@ export default {
     },
     props: {
         source: String
+    },
+    watch: {
+        connectionState(status) {
+            if (status === 'connected') {
+                this.restartStatus = false
+            }
+        }
     },
     computed: {
         disconnected: {

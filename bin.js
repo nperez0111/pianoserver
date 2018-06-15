@@ -29,6 +29,7 @@ const pm2 = require('pm2'),
     restartServer = serverCommands.restartServer,
     checkIfRunning = serverCommands.checkIfRunning,
     startLauncher = serverCommands.startLauncher,
+    defaultPort = serverCommands.defaultPort,
     ipcCommands = {
         play: 'Play song',
         pause: 'Pause song',
@@ -98,7 +99,7 @@ function connectToConsole() {
 
         // i don't want binary, do you?
         stdin.setEncoding('utf8');
-
+        let lineByLine = false;
         // on any data into stdin
         stdin.on('data', key => {
 
@@ -113,6 +114,28 @@ function connectToConsole() {
                 return quitServer().then(() => {
                     console.log('\nServer has been stopped.')
                 }).then(exitSuccess).catch(exitFailure)
+            }
+            if (lineByLine || lineByLine === '') {
+                if (key === '\u000D') {
+                    //ENTER/RETURN
+                    ipc.of[serverName].emit('sendLine', lineByLine)
+                    lineByLine = false
+                    key = '\r'
+                } else if (key === '\u0008') {
+                    //BACK_SPACE
+                    lineByLine = lineByLine.slice(0, -1)
+                } else {
+                    //ANY OTHER KEY
+                    lineByLine += key
+                }
+                process.stdout.write(key)
+                return
+            } else {
+                if (key === 's') {
+                    lineByLine = ''
+                    ipc.of[serverName].emit('sendLine', 'selectStation')
+                    return
+                }
             }
 
             //send single char and flush stdin
@@ -194,7 +217,7 @@ program.command('start [port] [subdomain]').description('Starts the server for b
         port = defaultPort
     }
     //console.log(subdomain, Number(port))
-    startServer(subdomain, port).then(exitSucces).catch(exitFailure)
+    startServer(subdomain, port).then(exitSuccess).catch(exitFailure)
 })
 program.description('Starts the server for both pianobar console and the web app. If the server is running, lets you interact with the console interface of pianobar.')
 program.arguments('[pianobarCommand]')
