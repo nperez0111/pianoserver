@@ -1,7 +1,7 @@
 <template>
     <v-slide-y-transition mode="out-in">
         <div v-resize="onResize">
-            <Full-Height class="blue darken-4" v-show="!vertical">
+            <full-height class="blue darken-4" v-show="!vertical">
                 <v-layout wrap justify-center>
                     <v-flex sm5 lg6 v-touch="{up:likeSong,left:nextSong}">
                         <v-layout column justify-center fill-height class="px-2">
@@ -47,8 +47,8 @@
                         </v-layout>
                     </v-flex>
                 </v-layout>
-            </Full-Height>
-            <Full-Height class="blue darken-4" v-show="vertical">
+            </full-height>
+            <full-height class="blue darken-4" v-show="vertical">
                 <v-layout column align-center fill-height>
                     <v-layout class="my-3 spacer fullwidth" ref="container" justify-center column v-touch="{up:likeSong,left:nextSong}">
                         <transition name="dialog-transition" mode="out-in">
@@ -80,7 +80,7 @@
                         </v-layout>
                     </div>
                 </v-layout>
-            </Full-Height>
+            </full-height>
         </div>
     </v-slide-y-transition>
 </template>
@@ -227,7 +227,7 @@ export default {
             }
         },
         components: {
-            'Full-Height': FullHeight
+            'full-height': FullHeight
         }
 }
 </script>
