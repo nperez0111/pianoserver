@@ -117,7 +117,7 @@ ipc.serve(() => {
 })
 ipc.server.start();
 
-ServerCommands.checkIfRunning({}, ServerCommands.launcherName).then(() => { console.log("Launcher already running") }).catch(() => {
+ServerCommands.checkIfRunning(ServerCommands.launcherName).then(() => { console.log("Launcher already running") }).catch(() => {
     ServerCommands.startLauncher(port + 1).catch(() => console.log('unable to start launcher'))
 });
 (function tunneller() {

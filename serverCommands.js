@@ -75,7 +75,7 @@ function quitServer() {
 }
 
 function checkIfRunning(cb, which) {
-    const { notRunning = () => false, running = () => true } = (cb || {})
+    const { notRunning = () => false, running = () => true } = (arguments.length==1?{}:cb || {})
 
     return new Promise((resolve, reject) => {
         pm2.connect(function (err) {
