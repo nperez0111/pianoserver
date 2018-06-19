@@ -67,7 +67,17 @@ const commandExists = require('command-exists'),
     },
     run = () => {
         log("Checking to see if Pianobar is installed...")
-        fileExists(pianobarLocalLoc).catch(() => {
+        fileExists(pianobarLocalLoc)
+        .then(() => inquirer.prompt({
+                type: 'confirm',
+                default: false,
+                name: 'regenPianobar',
+                message: 'You already have pianobar installed... Do you want to reinstall it?'
+            }).then(answer => {
+                if (answer.regenPianobar) {
+                    throw "Reinstall Pianobar"
+                }
+            })).catch(() => {
 
             log(`Pianobar is not installed, So let's install it...`)
 
@@ -108,7 +118,6 @@ const commandExists = require('command-exists'),
 
             })
         }).then(() => {
-            log("Pianobar is installed!")
             log(`Ensuring directory structure...`)
 
             return makedirIfNotExists(pianobarConfigPath).then(() => log("Success!")).catch(() => err("Failed..."))
