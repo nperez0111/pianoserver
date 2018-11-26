@@ -47,8 +47,8 @@ function connectToConsole() {
         serverName = 'pianobar-server',
         stdin = process.stdin,
         state = {
-            hasNotRun: true,
-            isDisconnected: true
+            hasRun: false,
+            isConnected: false
         }
 
     ipc.config.id = 'pianobar-console'
@@ -59,24 +59,25 @@ function connectToConsole() {
 
     ipc.connectTo(serverName, () => {
         ipc.of[serverName].on('connect', () => {
-            if (state.hasNotRun) {
-                ipc.of[serverName].emit('getPastLines', 200)
-                state.hasNotRun = false
-            } else {
+            if (state.hasRun) {
                 console.log(`Reconnected to Server`)
+            } else {
+                ipc.of[serverName].emit('getPastLines', 200)
+                state.hasRun = true                
             }
-            state.isDisconnected = false
+            state.isConnected = true
         })
         ipc.of[serverName].on('disconnect', () => {
-            if (!state.isDisconnected) {
+            if (state.isConnected) {
+                state.isConnected = false
+                setTimeout(() => {
+                    if (!state.isConnected) {
+                        process.exit()
+                    }
+                }, 2000)
+            }else{
                 console.log(`Lost Connection to Server...`)
             }
-            state.isDisconnected = true
-            setTimeout(() => {
-                if (state.isDisconnected) {
-                    process.exit()
-                }
-            }, 2000)
         })
         ipc.of[serverName].on('killProcess', exitSuccess)
         ipc.of[serverName].on('getLine', line => {
